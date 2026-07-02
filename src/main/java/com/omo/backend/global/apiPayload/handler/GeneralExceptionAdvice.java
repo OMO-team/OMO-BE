@@ -31,7 +31,6 @@ public class GeneralExceptionAdvice {
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<ApiResponse<Object>> handleGeneralException(GeneralException e) {
         BaseErrorCode code = e.getBaseErrorCode();
-
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.onFailure(code, null));
@@ -89,8 +88,6 @@ public class GeneralExceptionAdvice {
             HttpMessageNotReadableException e
     ) {
         BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
-
-        // 인자 3개짜리 onFailure 사용: (코드, 커스텀 메시지, 데이터(null))
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.onFailure(code, "요청 본문 형식이 올바르지 않습니다.", null));
@@ -105,7 +102,6 @@ public class GeneralExceptionAdvice {
     ) {
         BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
         String message = String.format("필수 요청 파라미터 '%s'가 누락되었습니다.", e.getParameterName());
-
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.onFailure(code, message, null));
@@ -120,7 +116,6 @@ public class GeneralExceptionAdvice {
     ) {
         BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
         String message = String.format("필수 경로 변수 '%s'가 누락되었습니다.", e.getVariableName());
-
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.onFailure(code, message, null));
@@ -136,7 +131,6 @@ public class GeneralExceptionAdvice {
     ) {
         BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
         String message = String.format("요청 값 '%s'의 타입이 올바르지 않습니다.", e.getName());
-
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.onFailure(code, message, null));
@@ -150,7 +144,6 @@ public class GeneralExceptionAdvice {
             IllegalArgumentException e
     ) {
         BaseErrorCode code = GeneralErrorCode.BAD_REQUEST;
-
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.onFailure(code, e.getMessage(), null));
@@ -165,7 +158,6 @@ public class GeneralExceptionAdvice {
             HttpRequestMethodNotSupportedException e
     ) {
         BaseErrorCode code = GeneralErrorCode.METHOD_NOT_ALLOWED;
-
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.onFailure(code, "지원하지 않는 HTTP 메서드입니다.", null));
@@ -179,7 +171,6 @@ public class GeneralExceptionAdvice {
         log.error("Unhandled Exception: ", e);
 
         BaseErrorCode code = GeneralErrorCode.INTERNAL_SERVER_ERROR;
-
         return ResponseEntity
                 .status(code.getStatus())
                 .body(ApiResponse.onFailure(code, "서버 내부 오류가 발생했습니다.", null));
