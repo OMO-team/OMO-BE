@@ -1,7 +1,8 @@
 package com.omo.backend.domain.member.entity;
 
 import com.omo.backend.common.BaseEntity;
-import com.omo.backend.domain.terms.entity.MemberTerms;
+import com.omo.backend.domain.member.enums.MemberProvider;
+import com.omo.backend.domain.member.enums.MemberStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;

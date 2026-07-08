@@ -1,4 +1,4 @@
-package com.omo.backend.domain.member.entity;
+package com.omo.backend.domain.member.enums;
 
 public enum MemberProvider {
     LOCAL,
