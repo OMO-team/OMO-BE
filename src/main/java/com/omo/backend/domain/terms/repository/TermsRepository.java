@@ -10,4 +10,6 @@ import java.util.List;
 public interface TermsRepository extends JpaRepository<Terms, Long> {
 
     List<Terms> findAllByRequiredTrueAndDeletedAtIsNull();
+
+    List<Terms> findAllByDeletedAtIsNullOrderByIdAsc();
 }

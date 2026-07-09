@@ -1,4 +1,4 @@
-package com.omo.backend.domain.terms.repository;
+package com.omo.backend.domain.member.repository;
 
 import com.omo.backend.domain.member.entity.MemberTerms;
 import org.springframework.data.jpa.repository.JpaRepository;

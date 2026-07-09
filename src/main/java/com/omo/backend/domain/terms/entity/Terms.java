@@ -52,22 +52,4 @@ public class Terms extends BaseEntity {
     @OneToMany(mappedBy = "terms", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<MemberTerms> memberTermsList = new ArrayList<>();
-
-    public static Terms createTerms(
-            String title,
-            String content,
-            TermsType type,
-            Boolean required,
-            String version,
-            LocalDateTime effectiveAt
-    ) {
-        return Terms.builder()
-                .title(title)
-                .content(content)
-                .type(type)
-                .required(required)
-                .version(version)
-                .effectiveAt(effectiveAt)
-                .build();
-    }
 }
