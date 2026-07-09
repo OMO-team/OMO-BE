@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -58,4 +58,15 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<MemberTerms> memberTermsList = new ArrayList<>();
+
+    public static Member createLocalMember(String email, String password, String name) {
+        return Member.builder()
+                .email(email)
+                .password(password)
+                .name(name)
+                .provider(MemberProvider.LOCAL)
+                .emailVerified(false)
+                .status(MemberStatus.ACTIVE)
+                .build();
+    }
 }

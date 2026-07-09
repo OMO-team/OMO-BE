@@ -19,7 +19,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import java.time.LocalDateTime;
 
 @Entity
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -53,4 +53,12 @@ public class MemberTerms extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "terms_id", nullable = false)
     private Terms terms;
+
+    public static MemberTerms createMemberTerms(Member member, Terms terms, LocalDateTime agreedAt) {
+        return MemberTerms.builder()
+                .member(member)
+                .terms(terms)
+                .agreedAt(agreedAt)
+                .build();
+    }
 }

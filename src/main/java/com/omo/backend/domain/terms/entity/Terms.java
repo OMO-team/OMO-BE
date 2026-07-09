@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -30,7 +30,7 @@ public class Terms extends BaseEntity {
     private String title;
 
     @Lob
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
     @Enumerated(EnumType.STRING)
@@ -52,4 +52,22 @@ public class Terms extends BaseEntity {
     @OneToMany(mappedBy = "terms", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<MemberTerms> memberTermsList = new ArrayList<>();
+
+    public static Terms createTerms(
+            String title,
+            String content,
+            TermsType type,
+            Boolean required,
+            String version,
+            LocalDateTime effectiveAt
+    ) {
+        return Terms.builder()
+                .title(title)
+                .content(content)
+                .type(type)
+                .required(required)
+                .version(version)
+                .effectiveAt(effectiveAt)
+                .build();
+    }
 }

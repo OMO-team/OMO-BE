@@ -11,7 +11,7 @@ import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
 import com.omo.backend.domain.member.repository.MemberSettingsRepository;
 import com.omo.backend.domain.terms.entity.Terms;
-import com.omo.backend.domain.terms.repository.MemberTermsRepository;
+import com.omo.backend.domain.member.repository.MemberTermsRepository;
 import com.omo.backend.domain.terms.repository.TermsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

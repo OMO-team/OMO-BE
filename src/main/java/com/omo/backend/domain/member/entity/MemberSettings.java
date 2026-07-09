@@ -7,7 +7,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
-@Builder
+@Builder(access = AccessLevel.PRIVATE)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -35,4 +35,14 @@ public class MemberSettings extends BaseEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
+
+    public static MemberSettings createDefaultSettings(Member member) {
+        return MemberSettings.builder()
+                .member(member)
+                .pushNotification(true)
+                .emailNotification(true)
+                .autoSave(true)
+                .twoFactorEnabled(false)
+                .build();
+    }
 }
