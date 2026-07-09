@@ -17,4 +17,12 @@ public class AuthResponseDTO {
             String email,
             Boolean verified
     ) {}
+
+    // 일반 로그인 결과
+    @Builder
+    public record LoginResultDTO(
+            Long memberId,
+            String accessToken,
+            String refreshToken
+    ) {}
 }

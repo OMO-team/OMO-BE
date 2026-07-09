@@ -2,6 +2,7 @@ package com.omo.backend.domain.auth.controller;
 
 import com.omo.backend.domain.auth.dto.AuthRequestDTO;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
+import com.omo.backend.domain.auth.service.AuthCommandService;
 import com.omo.backend.domain.auth.service.EmailVerificationService;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import jakarta.validation.Valid;
@@ -13,12 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth/v1/email")
+@RequestMapping("/auth/v1")
 public class AuthController implements AuthControllerDocs {
 
     private final EmailVerificationService emailVerificationService;
+    private final AuthCommandService authCommandService;
 
-    @PostMapping("/send")
+    @PostMapping("/email/send")
     public ApiResponse<AuthResponseDTO.EmailSendResultDTO> sendEmailVerificationCode(
             @Valid @RequestBody AuthRequestDTO.EmailSendDTO request
     ) {
@@ -26,11 +28,19 @@ public class AuthController implements AuthControllerDocs {
         return ApiResponse.onSuccess(result);
     }
 
-    @PostMapping("/verify")
+    @PostMapping("/email/verify")
     public ApiResponse<AuthResponseDTO.EmailVerifyResultDTO> verifyEmailVerificationCode(
             @Valid @RequestBody AuthRequestDTO.EmailVerifyDTO request
     ) {
         AuthResponseDTO.EmailVerifyResultDTO result = emailVerificationService.verify(request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @PostMapping("/login/local")
+    public ApiResponse<AuthResponseDTO.LoginResultDTO> doLogin(
+            @RequestBody @Valid AuthRequestDTO.LoginDTO request
+    ) {
+        AuthResponseDTO.LoginResultDTO result = authCommandService.login(request);
         return ApiResponse.onSuccess(result);
     }
 }

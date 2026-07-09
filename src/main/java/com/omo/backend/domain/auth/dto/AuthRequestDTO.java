@@ -29,4 +29,18 @@ public class AuthRequestDTO {
             @Size(min = 6, max = 6, message = "인증번호는 6자리로 입력해 주세요.")
             String code
     ) {}
+
+    // 일반 로그인
+    public record LoginDTO(
+            @Schema(description = "회원 이메일", example = "example@email.com")
+            @NotBlank(message = "이메일은 필수 입력값입니다.")
+            @Email(message = "올바른 이메일 형식을 입력해 주세요.")
+            @Size(max = 100, message = "이메일은 100자 이하로 입력해 주세요.")
+            String email,
+
+            @Schema(description = "비밀번호", example = "Password1234!")
+            @NotBlank(message = "비밀번호는 필수 입력값입니다.")
+            @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해 주세요.")
+            String password
+    ) {}
 }
