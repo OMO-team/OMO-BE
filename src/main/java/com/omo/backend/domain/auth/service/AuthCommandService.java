@@ -7,6 +7,7 @@ import com.omo.backend.domain.member.entity.Member;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
 import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
+import com.omo.backend.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class AuthCommandService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public AuthResponseDTO.LoginResultDTO login(AuthRequestDTO.LoginDTO request) {
         // 이메일로 회원 조회
@@ -30,9 +32,9 @@ public class AuthCommandService {
             throw new MemberException(MemberErrorCode.INVALID_LOGIN_ID_OR_PASSWORD);
         }
 
-        // 토큰 생성
-        String accessToken = "";
-        String refreshToken = "";
+        // 이메일과 비밀번호가 일치할 경우 토큰 생성
+        String accessToken = jwtTokenProvider.createAccessToken(request.email());
+        String refreshToken = jwtTokenProvider.createRefreshToken(request.email());
 
         return AuthConverter.toLoginResultDTO(member.getId(), accessToken, refreshToken);
     }
