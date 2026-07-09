@@ -1,0 +1,32 @@
+package com.omo.backend.domain.auth.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public class AuthRequestDTO {
+
+    // 이메일 인증번호 발송
+    public record EmailSendDTO(
+            @Schema(description = "인증번호를 받을 이메일", example = "example@email.com")
+            @NotBlank(message = "이메일은 필수 입력값입니다.")
+            @Email(message = "올바른 이메일 형식을 입력해 주세요.")
+            @Size(max = 100, message = "이메일은 100자 이하로 입력해 주세요.")
+            String email
+    ) {}
+
+    // 이메일 인증번호 검증
+    public record EmailVerifyDTO(
+            @Schema(description = "인증할 이메일", example = "example@email.com")
+            @NotBlank(message = "이메일은 필수 입력값입니다.")
+            @Email(message = "올바른 이메일 형식을 입력해 주세요.")
+            @Size(max = 100, message = "이메일은 100자 이하로 입력해 주세요.")
+            String email,
+
+            @Schema(description = "이메일 인증번호", example = "123456")
+            @NotBlank(message = "인증번호는 필수 입력값입니다.")
+            @Size(min = 6, max = 6, message = "인증번호는 6자리로 입력해 주세요.")
+            String code
+    ) {}
+}

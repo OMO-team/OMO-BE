@@ -1,5 +1,6 @@
 package com.omo.backend.domain.member.service;
 
+import com.omo.backend.domain.auth.service.EmailVerificationService;
 import com.omo.backend.domain.member.converter.MemberConverter;
 import com.omo.backend.domain.member.dto.MemberRequestDTO;
 import com.omo.backend.domain.member.dto.MemberResponseDTO;
@@ -31,10 +32,14 @@ public class MemberCommandService {
     private final MemberTermsRepository memberTermsRepository;
     private final TermsRepository termsRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationService emailVerificationService;
 
     public MemberResponseDTO.JoinResultDTO join(MemberRequestDTO.JoinDTO request) {
         // 이미 등록된 이메일인지 확인
         validateDuplicateEmail(request.email());
+
+        // 이메일 인증이 완료된 이메일인지 확인
+        emailVerificationService.validateVerifiedEmail(request.email());
 
         // 실제 존재하는 약관인지 확인
         List<Terms> agreedTerms = termsRepository.findAllById(request.agreedTermsIds());
@@ -53,6 +58,7 @@ public class MemberCommandService {
                 .map(terms -> MemberConverter.toMemberTerms(member, terms))
                 .toList();
         memberTermsRepository.saveAll(memberTermsList);
+        emailVerificationService.deleteVerifiedEmail(request.email());
 
         return MemberConverter.toJoinResultDTO(member);
     }
