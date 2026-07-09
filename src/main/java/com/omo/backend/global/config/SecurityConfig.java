@@ -18,8 +18,8 @@ public class SecurityConfig {
 
     // Swagger 및 API 문서 관련 URL 배열
     private static final String[] SWAGGER_URLS = {
-            "/api/v3/api-docs/**",
-            "/api/swagger-resources/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api/swagger-ui/**",
@@ -31,6 +31,7 @@ public class SecurityConfig {
     private static final String[] PUBLIC_API_URLS = {
             "/api/v1/members/signup",
             "/auth/v1/email/**",
+            "/auth/v1/login/local",
             "/api/v1/terms"
     };
 
