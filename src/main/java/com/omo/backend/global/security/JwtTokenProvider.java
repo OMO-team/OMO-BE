@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +76,7 @@ public class JwtTokenProvider {
     public Authentication getAuthentication(String jwtToken) {
         Claims claims = getClaims(jwtToken);
 
-        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
 
         Number memberId = claims.get("memberId", Number.class);
         CustomUserDetails userDetails = CustomUserDetails.of(memberId.longValue(), claims.getSubject(), authorities);
