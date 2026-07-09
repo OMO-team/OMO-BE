@@ -33,8 +33,8 @@ public class AuthCommandService {
         }
 
         // 이메일과 비밀번호가 일치할 경우 토큰 생성
-        String accessToken = jwtTokenProvider.createAccessToken(request.email());
-        String refreshToken = jwtTokenProvider.createRefreshToken(request.email());
+        String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(member.getId(), member.getEmail());
 
         return AuthConverter.toLoginResultDTO(member.getId(), accessToken, refreshToken);
     }
