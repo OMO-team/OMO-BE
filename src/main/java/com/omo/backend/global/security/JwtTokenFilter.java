@@ -3,7 +3,7 @@ package com.omo.backend.global.security;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,7 +53,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         } catch (ExpiredJwtException e) {
             log.warn("[JwtTokenFilter] 토큰 만료: {}", e.getMessage());
             request.setAttribute("exception", AuthErrorCode.TOKEN_EXPIRED);
-        } catch (SecurityException | MalformedJwtException e) {
+        } catch (SignatureException | MalformedJwtException e) {
             log.warn("[JwtTokenFilter] 잘못된 토큰 서명: {}", e.getMessage());
             request.setAttribute("exception", AuthErrorCode.INVALID_TOKEN_SIGNATURE);
         } catch (Exception e) {

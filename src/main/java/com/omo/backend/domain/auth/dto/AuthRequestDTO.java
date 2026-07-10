@@ -43,4 +43,11 @@ public class AuthRequestDTO {
             @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해 주세요.")
             String password
     ) {}
+
+    // 토큰 재발급
+    public record ReissueDTO(
+            @Schema(description = "재발급에 사용할 리프레시 토큰")
+            @NotBlank(message = "리프레시 토큰은 필수 입력값입니다.")
+            String refreshToken
+    ) {}
 }

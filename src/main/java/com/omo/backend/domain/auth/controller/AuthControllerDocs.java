@@ -25,4 +25,9 @@ public interface AuthControllerDocs {
     ApiResponse<AuthResponseDTO.LoginResultDTO> doLogin(
             @Valid @RequestBody AuthRequestDTO.LoginDTO request
     );
+
+    @Operation(summary = "토큰 재발급", description = "리프레시 토큰을 검증하고 새로운 액세스 토큰과 리프레시 토큰을 발급합니다.")
+    ApiResponse<AuthResponseDTO.ReissueResultDTO> reissue(
+            @Valid @RequestBody AuthRequestDTO.ReissueDTO request
+    );
 }

@@ -28,4 +28,12 @@ public class AuthConverter {
                 .refreshToken(refreshToken)
                 .build();
     }
+
+    // entity -> 토큰 재발급 DTO
+    public static AuthResponseDTO.ReissueResultDTO toReissueResultDTO(String accessToken, String refreshToken) {
+        return AuthResponseDTO.ReissueResultDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
 }

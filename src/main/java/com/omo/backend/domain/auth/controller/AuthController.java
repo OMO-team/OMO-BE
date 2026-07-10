@@ -43,4 +43,12 @@ public class AuthController implements AuthControllerDocs {
         AuthResponseDTO.LoginResultDTO result = authCommandService.login(request);
         return ApiResponse.onSuccess(result);
     }
+
+    @PostMapping("/reissue")
+    public ApiResponse<AuthResponseDTO.ReissueResultDTO> reissue(
+            @RequestBody @Valid AuthRequestDTO.ReissueDTO request
+    ) {
+        AuthResponseDTO.ReissueResultDTO result = authCommandService.reissue(request);
+        return ApiResponse.onSuccess(result);
+    }
 }

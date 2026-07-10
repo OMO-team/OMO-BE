@@ -20,6 +20,9 @@ import java.util.Map;
 @Component
 public class JwtTokenProvider {
 
+    private static final String ACCESS_TOKEN_TYPE = "ACCESS";
+    private static final String REFRESH_TOKEN_TYPE = "REFRESH";
+
     private final SecretKey signingKey;
     private final long accessTokenExpirationMs;
     private final long refreshTokenExpirationMs;
@@ -39,22 +42,23 @@ public class JwtTokenProvider {
 
     // Access Token 생성
     public String createAccessToken(Long memberId, String email) {
-        return createToken(memberId, email, accessTokenExpirationMs);
+        return createToken(memberId, email, ACCESS_TOKEN_TYPE, accessTokenExpirationMs);
     }
 
     // Refresh Token 생성
     public String createRefreshToken(Long memberId, String email) {
-        return createToken(memberId, email, refreshTokenExpirationMs);
+        return createToken(memberId, email, REFRESH_TOKEN_TYPE, refreshTokenExpirationMs);
     }
 
     // 토큰 생성
-    private String createToken(Long memberId, String email, long validityMs) {
+    private String createToken(Long memberId, String email, String tokenType, long validityMs) {
         Date now = new Date();
 
         return Jwts.builder()
                 .claims(Map.of(
                         "memberId", memberId,
-                        "email", email
+                        "email", email,
+                        "tokenType", tokenType
                 ))
                 .subject(email)
                 .issuedAt(now)
@@ -70,6 +74,27 @@ public class JwtTokenProvider {
                 .build()
                 .parseSignedClaims(jwtToken);
         return true;
+    }
+
+    // Refresh Token 여부 확인
+    public boolean isRefreshToken(String jwtToken) {
+        Claims claims = getClaims(jwtToken);
+        return REFRESH_TOKEN_TYPE.equals(claims.get("tokenType", String.class));
+    }
+
+    // 토큰에서 회원 아이디 추출
+    public Long getMemberId(String jwtToken) {
+        Number memberId = getClaims(jwtToken).get("memberId", Number.class);
+        if (memberId == null) {
+            throw new IllegalArgumentException("토큰에 회원 아이디가 없습니다.");
+        }
+        return memberId.longValue();
+    }
+
+    // 토큰의 남은 만료 시간 추출
+    public long getExpiration(String jwtToken) {
+        Date expiration = getClaims(jwtToken).getExpiration();
+        return Math.max(expiration.getTime() - System.currentTimeMillis(), 0);
     }
 
     // 토큰에서 Authentication 객체 추출

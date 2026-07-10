@@ -25,4 +25,11 @@ public class AuthResponseDTO {
             String accessToken,
             String refreshToken
     ) {}
+
+    // 토큰 재발급
+    @Builder
+    public record ReissueResultDTO(
+            String accessToken,
+            String refreshToken
+    ) {}
 }
