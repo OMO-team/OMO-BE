@@ -76,6 +76,12 @@ public class JwtTokenProvider {
         return true;
     }
 
+    // Access Token 여부 확인
+    public boolean isAccessToken(String jwtToken) {
+        Claims claims = getClaims(jwtToken);
+        return ACCESS_TOKEN_TYPE.equals(claims.get("tokenType", String.class));
+    }
+
     // Refresh Token 여부 확인
     public boolean isRefreshToken(String jwtToken) {
         Claims claims = getClaims(jwtToken);

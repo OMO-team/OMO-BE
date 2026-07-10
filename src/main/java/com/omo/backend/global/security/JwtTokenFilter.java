@@ -39,6 +39,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             // 추출된 토큰이 있고, 형식이 올바른 경우에만 검증 진행
             if (StringUtils.hasText(jwtToken)) {
                 if (jwtTokenProvider.isValid(jwtToken)) {
+                    // 인증 API 접근에는 accessToken만 허용, refreshToken은 재발급 용도로만 사용
+                    if (!jwtTokenProvider.isAccessToken(jwtToken)) {
+                        request.setAttribute("exception", AuthErrorCode.TOKEN_INVALID);
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
 
                     String isLogout = redisTemplate.opsForValue().get(BLACKLIST_PREFIX + jwtToken);
 

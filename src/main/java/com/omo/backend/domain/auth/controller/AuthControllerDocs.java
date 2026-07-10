@@ -3,10 +3,15 @@ package com.omo.backend.domain.auth.controller;
 import com.omo.backend.domain.auth.dto.AuthRequestDTO;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
 import com.omo.backend.global.apiPayload.ApiResponse;
+import com.omo.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Tag(name = "Auth", description = "인증 API")
 public interface AuthControllerDocs {
@@ -27,7 +32,15 @@ public interface AuthControllerDocs {
     );
 
     @Operation(summary = "토큰 재발급", description = "리프레시 토큰을 검증하고 새로운 액세스 토큰과 리프레시 토큰을 발급합니다.")
-    ApiResponse<AuthResponseDTO.ReissueResultDTO> reissue(
+    ApiResponse<AuthResponseDTO.ReissueResultDTO> doReissue(
             @Valid @RequestBody AuthRequestDTO.ReissueDTO request
+    );
+
+    @Operation(summary = "로그아웃", description = "리프레시 토큰을 삭제하고 현재 액세스 토큰을 블랙리스트에 등록합니다.")
+    ApiResponse<Void> doLogout(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Parameter(hidden = true)
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
     );
 }

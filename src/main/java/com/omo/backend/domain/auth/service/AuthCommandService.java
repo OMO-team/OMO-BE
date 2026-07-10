@@ -28,6 +28,7 @@ import java.time.Duration;
 public class AuthCommandService {
 
     private static final String REFRESH_TOKEN_KEY_PREFIX = "RT:";
+    private static final String BLACKLIST_KEY_PREFIX = "BL:";
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -97,6 +98,23 @@ public class AuthCommandService {
         }
     }
 
+    public void logout(Long memberId, String accessToken) {
+        // Redis에 저장된 RefreshToken 삭제
+        redisTemplate.delete(refreshTokenKey(memberId));
+
+        // 로그아웃 이후 accessToken을 통한 재로그인 요청 방지
+        long expiration = jwtTokenProvider.getExpiration(accessToken);
+        if (expiration <= 0) {
+            throw new AuthException(AuthErrorCode.TOKEN_EXPIRED);
+        }
+
+        redisTemplate.opsForValue().set(
+                blacklistKey(accessToken),
+                "logout",
+                Duration.ofMillis(expiration)
+        );
+    }
+
     private void saveRefreshToken(Long memberId, String refreshToken) {
         long expiration = jwtTokenProvider.getExpiration(refreshToken);
         if (expiration <= 0) {
@@ -112,5 +130,9 @@ public class AuthCommandService {
 
     private String refreshTokenKey(Long memberId) {
         return REFRESH_TOKEN_KEY_PREFIX + memberId;
+    }
+
+    private String blacklistKey(String accessToken) {
+        return BLACKLIST_KEY_PREFIX + accessToken;
     }
 }

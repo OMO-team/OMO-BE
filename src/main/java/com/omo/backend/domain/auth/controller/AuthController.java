@@ -5,10 +5,14 @@ import com.omo.backend.domain.auth.dto.AuthResponseDTO;
 import com.omo.backend.domain.auth.service.AuthCommandService;
 import com.omo.backend.domain.auth.service.EmailVerificationService;
 import com.omo.backend.global.apiPayload.ApiResponse;
+import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/auth/v1")
 public class AuthController implements AuthControllerDocs {
+
+    private static final String BEARER_PREFIX = "Bearer ";
 
     private final EmailVerificationService emailVerificationService;
     private final AuthCommandService authCommandService;
@@ -45,10 +51,24 @@ public class AuthController implements AuthControllerDocs {
     }
 
     @PostMapping("/reissue")
-    public ApiResponse<AuthResponseDTO.ReissueResultDTO> reissue(
+    public ApiResponse<AuthResponseDTO.ReissueResultDTO> doReissue(
             @RequestBody @Valid AuthRequestDTO.ReissueDTO request
     ) {
         AuthResponseDTO.ReissueResultDTO result = authCommandService.reissue(request);
         return ApiResponse.onSuccess(result);
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> doLogout(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
+    ) {
+        authCommandService.logout(userDetails.getMemberId(), extractToken(authorizationHeader));
+        return ApiResponse.onSuccess(null);
+    }
+
+    // Authorization 헤더에서 토큰 추출
+    private String extractToken(String authorizationHeader) {
+        return authorizationHeader.substring(BEARER_PREFIX.length());
     }
 }
