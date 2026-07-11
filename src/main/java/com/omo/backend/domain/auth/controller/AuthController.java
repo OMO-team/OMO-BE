@@ -2,6 +2,8 @@ package com.omo.backend.domain.auth.controller;
 
 import com.omo.backend.domain.auth.dto.AuthRequestDTO;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
+import com.omo.backend.domain.auth.exception.AuthErrorCode;
+import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.auth.service.AuthCommandService;
 import com.omo.backend.domain.auth.service.EmailVerificationService;
 import com.omo.backend.global.apiPayload.ApiResponse;
@@ -69,6 +71,9 @@ public class AuthController implements AuthControllerDocs {
 
     // Authorization 헤더에서 토큰 추출
     private String extractToken(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
+            throw new AuthException(AuthErrorCode.INVALID_TOKEN_FORMAT);
+        }
         return authorizationHeader.substring(BEARER_PREFIX.length());
     }
 }
