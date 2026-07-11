@@ -39,7 +39,7 @@ public class ReportQueryService {
 
     public List<ReportResponseDTO.ResourceDTO> getResources(Long cityId, String topic) {
         validateCityExists(cityId);
-        List<CityRelatedResource> resources = (topic == null)
+        List<CityRelatedResource> resources = (topic == null || topic.isBlank())
                 ? cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId)
                 : cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, topic);
         return ReportConverter.toResourceDTOList(resources);
