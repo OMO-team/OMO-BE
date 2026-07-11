@@ -1,0 +1,53 @@
+package com.omo.backend.domain.report.service;
+
+import com.omo.backend.domain.report.converter.ReportConverter;
+import com.omo.backend.domain.report.dto.ReportResponseDTO;
+import com.omo.backend.domain.report.entity.CityCoreSummary;
+import com.omo.backend.domain.report.entity.CityProsCons;
+import com.omo.backend.domain.report.entity.CityRelatedResource;
+import com.omo.backend.domain.report.repository.CityCoreSummaryRepository;
+import com.omo.backend.domain.report.repository.CityProsConsRepository;
+import com.omo.backend.domain.report.repository.CityRelatedResourceRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ReportQueryService {
+
+    private final CityCoreSummaryRepository cityCoreSummaryRepository;
+    private final CityProsConsRepository cityProsConsRepository;
+    private final CityRelatedResourceRepository cityRelatedResourceRepository;
+    // private final CityRepository cityRepository;
+
+    public List<ReportResponseDTO.CoreSummaryDTO> getCoreSummaries(Long cityId) {
+        validateCityExists(cityId);
+        List<CityCoreSummary> summaries = cityCoreSummaryRepository.findByCityIdAndDeletedAtIsNull(cityId);
+        return ReportConverter.toCoreSummaryDTOList(summaries);
+    }
+
+    public ReportResponseDTO.ProsConsDTO getProsCons (Long cityId) {
+        validateCityExists(cityId);
+        List<CityProsCons> prosCons =
+                cityProsConsRepository.findByCityIdAndDeletedAtIsNullOrderByDisplayOrderAsc(cityId);
+        return ReportConverter.toProsConsDTO(prosCons);
+    }
+
+    public List<ReportResponseDTO.ResourceDTO> getResources(Long cityId, String topic) {
+        validateCityExists(cityId);
+        List<CityRelatedResource> resources = (topic == null)
+                ? cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId)
+                : cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, topic);
+        return ReportConverter.toResourceDTOList(resources);
+    }
+
+    private void validateCityExists(Long cityId) {
+        // TODO: City entity 연동 후 존재 여부 검증 로직 추가 (CITY404_1)
+        // cityRepository.findById(cityId)
+        //         .orElseThrow(() -> new ReportException(ReportErrorCode.CITY_NOT_FOUND));
+    }
+}
