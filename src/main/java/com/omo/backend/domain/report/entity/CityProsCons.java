@@ -22,7 +22,7 @@ public class CityProsCons extends BaseEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "city_id")
+    @Column(name = "city_id", nullable = false)
     private Long cityId;
 
     @Enumerated(EnumType.STRING)
