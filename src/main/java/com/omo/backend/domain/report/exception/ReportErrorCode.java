@@ -1,0 +1,18 @@
+package com.omo.backend.domain.report.exception;
+
+import com.omo.backend.global.apiPayload.code.BaseErrorCode;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@AllArgsConstructor
+public enum ReportErrorCode implements BaseErrorCode {
+
+    CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "CITY404_1", "도시를 찾을 수 없습니다.")
+    ;
+
+    private final HttpStatus status;
+    private final String code;
+    private final String message;
+}
