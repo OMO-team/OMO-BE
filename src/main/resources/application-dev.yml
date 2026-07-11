@@ -15,3 +15,24 @@ spring:
         format_sql: true
         use_sql_comments: true
         default_batch_fetch_size: 100
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          connectiontimeout: 5000  # SMTP 서버 연결 대기 시간
+          timeout: 5000            # 응답 대기 시간
+          writetimeout: 5000       # 데이터 전송 대기 시간
+          starttls:
+            enable: true
+            required: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
