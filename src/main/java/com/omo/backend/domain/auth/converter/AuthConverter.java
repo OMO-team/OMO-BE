@@ -19,4 +19,21 @@ public class AuthConverter {
                 .verified(true)
                 .build();
     }
+
+    // entity -> 일반 로그인 DTO
+    public static AuthResponseDTO.LoginResultDTO toLoginResultDTO(Long memberId, String accessToken, String refreshToken) {
+        return AuthResponseDTO.LoginResultDTO.builder()
+                .memberId(memberId)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    // entity -> 토큰 재발급 DTO
+    public static AuthResponseDTO.ReissueResultDTO toReissueResultDTO(String accessToken, String refreshToken) {
+        return AuthResponseDTO.ReissueResultDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
 }
