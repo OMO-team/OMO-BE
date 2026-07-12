@@ -5,6 +5,8 @@ import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
+import com.omo.backend.domain.report.exception.ReportErrorCode;
+import com.omo.backend.domain.report.exception.ReportException;
 import com.omo.backend.domain.report.repository.CityCoreSummaryRepository;
 import com.omo.backend.domain.report.repository.CityProsConsRepository;
 import com.omo.backend.domain.report.repository.CityRelatedResourceRepository;
@@ -43,6 +45,25 @@ public class ReportQueryService {
                 ? cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId)
                 : cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, topic);
         return ReportConverter.toResourceDTOList(resources);
+    }
+
+    public ReportResponseDTO.AiReportDTO getAiReport(Long cityId, String question) {
+        if (question == null || question.isBlank()) {
+            throw new ReportException(ReportErrorCode.AI_REPORT_QUERY_EMPTY);
+        }
+        validateCityExists(cityId);
+
+        String summary = generateAiSummary(cityId, question);
+
+        List<CityRelatedResource> resources =
+                cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
+
+        return new ReportResponseDTO.AiReportDTO(summary, ReportConverter.toResourceDTOList(resources));
+    }
+
+    private String generateAiSummary(Long cityId, String question) {
+        // TODO: 팀원 LLM 연동 코드 참고해서 실제 구현 예정
+        return "AI 답변 준비 중입니다. (임시 응답)";
     }
 
     private void validateCityExists(Long cityId) {
