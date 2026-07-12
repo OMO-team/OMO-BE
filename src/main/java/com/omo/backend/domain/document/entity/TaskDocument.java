@@ -45,7 +45,7 @@ public class TaskDocument extends BaseEntity {
     @Column(name = "is_checked", nullable = false)
     private Boolean checked;
 
-    @Column(name = "checked_at", nullable = true)
+    @Column(name = "checked_at")
     private LocalDateTime checkedAt;
 
     public static TaskDocument createTaskDocument(

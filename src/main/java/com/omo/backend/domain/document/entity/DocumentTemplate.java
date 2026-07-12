@@ -33,7 +33,7 @@ public class DocumentTemplate extends BaseEntity {
     @Column(name = "document_name", length = 100, nullable = false)
     private String documentName;
 
-    @Column(name = "description", length = 500, nullable = true)
+    @Column(name = "description", length = 500)
     private String description;
 
     @Column(name = "ocr_support", nullable = false)
