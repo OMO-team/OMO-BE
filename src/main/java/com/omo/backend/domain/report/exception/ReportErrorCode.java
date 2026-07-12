@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ReportErrorCode implements BaseErrorCode {
 
-    CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "CITY404_1", "도시를 찾을 수 없습니다.")
+    CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "CITY404_1", "도시를 찾을 수 없습니다."),
+    AI_REPORT_QUERY_EMPTY(HttpStatus.BAD_REQUEST, "AIREPORT400_1", "질문을 입력해주세요.")
     ;
 
     private final HttpStatus status;

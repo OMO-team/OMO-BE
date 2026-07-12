@@ -62,4 +62,12 @@ public class ReportResponseDTO {
             @Schema(description = "링크", example = "https://example.com")
             String url
     ) {}
+
+    public record AiReportDTO(
+            @Schema(description = "AI 요약 답변", example = "시드니의 평균 생활비는...")
+            String summary,
+
+            @Schema(description = "관련자료 목록")
+            List<ResourceDTO> resources
+    ){}
 }
