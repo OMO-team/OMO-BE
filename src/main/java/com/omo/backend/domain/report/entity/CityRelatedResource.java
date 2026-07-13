@@ -1,6 +1,7 @@
 package com.omo.backend.domain.report.entity;
 
 import com.omo.backend.common.BaseEntity;
+import com.omo.backend.domain.report.enums.ResourceTopic;
 import com.omo.backend.domain.report.enums.ResourceType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -27,8 +28,9 @@ public class CityRelatedResource extends BaseEntity {
     @Column(name = "city_id", nullable = false)
     private Long cityId;
 
-    @Column(length = 30)
-    private String topic;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ResourceTopic topic;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "resource_type", nullable = false, length = 20)
@@ -47,7 +49,7 @@ public class CityRelatedResource extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private CityRelatedResource(Long cityId, String topic, ResourceType resourceType,
+    private CityRelatedResource(Long cityId, ResourceTopic topic, ResourceType resourceType,
                                 String title, String source, String url) {
         this.cityId = cityId;
         this.topic = topic;
