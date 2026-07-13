@@ -6,6 +6,8 @@ import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
 import com.omo.backend.domain.report.enums.ResourceTopic;
+import com.omo.backend.domain.report.exception.ReportErrorCode;
+import com.omo.backend.domain.report.exception.ReportException;
 import com.omo.backend.domain.report.repository.CityCoreSummaryRepository;
 import com.omo.backend.domain.report.repository.CityProsConsRepository;
 import com.omo.backend.domain.report.repository.CityRelatedResourceRepository;
@@ -50,7 +52,7 @@ public class ReportQueryService {
         try {
             resourceTopic = ResourceTopic.valueOf(topic.toUpperCase());
         } catch (IllegalArgumentException e) {
-            return List.of();
+            throw new ReportException(ReportErrorCode.RESOURCE_TOPIC_INVALID);
         }
 
         List<CityRelatedResource> resources =
