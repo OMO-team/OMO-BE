@@ -9,5 +9,5 @@ public class ReportRequestDTO {
             @Schema(description = "질문 내용", example = "시드니 물가는 어때?")
             @NotBlank(message = "질문을 입력해주세요.")
             String question
-    ){}
+    ) {}
 }

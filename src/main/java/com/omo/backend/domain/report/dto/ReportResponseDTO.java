@@ -69,5 +69,5 @@ public class ReportResponseDTO {
 
             @Schema(description = "관련자료 목록")
             List<ResourceDTO> resources
-    ){}
+    ) {}
 }
