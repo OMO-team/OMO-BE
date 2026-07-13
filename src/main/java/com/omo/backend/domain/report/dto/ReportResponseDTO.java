@@ -1,6 +1,6 @@
 package com.omo.backend.domain.report.dto;
 
-import com.omo.backend.domain.report.entity.SummaryCategory;
+import com.omo.backend.domain.report.enums.SummaryCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;

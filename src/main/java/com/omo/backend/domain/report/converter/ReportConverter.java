@@ -4,7 +4,7 @@ import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
-import com.omo.backend.domain.report.entity.ProsConsType;
+import com.omo.backend.domain.report.enums.ProsConsType;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class ReportConverter {
 
     public static ReportResponseDTO.ResourceDTO toResourceDTO(CityRelatedResource resource) {
         return new ReportResponseDTO.ResourceDTO(
-                resource.getTopic(),
+                resource.getTopic().name(),
                 resource.getResourceType().name(),
                 resource.getTitle(),
                 resource.getSource(),

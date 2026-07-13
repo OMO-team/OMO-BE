@@ -7,6 +7,7 @@ import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
 import com.omo.backend.domain.report.exception.ReportErrorCode;
 import com.omo.backend.domain.report.exception.ReportException;
+import com.omo.backend.domain.report.enums.ResourceTopic;
 import com.omo.backend.domain.report.repository.CityCoreSummaryRepository;
 import com.omo.backend.domain.report.repository.CityProsConsRepository;
 import com.omo.backend.domain.report.repository.CityRelatedResourceRepository;
@@ -41,9 +42,21 @@ public class ReportQueryService {
 
     public List<ReportResponseDTO.ResourceDTO> getResources(Long cityId, String topic) {
         validateCityExists(cityId);
-        List<CityRelatedResource> resources = (topic == null || topic.isBlank())
-                ? cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId)
-                : cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, topic);
+
+        if (topic == null || topic.isBlank()) {
+            List<CityRelatedResource> resources = cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
+            return ReportConverter.toResourceDTOList(resources);
+        }
+
+        ResourceTopic resourceTopic;
+        try {
+            resourceTopic = ResourceTopic.valueOf(topic.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return List.of();
+        }
+
+        List<CityRelatedResource> resources =
+                cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, resourceTopic);
         return ReportConverter.toResourceDTOList(resources);
     }
 
