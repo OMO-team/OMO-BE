@@ -1,6 +1,7 @@
 package com.omo.backend.domain.report.entity;
 
 import com.omo.backend.common.BaseEntity;
+import com.omo.backend.domain.report.enums.ProsConsType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
