@@ -3,6 +3,7 @@ package com.omo.backend.domain.member.entity;
 import com.omo.backend.common.BaseEntity;
 import com.omo.backend.domain.member.enums.MemberProvider;
 import com.omo.backend.domain.member.enums.MemberStatus;
+import com.omo.backend.domain.roadmap.entity.Roadmap;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -69,4 +70,9 @@ public class Member extends BaseEntity {
                 .status(MemberStatus.ACTIVE)
                 .build();
     }
+
+    // Roadmap 양방향 매핑
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Roadmap> roadmaps = new ArrayList<>();
+
 }
