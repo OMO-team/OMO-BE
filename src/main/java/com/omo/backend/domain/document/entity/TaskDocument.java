@@ -1,15 +1,8 @@
 package com.omo.backend.domain.document.entity;
 
 import com.omo.backend.common.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -26,7 +19,15 @@ import org.hibernate.annotations.DynamicUpdate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @DynamicUpdate
 @DynamicInsert
-@Table(name = "task_document")
+@Table(
+        name = "task_document",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_task_document_task_template",
+                        columnNames = {"task_id", "document_template_id"}
+                )
+        }
+)
 public class TaskDocument extends BaseEntity {
 
     @Id
