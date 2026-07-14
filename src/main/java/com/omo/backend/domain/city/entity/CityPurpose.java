@@ -1,5 +1,6 @@
 package com.omo.backend.domain.city.entity;
 
+import com.omo.backend.common.BaseEntity;
 import com.omo.backend.domain.purpose.entity.Purpose;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "city_purpose")
-public class CityPurpose {
+public class CityPurpose extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

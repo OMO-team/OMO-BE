@@ -1,4 +1,4 @@
-package com.omo.backend.domain.purpose.service;
+package com.omo.backend.domain.purpose.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
