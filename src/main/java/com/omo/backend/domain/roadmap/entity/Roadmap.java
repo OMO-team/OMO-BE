@@ -3,6 +3,8 @@ package com.omo.backend.domain.roadmap.entity;
 import com.omo.backend.common.BaseEntity;
 import com.omo.backend.domain.budget.entity.Budget;
 import com.omo.backend.domain.member.entity.Member;
+import com.omo.backend.domain.roadmap.exception.RoadmapErrorCode;
+import com.omo.backend.domain.roadmap.exception.RoadmapException;
 import com.omo.backend.domain.task.entity.Task;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,6 +16,8 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PRIVATE)
 @Table(name = "roadmap")
 public class Roadmap extends BaseEntity {
 
@@ -25,7 +29,7 @@ public class Roadmap extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    // TODO: 도시 도메인 FK - City 엔티티 아직 미완성. 임시로 Long로 처리.
+    // TODO: 도시 도메인 FK - City 엔티티 아직 미완성. 임시로 Long으로 처리.
     @Column(name = "city_id", nullable = false)
     private Long cityId;
 
@@ -43,11 +47,26 @@ public class Roadmap extends BaseEntity {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Builder.Default
     @OneToMany(mappedBy = "roadmap", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();
 
     @OneToOne(mappedBy = "roadmap", cascade = CascadeType.ALL, orphanRemoval = true)
     private Budget budget;
+
+    // === 정적 팩토리 메서드 ===
+
+    public static Roadmap createRoadmap(Member member, Long cityId, Long purposeId,
+                                        LocalDate departureDate, Integer stayMonths) {
+        return Roadmap.builder()
+                .member(member)
+                .cityId(cityId)
+                .purposeId(purposeId)
+                .departureDate(departureDate)
+                .stayMonths(stayMonths)
+                .isActive(true)
+                .build();
+    }
 
     // === 생성자 ===
     @Builder
