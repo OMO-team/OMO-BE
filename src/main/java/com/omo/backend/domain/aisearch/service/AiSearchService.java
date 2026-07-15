@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true) // 조회 성능 최적화를 위해 readOnly 적용!
+@Transactional(readOnly = true)
 public class AiSearchService {
 
     private final RecommendPromptChipRepository recommendPromptChipRepository;
