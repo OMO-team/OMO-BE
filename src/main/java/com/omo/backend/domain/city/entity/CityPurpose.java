@@ -10,7 +10,15 @@ import lombok.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(name = "city_purpose")
+@Table(
+        name = "city_purpose",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_city_purpose_city_purpose",
+                        columnNames = {"city_id", "purpose_id"}
+                )
+        }
+)
 public class CityPurpose extends BaseEntity {
 
     @Id
