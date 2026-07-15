@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface CountryRepository extends JpaRepository<Country, Long> {
 
+    // 선택한 목적에 해당하는 도시가 있는 국가만 반환
     @Query("""
             select distinct city.country
             from City city
