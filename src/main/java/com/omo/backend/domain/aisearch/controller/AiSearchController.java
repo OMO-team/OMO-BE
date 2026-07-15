@@ -3,7 +3,6 @@ package com.omo.backend.domain.aisearch.controller;
 import com.omo.backend.domain.aisearch.dto.RecommendPromptChipResponseDTO;
 import com.omo.backend.domain.aisearch.service.AiSearchService;
 import com.omo.backend.global.apiPayload.ApiResponse;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
