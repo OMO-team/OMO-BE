@@ -14,7 +14,7 @@ import lombok.*;
         name = "city_purpose",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_city_purpose_city_purpose",
+                        name = "uk_city_purpose",
                         columnNames = {"city_id", "purpose_id"}
                 )
         }
