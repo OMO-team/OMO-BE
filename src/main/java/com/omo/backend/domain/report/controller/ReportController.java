@@ -1,5 +1,6 @@
 package com.omo.backend.domain.report.controller;
 
+import com.omo.backend.domain.report.dto.ReportRequestDTO;
 import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.service.ReportQueryService;
 import com.omo.backend.global.apiPayload.ApiResponse;
@@ -35,5 +36,13 @@ public class ReportController implements ReportControllerDocs {
             @RequestParam(required = false) String topic
     ) {
         return ApiResponse.onSuccess(reportQueryService.getResources(cityId, topic));
+    }
+
+    @PostMapping("/{cityId}/ai-report")
+    public ApiResponse<ReportResponseDTO.AiReportDTO> getAiReport(
+            @PathVariable Long cityId,
+            @RequestBody ReportRequestDTO.AiReportRequestDTO request
+    ) {
+        return ApiResponse.onSuccess(reportQueryService.getAiReport(cityId, request.question()));
     }
 }
