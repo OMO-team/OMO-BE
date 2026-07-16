@@ -51,4 +51,18 @@ public class City extends BaseEntity {
     @Column(name = "infra_score", precision = 2, scale = 1)
     private BigDecimal infraScore;
 
+// language_score >= 4.0을 영어권 도시 기준으로 사용
+    @Column(name = "language_score", precision = 2, scale = 1)
+    private BigDecimal languageScore;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id", nullable = false)
+    private Country country;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "city")
+    private List<CityPurpose> cityPurposes = new ArrayList<>();
 }
