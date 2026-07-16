@@ -27,10 +27,10 @@ public class CityPurpose extends BaseEntity {
     private Long cityPurposeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id")
+    @JoinColumn(name = "city_id", nullable = false)
     private City city;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "purpose_id")
+    @JoinColumn(name = "purpose_id", nullable = false)
     private Purpose purpose;
 }
