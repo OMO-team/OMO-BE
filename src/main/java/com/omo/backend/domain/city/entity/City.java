@@ -24,7 +24,7 @@ public class City extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cityId;
 
-    @Column(name = "name", length = 100,nullable = false)
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -51,3 +51,4 @@ public class City extends BaseEntity {
     @Column(name = "infra_score", precision = 2, scale = 1)
     private BigDecimal infraScore;
 
+}
