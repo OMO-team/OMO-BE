@@ -1,5 +1,7 @@
 package com.omo.backend.domain.report.service;
 
+import com.omo.backend.domain.city.entity.City;
+import com.omo.backend.domain.city.repository.CityRepository;
 import com.omo.backend.domain.report.converter.ReportConverter;
 import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
@@ -25,7 +27,7 @@ public class ReportQueryService {
     private final CityCoreSummaryRepository cityCoreSummaryRepository;
     private final CityProsConsRepository cityProsConsRepository;
     private final CityRelatedResourceRepository cityRelatedResourceRepository;
-    // private final CityRepository cityRepository;
+    private final CityRepository cityRepository;
 
     public List<ReportResponseDTO.CoreSummaryDTO> getCoreSummaries(Long cityId) {
         validateCityExists(cityId);
@@ -33,7 +35,7 @@ public class ReportQueryService {
         return ReportConverter.toCoreSummaryDTOList(summaries);
     }
 
-    public ReportResponseDTO.ProsConsDTO getProsCons (Long cityId) {
+    public ReportResponseDTO.ProsConsDTO getProsCons(Long cityId) {
         validateCityExists(cityId);
         List<CityProsCons> prosCons =
                 cityProsConsRepository.findByCityIdAndDeletedAtIsNullOrderByDisplayOrderAsc(cityId);
@@ -83,5 +85,11 @@ public class ReportQueryService {
         if (!cityRepository.existsById(cityId)) {
             throw new ReportException(ReportErrorCode.CITY_NOT_FOUND);
         }
+    }
+
+    public List<ReportResponseDTO.StatDTO> getStats(Long cityId) {
+        City city = cityRepository.findById(cityId)
+                .orElseThrow(() -> new ReportException(ReportErrorCode.CITY_NOT_FOUND));
+        return ReportConverter.toStatDTOList(city);
     }
 }
