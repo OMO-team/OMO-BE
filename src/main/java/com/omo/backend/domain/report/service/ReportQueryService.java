@@ -80,8 +80,8 @@ public class ReportQueryService {
     }
 
     private void validateCityExists(Long cityId) {
-        // TODO: City entity 연동 후 존재 여부 검증 로직 추가 (CITY404_1)
-        // cityRepository.findById(cityId)
-        //         .orElseThrow(() -> new ReportException(ReportErrorCode.CITY_NOT_FOUND));
+        if (!cityRepository.existsById(cityId)) {
+            throw new ReportException(ReportErrorCode.CITY_NOT_FOUND);
+        }
     }
 }
