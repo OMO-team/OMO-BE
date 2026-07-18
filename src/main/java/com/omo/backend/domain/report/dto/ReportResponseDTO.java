@@ -70,4 +70,51 @@ public class ReportResponseDTO {
             @Schema(description = "관련자료 목록")
             List<ResourceDTO> resources
     ) {}
+
+    public record CityHeaderDTO(
+            @Schema(description = "도시 ID", example = "12")
+            Long cityId,
+
+            @Schema(description = "도시명", example = "베를린")
+            String cityName,
+
+            @Schema(description = "국가명", example = "독일")
+            String countryName,
+
+            @Schema(description = "이미지 URL")
+            String imageUrl,
+
+            @Schema(description = "평점", example = "4.5")
+            Double rating
+    ) {}
+
+    public record CityValueDTO(
+            @Schema(description = "도시 ID", example = "12")
+            Long cityId,
+
+            @Schema(description = "값", example = "4.2")
+            Double value
+    ) {}
+
+    public record StatGroupDTO(
+            @Schema(description = "스탯 종류", example = "SAFETY")
+            String statType,
+
+            @Schema(description = "최대값", example = "5.0")
+            Double maxValue,
+
+            @Schema(description = "단위", example = "점")
+            String unit,
+
+            @Schema(description = "도시별 값 목록")
+            List<CityValueDTO> cityValues
+    ) {}
+
+    public record CompareResultDTO(
+            @Schema(description = "비교 도시 헤더 목록")
+            List<CityHeaderDTO> cities,
+
+            @Schema(description = "스탯별 그룹")
+            List<StatGroupDTO> stats
+    ) {}
 }
