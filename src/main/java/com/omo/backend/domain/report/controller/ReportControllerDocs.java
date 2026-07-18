@@ -39,4 +39,10 @@ public interface ReportControllerDocs {
     ApiResponse<List<ReportResponseDTO.StatDTO>> getStats(
             @Parameter(description = "도시 ID") Long cityId
     );
+
+    @Operation(summary = "도시 비교 조회", description = "2~3개 도시의 수치 스탯을 비교합니다.")
+    ApiResponse<ReportResponseDTO.CompareResultDTO> compareCities(
+            @Parameter(description = "콤마로 구분된 도시 ID 목록, 2~3개", example = "1,2,3")
+            List<Long> cityIds
+    );
 }
