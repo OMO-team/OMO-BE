@@ -69,4 +69,40 @@ public class ReportConverter {
     private static Double toDouble(Number number) {
         return number == null ? null : number.doubleValue();
     }
+
+    public static ReportResponseDTO.CityHeaderDTO toCityHeaderDTO(City city) {
+        return new ReportResponseDTO.CityHeaderDTO(
+                city.getCityId(),
+                city.getName(),
+                city.getCountry().getName(),
+                city.getImageUrl(),
+                toDouble(city.getRating())
+        );
+    }
+
+    public static ReportResponseDTO.CompareResultDTO toCompareResultDTO(List<City> cities) {
+        List<ReportResponseDTO.CityHeaderDTO> cityHeaders = cities.stream()
+                .map(ReportConverter::toCityHeaderDTO)
+                .toList();
+
+        List<ReportResponseDTO.StatGroupDTO> statGroups = List.of(
+                toStatGroupDTO(StatType.SAFETY, 5.0, "점", cities, City::getSafetyScore),
+                toStatGroupDTO(StatType.COST, null, "원", cities, City::getMonthlyCost),
+                toStatGroupDTO(StatType.HOUSING, 5.0, "점", cities, City::getHousingScore),
+                toStatGroupDTO(StatType.VISA, 5.0, "점", cities, City::getVisaScore),
+                toStatGroupDTO(StatType.INFRA, 5.0, "점", cities, City::getInfraScore)
+        );
+
+        return new ReportResponseDTO.CompareResultDTO(cityHeaders, statGroups);
+    }
+
+    private static ReportResponseDTO.StatGroupDTO toStatGroupDTO(
+            StatType statType, Double maxValue, String unit,
+            List<City> cities, java.util.function.Function<City, Number> valueExtractor
+    ) {
+        List<ReportResponseDTO.CityValueDTO> cityValues = cities.stream()
+                .map(city -> new ReportResponseDTO.CityValueDTO(city.getCityId(), toDouble(valueExtractor.apply(city))))
+                .toList();
+        return new ReportResponseDTO.StatGroupDTO(statType.name(), maxValue, unit, cityValues);
+    }
 }
