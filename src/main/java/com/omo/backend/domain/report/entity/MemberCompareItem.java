@@ -41,4 +41,11 @@ public class MemberCompareItem {
         this.memberId = memberId;
         this.cityId = cityId;
     }
+
+    public static MemberCompareItem create(Long memberId, Long cityId) {
+        return MemberCompareItem.builder()
+                .memberId(memberId)
+                .cityId(cityId)
+                .build();
+    }
 }
