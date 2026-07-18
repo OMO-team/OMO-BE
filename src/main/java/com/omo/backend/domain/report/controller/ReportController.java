@@ -45,4 +45,12 @@ public class ReportController implements ReportControllerDocs {
     ) {
         return ApiResponse.onSuccess(reportQueryService.getAiReport(cityId, request.question()));
     }
+
+    @Override
+    @GetMapping("/{cityId}/stats")
+    public ApiResponse<List<ReportResponseDTO.StatDTO>> getStats(
+            @PathVariable Long cityId
+    ) {
+        return ApiResponse.onSuccess(reportQueryService.getStats(cityId));
+    }
 }
