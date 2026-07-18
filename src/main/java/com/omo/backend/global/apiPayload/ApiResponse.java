@@ -44,7 +44,7 @@ public class ApiResponse<T> {
     }
 
     // 요청 성공 - 204 NO CONTENT
-    public static <T> ApiResponse<T> noContent() {
+    public static ApiResponse<Void> noContent() {
         return new ApiResponse<>(true, GeneralSuccessCode.NO_CONTENT.getCode(), GeneralSuccessCode.NO_CONTENT.getMessage(), null, LocalDateTime.now());
     }
 
