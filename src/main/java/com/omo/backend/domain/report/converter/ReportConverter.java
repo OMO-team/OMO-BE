@@ -1,10 +1,12 @@
 package com.omo.backend.domain.report.converter;
 
+import com.omo.backend.domain.city.entity.City;
 import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
 import com.omo.backend.domain.report.enums.ProsConsType;
+import com.omo.backend.domain.report.enums.StatType;
 
 import java.util.List;
 
@@ -54,5 +56,17 @@ public class ReportConverter {
                 .toList();
     }
 
-    //4번 stat변환은 추후 city테이블 연동후 작성 예정
+    public static List<ReportResponseDTO.StatDTO> toStatDTOList(City city) {
+        return List.of(
+                new ReportResponseDTO.StatDTO(StatType.SAFETY.name(), toDouble(city.getSafetyScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.COST.name(), toDouble(city.getMonthlyCost()), null, "원"),
+                new ReportResponseDTO.StatDTO(StatType.HOUSING.name(), toDouble(city.getHousingScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.VISA.name(), toDouble(city.getVisaScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.INFRA.name(), toDouble(city.getInfraScore()), 5.0, "점")
+        );
+    }
+
+    private static Double toDouble(Number number) {
+        return number == null ? null : number.doubleValue();
+    }
 }
