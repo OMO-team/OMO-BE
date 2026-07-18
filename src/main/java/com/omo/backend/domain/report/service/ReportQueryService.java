@@ -92,4 +92,17 @@ public class ReportQueryService {
                 .orElseThrow(() -> new ReportException(ReportErrorCode.CITY_NOT_FOUND));
         return ReportConverter.toStatDTOList(city);
     }
+
+    public ReportResponseDTO.CompareResultDTO getCompareStats(List<Long> cityIds) {
+        if (cityIds.size() < 2 || cityIds.size() > 3) {
+            throw new ReportException(ReportErrorCode.COMPARE_CITY_IDS_INVALID);
+        }
+
+        List<City> cities = cityRepository.findAllById(cityIds);
+        if (cities.size() != cityIds.size()) {
+            throw new ReportException(ReportErrorCode.CITY_NOT_FOUND);
+        }
+
+        return ReportConverter.toCompareResultDTO(cities);
+    }
 }
