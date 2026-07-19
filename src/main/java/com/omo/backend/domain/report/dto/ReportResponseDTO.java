@@ -70,4 +70,15 @@ public class ReportResponseDTO {
             @Schema(description = "관련자료 목록")
             List<ResourceDTO> resources
     ) {}
+
+    public record CityReviewDTO(
+            @Schema(description = "작성자 이름", example = "김민수")
+            String authorName,
+
+            @Schema(description = "평점", example = "5")
+            Integer rating,
+
+            @Schema(description = "후기 내용", example = "정말 좋았어요")
+            String content
+    ) {}
 }
