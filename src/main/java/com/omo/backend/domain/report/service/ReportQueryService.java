@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -97,8 +98,11 @@ public class ReportQueryService {
         if (cityIds.size() < 2 || cityIds.size() > 3) {
             throw new ReportException(ReportErrorCode.COMPARE_CITY_IDS_INVALID);
         }
+        if (cityIds.size() != Set.copyOf(cityIds).size()) {
+            throw new ReportException(ReportErrorCode.COMPARE_CITY_IDS_DUPLICATED);
+        }
 
-        List<City> cities = cityRepository.findAllById(cityIds);
+        List<City> cities = cityRepository.findAllWithCountryByCityIdIn(cityIds);
         if (cities.size() != cityIds.size()) {
             throw new ReportException(ReportErrorCode.CITY_NOT_FOUND);
         }
