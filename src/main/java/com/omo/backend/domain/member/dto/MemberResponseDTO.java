@@ -1,7 +1,6 @@
 package com.omo.backend.domain.member.dto;
 
 import com.omo.backend.domain.member.enums.MemberProvider;
-import com.omo.backend.domain.member.enums.MemberStatus;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

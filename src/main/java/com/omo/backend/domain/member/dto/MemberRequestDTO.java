@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -27,6 +28,10 @@ public class MemberRequestDTO {
             @Schema(description = "비밀번호", example = "Password1234!")
             @NotBlank(message = "비밀번호는 필수 입력값입니다.")
             @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해 주세요.")
+            @Pattern(
+                    regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,20}$|^(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$|^(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$",
+                    message = "비밀번호는 영문, 숫자, 특수문자 중 2종류 이상을 조합해 주세요."
+            )
             String password,
 
             @Schema(description = "동의한 약관 ID 목록", example = "[1, 2]")
@@ -71,6 +76,10 @@ public class MemberRequestDTO {
             @Schema(description = "새 비밀번호", example = "NewPassword1234!")
             @NotBlank(message = "새 비밀번호는 필수 입력값입니다.")
             @Size(min = 8, max = 20, message = "새 비밀번호는 8자 이상 20자 이하로 입력해 주세요.")
+            @Pattern(
+                    regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,20}$|^(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$|^(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$",
+                    message = "새 비밀번호는 영문, 숫자, 특수문자 중 2종류 이상을 조합해 주세요."
+            )
             String newPassword
     ) {}
 }
