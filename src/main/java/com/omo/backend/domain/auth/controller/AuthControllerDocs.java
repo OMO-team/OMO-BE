@@ -36,6 +36,11 @@ public interface AuthControllerDocs {
             @Valid @RequestBody AuthRequestDTO.PasswordResetEmailVerifyDTO request
     );
 
+    @Operation(summary = "새 비밀번호 설정", description = "비밀번호 찾기 이메일 인증을 완료한 회원의 새 비밀번호를 설정합니다.")
+    ApiResponse<Void> resetPassword(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetDTO request
+    );
+
     @Operation(summary = "일반 로그인", description = "이메일과 비밀번호로 로그인합니다.")
     ApiResponse<AuthResponseDTO.LoginResultDTO> doLogin(
             @Valid @RequestBody AuthRequestDTO.LoginDTO request
