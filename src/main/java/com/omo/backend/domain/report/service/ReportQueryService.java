@@ -5,6 +5,7 @@ import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
+import com.omo.backend.domain.report.enums.ResourceType;
 import com.omo.backend.domain.report.exception.ReportErrorCode;
 import com.omo.backend.domain.report.exception.ReportException;
 import com.omo.backend.domain.report.enums.ResourceTopic;
@@ -40,23 +41,38 @@ public class ReportQueryService {
         return ReportConverter.toProsConsDTO(prosCons);
     }
 
-    public List<ReportResponseDTO.ResourceDTO> getResources(Long cityId, String topic) {
+    public List<ReportResponseDTO.ResourceDTO> getResources(Long cityId, String topic, String resourceType) {
         validateCityExists(cityId);
 
-        if (topic == null || topic.isBlank()) {
-            List<CityRelatedResource> resources = cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
-            return ReportConverter.toResourceDTOList(resources);
+        ResourceTopic resourceTopic = null;
+        if (topic != null && !topic.isBlank()) {
+            try {
+                resourceTopic = ResourceTopic.valueOf(topic.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new ReportException(ReportErrorCode.RESOURCE_TOPIC_INVALID);
+            }
         }
 
-        ResourceTopic resourceTopic;
-        try {
-            resourceTopic = ResourceTopic.valueOf(topic.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ReportException(ReportErrorCode.RESOURCE_TOPIC_INVALID);
+        ResourceType type = null;
+        if (resourceType != null && !resourceType.isBlank()) {
+            try {
+                type = ResourceType.valueOf(resourceType.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new ReportException(ReportErrorCode.RESOURCE_TYPE_INVALID);
+            }
         }
 
-        List<CityRelatedResource> resources =
-                cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, resourceTopic);
+        List<CityRelatedResource> resources;
+        if (resourceTopic != null && type != null) {
+            resources = cityRelatedResourceRepository.findByCityIdAndTopicAndResourceTypeAndDeletedAtIsNull(cityId, resourceTopic, type);
+        } else if (resourceTopic != null) {
+            resources = cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, resourceTopic);
+        } else if (type != null) {
+            resources = cityRelatedResourceRepository.findByCityIdAndResourceTypeAndDeletedAtIsNull(cityId, type);
+        } else {
+            resources = cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
+        }
+
         return ReportConverter.toResourceDTOList(resources);
     }
 

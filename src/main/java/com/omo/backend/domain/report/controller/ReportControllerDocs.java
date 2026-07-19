@@ -22,16 +22,17 @@ public interface ReportControllerDocs {
             @Parameter(description = "도시 ID") Long cityId
     );
 
-    @Operation(summary = "관련자료 조회", description = "도시의 관련자료를 topic으로 필터링해서 조회합니다.")
-    ApiResponse<List<ReportResponseDTO.ResourceDTO>> getResources(
-            @Parameter(description = "도시 ID") Long cityId,
-            @Parameter(description = "주제 (COST/HOUSING/VISA/SAFETY)") String topic
-    );
-
     @Operation(summary = "도시별 AI 질문 답변",
             description = "질문에 대한 AI 답변과 관련자료를 조회합니다. (LLM 연동 전 임시 응답)")
     ApiResponse<ReportResponseDTO.AiReportDTO> getAiReport(
             @Parameter(description = "도시 ID") Long cityId,
             @RequestBody(description = "질문 내용") ReportRequestDTO.AiReportRequestDTO request
+    );
+
+    @Operation(summary = "관련자료 조회", description = "도시의 관련자료를 topic, resourceType으로 필터링해서 조회합니다.")
+    ApiResponse<List<ReportResponseDTO.ResourceDTO>> getResources(
+            @Parameter(description = "도시 ID") Long cityId,
+            @Parameter(description = "주제 (COST/HOUSING/VISA/SAFETY)") String topic,
+            @Parameter(description = "자료 유형 (OFFICIAL/BLOG/VIDEO/REPORT)") String resourceType
     );
 }
