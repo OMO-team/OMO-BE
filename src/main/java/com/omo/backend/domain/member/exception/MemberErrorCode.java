@@ -13,6 +13,7 @@ public enum MemberErrorCode implements BaseErrorCode {
     INVALID_AGREED_TERMS(HttpStatus.BAD_REQUEST, "MEMBER400_2", "유효하지 않은 약관 동의 정보입니다."),
     REQUIRED_TERMS_NOT_AGREED(HttpStatus.BAD_REQUEST, "MEMBER400_3", "필수 약관에 모두 동의해야 합니다."),
     INVALID_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "MEMBER400_4", "현재 비밀번호가 일치하지 않습니다."),
+    PASSWORD_CONFIRM_MISMATCH(HttpStatus.BAD_REQUEST, "MEMBER400_5", "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
     INVALID_LOGIN_ID_OR_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER401_1", "아이디 또는 비밀번호가 일치하지 않습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_1", "회원을 찾을 수 없습니다."),
     MEMBER_SETTINGS_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_2", "회원 설정을 찾을 수 없습니다.")

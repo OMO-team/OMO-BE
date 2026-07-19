@@ -34,6 +34,11 @@ public class MemberRequestDTO {
             )
             String password,
 
+            @Schema(description = "비밀번호 확인", example = "Password1234!")
+            @NotBlank(message = "비밀번호 확인은 필수 입력값입니다.")
+            @Size(min = 8, max = 20, message = "비밀번호 확인은 8자 이상 20자 이하로 입력해 주세요.")
+            String passwordConfirm,
+
             @Schema(description = "동의한 약관 ID 목록", example = "[1, 2]")
             @NotEmpty(message = "동의한 약관 목록은 필수 입력값입니다.")
             List<@NotNull(message = "약관 ID는 null일 수 없습니다.") Long> agreedTermsIds
@@ -80,6 +85,11 @@ public class MemberRequestDTO {
                     regexp = "^(?=.*[A-Za-z])(?=.*\\d).{8,20}$|^(?=.*[A-Za-z])(?=.*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$|^(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-\\[\\]{};':\"\\\\|,.<>/?]).{8,20}$",
                     message = "새 비밀번호는 영문, 숫자, 특수문자 중 2종류 이상을 조합해 주세요."
             )
-            String newPassword
+            String newPassword,
+
+            @Schema(description = "새 비밀번호 확인", example = "NewPassword1234!")
+            @NotBlank(message = "새 비밀번호 확인은 필수 입력값입니다.")
+            @Size(min = 8, max = 20, message = "새 비밀번호 확인은 8자 이상 20자 이하로 입력해 주세요.")
+            String newPasswordConfirm
     ) {}
 }

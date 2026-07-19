@@ -43,6 +43,9 @@ public class MemberCommandService {
         // 이메일 인증이 완료된 이메일인지 확인
         emailVerificationService.validateVerifiedEmail(request.email());
 
+        // 비밀번호와 비밀번호 확인이 일치하는지 확인
+        validatePasswordConfirm(request.password(), request.passwordConfirm());
+
         // 실제 존재하는 약관인지 확인
         List<Terms> agreedTerms = termsRepository.findAllById(request.agreedTermsIds());
         validateAgreedTerms(request.agreedTermsIds(), agreedTerms);
@@ -98,7 +101,15 @@ public class MemberCommandService {
             throw new MemberException(MemberErrorCode.INVALID_CURRENT_PASSWORD);
         }
 
+        validatePasswordConfirm(request.newPassword(), request.newPasswordConfirm());
+
         member.changePassword(passwordEncoder.encode(request.newPassword()));
+    }
+
+    private void validatePasswordConfirm(String password, String passwordConfirm) {
+        if (!password.equals(passwordConfirm)) {
+            throw new MemberException(MemberErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
     }
 
     private void validateDuplicateEmail(String email) {
