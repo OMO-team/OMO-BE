@@ -46,4 +46,11 @@ public class ReportController implements ReportControllerDocs {
     ) {
         return ApiResponse.onSuccess(reportQueryService.getResources(cityId, topic, resourceType));
     }
+
+    @GetMapping("/{cityId}/reviews")
+    public ApiResponse<List<ReportResponseDTO.CityReviewDTO>> getCityReviews(
+            @PathVariable Long cityId
+    ) {
+        return ApiResponse.onSuccess(reportQueryService.getCityReviews(cityId));
+    }
 }

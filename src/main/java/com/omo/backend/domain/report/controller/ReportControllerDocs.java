@@ -35,4 +35,9 @@ public interface ReportControllerDocs {
             @Parameter(description = "주제 (COST/HOUSING/VISA/SAFETY)") String topic,
             @Parameter(description = "자료 유형 (OFFICIAL/BLOG/VIDEO/REPORT)") String resourceType
     );
+
+    @Operation(summary = "거주자 후기 조회", description = "도시의 거주자 후기를 조회합니다.")
+    ApiResponse<List<ReportResponseDTO.CityReviewDTO>> getCityReviews(
+            @Parameter(description = "도시 ID") Long cityId
+    );
 }
