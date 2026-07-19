@@ -44,6 +44,22 @@ public class AuthController implements AuthControllerDocs {
         return ApiResponse.onSuccess(result);
     }
 
+    @PostMapping("/password/reset/email")
+    public ApiResponse<AuthResponseDTO.EmailSendResultDTO> sendPasswordResetVerificationCode(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetEmailSendDTO request
+    ) {
+        AuthResponseDTO.EmailSendResultDTO result = emailVerificationService.sendPasswordReset(request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @PostMapping("/password/reset/verify")
+    public ApiResponse<AuthResponseDTO.EmailVerifyResultDTO> verifyPasswordResetVerificationCode(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetEmailVerifyDTO request
+    ) {
+        AuthResponseDTO.EmailVerifyResultDTO result = emailVerificationService.verifyPasswordReset(request);
+        return ApiResponse.onSuccess(result);
+    }
+
     @PostMapping("/login/local")
     public ApiResponse<AuthResponseDTO.LoginResultDTO> doLogin(
             @RequestBody @Valid AuthRequestDTO.LoginDTO request
