@@ -15,7 +15,7 @@ public class AiSearchRequestDTO {
             @Schema(description = "이어묻기 여부 (첫 검색 시 false, 꼬리질문 시 true)", example = "false")
             Boolean isRefine,
 
-            @Schema(description = "대화 세션 ID (첫 검색 시 NULL, 이어묻기 시 이전 세션 ID", example = "12345")
+            @Schema(description = "대화 세션 ID (첫 검색 시 NULL, 이어묻기 시 이전 세션 ID)", example = "12345")
             Long sessionId
     ) {}
 }
