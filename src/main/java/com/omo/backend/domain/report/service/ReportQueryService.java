@@ -50,7 +50,7 @@ public class ReportQueryService {
         ResourceTopic resourceTopic = null;
         if (topic != null && !topic.isBlank()) {
             try {
-                resourceTopic = ResourceTopic.valueOf(topic.toUpperCase());
+                resourceTopic = ResourceTopic.valueOf(topic.toUpperCase(java.util.Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 throw new ReportException(ReportErrorCode.RESOURCE_TOPIC_INVALID);
             }
@@ -59,7 +59,7 @@ public class ReportQueryService {
         ResourceType type = null;
         if (resourceType != null && !resourceType.isBlank()) {
             try {
-                type = ResourceType.valueOf(resourceType.toUpperCase());
+                type = ResourceType.valueOf(resourceType.toUpperCase(java.util.Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 throw new ReportException(ReportErrorCode.RESOURCE_TYPE_INVALID);
             }
