@@ -33,4 +33,11 @@ public class AiSearchSession extends BaseEntity {
     public void updateAccumulatedConditions(String newConditions) {
         this.accumulatedConditions = newConditions;
     }
+
+    // 세 세션 생성 메서드
+    public static AiSearchSession createSession() {
+        return AiSearchSession.builder()
+                .accumulatedConditions("{}")
+                .build();
+    }
 }
