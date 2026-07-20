@@ -45,6 +45,7 @@ public class SecurityConfig {
 
     // 인증 없이 접근할 수 있는 공개 API URL 배열
     private static final String[] PUBLIC_API_URLS = {
+            "/actuator/health",
             "/api/v1/members/signup",
             "/auth/v1/email/**",
             "/auth/v1/login/local",
