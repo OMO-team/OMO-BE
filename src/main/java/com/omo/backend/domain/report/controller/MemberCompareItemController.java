@@ -46,6 +46,6 @@ public class MemberCompareItemController implements MemberCompareItemControllerD
             @PathVariable Long cityId
     ) {
         reportCommandService.removeCompareItem(userDetails.getMemberId(), cityId);
-        return ApiResponse.noContent();
+        return ApiResponse.onSuccess(null);
     }
 }

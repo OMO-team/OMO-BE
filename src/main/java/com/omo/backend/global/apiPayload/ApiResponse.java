@@ -43,11 +43,6 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, GeneralSuccessCode.ACCEPTED.getCode(), GeneralSuccessCode.ACCEPTED.getMessage(), result, LocalDateTime.now());
     }
 
-    // 요청 성공 - 204 NO CONTENT
-    public static ApiResponse<Void> noContent() {
-        return new ApiResponse<>(true, GeneralSuccessCode.NO_CONTENT.getCode(), GeneralSuccessCode.NO_CONTENT.getMessage(), null, LocalDateTime.now());
-    }
-
     // 요청 실패 - 기본 에러 메시지 사용
     public static <T> ApiResponse<T> onFailure(BaseErrorCode baseErrorCode, T result) {
         return new ApiResponse<>(false, baseErrorCode.getCode(), baseErrorCode.getMessage(), result, LocalDateTime.now());

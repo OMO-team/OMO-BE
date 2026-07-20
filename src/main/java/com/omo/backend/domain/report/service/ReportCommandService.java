@@ -1,6 +1,7 @@
 package com.omo.backend.domain.report.service;
 
 import com.omo.backend.domain.city.repository.CityRepository;
+import com.omo.backend.domain.member.repository.MemberRepository;
 import com.omo.backend.domain.report.entity.MemberCompareItem;
 import com.omo.backend.domain.report.exception.ReportErrorCode;
 import com.omo.backend.domain.report.exception.ReportException;
@@ -18,9 +19,12 @@ import java.util.List;
 public class ReportCommandService {
     private final MemberCompareItemRepository memberCompareItemRepository;
     private final CityRepository cityRepository;
+    private final MemberRepository memberRepository;
 
     public void addCompareItem(Long memberId, Long cityId) {
-        // 같은 memberId에 대한 동시 요청을 직렬화 (3개 제한 레이스 컨디션 방지)
+        memberRepository.findByIdForUpdate(memberId)
+                .orElseThrow(() -> new IllegalStateException("인증된 회원 정보를 찾을 수 없습니다: " + memberId));
+
         List<MemberCompareItem> existingItems = memberCompareItemRepository.findByMemberIdForUpdate(memberId);
 
         if (existingItems.size() >= 3) {
