@@ -29,5 +29,8 @@ public class AiSearchSession extends BaseEntity {
     @OneToMany(mappedBy = "aiSearchSession", cascade = CascadeType.ALL)
     private List<AiSearchLog> searchLogs = new ArrayList<>();
 
-
+    // 누적 조건 업데이트 메서드
+    public void updateAccumulatedConditions(String newConditions) {
+        this.accumulatedConditions = newConditions;
+    }
 }
