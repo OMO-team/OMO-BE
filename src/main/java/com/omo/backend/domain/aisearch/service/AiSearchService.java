@@ -16,9 +16,11 @@ import com.omo.backend.global.apiPayload.code.GeneralErrorCode;
 import com.omo.backend.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,6 +33,11 @@ public class AiSearchService {
     private final RecommendPromptChipRepository recommendPromptChipRepository;
     private final AiSearchSessionRepository aiSearchSessionRepository;
     private final AiSearchLogRepository aiSearchLogRepository;
+    private final StringRedisTemplate redisTemplate;
+
+    // Redis Key Prefix 및 만료시간(TTL)
+    private static final String TASK_PREFIX = "ai_task:";
+    private static final long TASK_TTL_MINUTES = 30; // 30분 후 자동 삭제
 
     /**
      * 현재 활성화 상태(isActive = true)인 추천 프롬프트 칩 목록을 조회
@@ -59,9 +66,11 @@ public class AiSearchService {
         log.info("[AI Search Request] SessionId: {}, TaskId: {}, Query: {}, isRefine: {}",
                 session.getId(), taskId, request.searchQuery(), request.isRefine());
 
-        // TODO: 레디스에 taskId 임시 저장하기
+        // 4. Redis에 taskId 초기 작업 상태 저장
+        saveInitialTaskStatus(taskId);
 
-        // 4. 응답 DTO 반환
+
+        // 5. 응답 DTO 반환
         return AiSearchConverter.toBriefingInitResult(session.getId(), taskId);
     }
 
@@ -75,5 +84,10 @@ public class AiSearchService {
         // 첫 검색이거나 세션 Id가 없는 경우 -> 새 세션 생성
         AiSearchSession newSession = AiSearchSession.createSession();
         return aiSearchSessionRepository.save(newSession);
+    }
+
+    private void saveInitialTaskStatus(String taskId) {
+        String key = TASK_PREFIX + taskId;
+        redisTemplate.opsForValue().set(key, "IN_PROGRESS", Duration.ofMinutes(TASK_TTL_MINUTES));
     }
 }
