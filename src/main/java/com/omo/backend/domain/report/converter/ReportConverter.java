@@ -58,11 +58,11 @@ public class ReportConverter {
 
     public static List<ReportResponseDTO.StatDTO> toStatDTOList(City city) {
         return List.of(
-                new ReportResponseDTO.StatDTO(StatType.SAFETY.name(), toDouble(city.getSafetyScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.COST.name(), toDouble(city.getMonthlyCost()), null, "원"),
-                new ReportResponseDTO.StatDTO(StatType.HOUSING.name(), toDouble(city.getHousingScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.VISA.name(), toDouble(city.getVisaScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.INFRA.name(), toDouble(city.getInfraScore()), 5.0, "점")
+                new ReportResponseDTO.StatDTO(StatType.SAFETY, toDouble(city.getSafetyScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.COST, toDouble(city.getMonthlyCost()), null, "원"),
+                new ReportResponseDTO.StatDTO(StatType.HOUSING, toDouble(city.getHousingScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.VISA, toDouble(city.getVisaScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.INFRA, toDouble(city.getInfraScore()), 5.0, "점")
         );
     }
 
@@ -103,6 +103,6 @@ public class ReportConverter {
         List<ReportResponseDTO.CityValueDTO> cityValues = cities.stream()
                 .map(city -> new ReportResponseDTO.CityValueDTO(city.getCityId(), toDouble(valueExtractor.apply(city))))
                 .toList();
-        return new ReportResponseDTO.StatGroupDTO(statType.name(), maxValue, unit, cityValues);
+        return new ReportResponseDTO.StatGroupDTO(statType, maxValue, unit, cityValues);
     }
 }

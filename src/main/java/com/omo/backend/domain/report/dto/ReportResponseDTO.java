@@ -1,5 +1,6 @@
 package com.omo.backend.domain.report.dto;
 
+import com.omo.backend.domain.report.enums.StatType;
 import com.omo.backend.domain.report.enums.SummaryCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -20,7 +21,7 @@ public class ReportResponseDTO {
 
     public record StatDTO(
             @Schema(description = "스탯 종류", example = "SAFETY")
-            String statType,
+            StatType statType,
 
             @Schema(description = "값", example = "78.5")
             Double value,
@@ -98,7 +99,7 @@ public class ReportResponseDTO {
 
     public record StatGroupDTO(
             @Schema(description = "스탯 종류", example = "SAFETY")
-            String statType,
+            StatType statType,
 
             @Schema(description = "최대값", example = "5.0")
             Double maxValue,
