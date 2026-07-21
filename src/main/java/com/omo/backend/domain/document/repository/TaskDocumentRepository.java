@@ -12,4 +12,7 @@ public interface TaskDocumentRepository
 
     @EntityGraph(attributePaths = "documentTemplate")
     List<TaskDocument> findAllByTask_IdOrderByIdAsc(Long taskId);
+
+    @EntityGraph(attributePaths = "task")
+    List<TaskDocument> findAllByTask_Roadmap_Id(Long roadmapId);
 }

@@ -22,12 +22,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@DynamicUpdate
 @Table(name = "task")
 public class Task extends BaseEntity {
 
@@ -87,7 +89,7 @@ public class Task extends BaseEntity {
     }
 
     public void complete() {
-        if (!Boolean.TRUE.equals(isCompleted)) {
+        if (!isCompleted() || completedAt == null) {
             isCompleted = true;
             completedAt = LocalDateTime.now();
         }
@@ -96,5 +98,9 @@ public class Task extends BaseEntity {
     public void uncomplete() {
         isCompleted = false;
         completedAt = null;
+    }
+
+    public boolean isCompleted() {
+        return Boolean.TRUE.equals(isCompleted);
     }
 }

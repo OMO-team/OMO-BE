@@ -64,6 +64,11 @@ public enum RoadmapErrorCode implements BaseErrorCode {
             "ROADMAP404_1",
             "도시와 목적에 대응하는 로드맵 템플릿이 없습니다."
     ),
+    ROADMAP_NOT_FOUND(
+            HttpStatus.NOT_FOUND,
+            "ROADMAP404_2",
+            "존재하지 않는 로드맵입니다."
+    ),
     AMBIGUOUS_ROADMAP_TEMPLATE(
             HttpStatus.CONFLICT,
             "ROADMAP409_1",

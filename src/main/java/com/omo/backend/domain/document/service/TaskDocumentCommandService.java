@@ -7,6 +7,7 @@ import com.omo.backend.domain.document.entity.TaskDocument;
 import com.omo.backend.domain.document.exception.DocumentErrorCode;
 import com.omo.backend.domain.document.exception.DocumentException;
 import com.omo.backend.domain.document.repository.TaskDocumentRepository;
+import com.omo.backend.domain.task.entity.Task;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class TaskDocumentCommandService {
                 taskDocumentRepository.findAllByTask_IdOrderByIdAsc(
                         taskDocument.getTaskId()
                 );
+        synchronizeTaskCompletion(taskDocument.getTask(), taskDocuments);
 
         return TaskDocumentConverter.toUpdateCheckResultDTO(
                 taskDocument,
@@ -43,5 +45,20 @@ public class TaskDocumentCommandService {
                 .orElseThrow(() -> new DocumentException(
                         DocumentErrorCode.TASK_DOCUMENT_NOT_FOUND
                 ));
+    }
+
+    private void synchronizeTaskCompletion(
+            Task task,
+            List<TaskDocument> taskDocuments
+    ) {
+        boolean allChecked = !taskDocuments.isEmpty()
+                && taskDocuments.stream()
+                .allMatch(document -> Boolean.TRUE.equals(document.getChecked()));
+
+        if (allChecked) {
+            task.complete();
+            return;
+        }
+        task.uncomplete();
     }
 }

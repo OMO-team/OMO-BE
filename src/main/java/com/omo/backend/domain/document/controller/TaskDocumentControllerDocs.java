@@ -35,7 +35,7 @@ public interface TaskDocumentControllerDocs {
 
     @Operation(
             summary = "작업 서류 완료 체크 상태 변경",
-            description = "특정 작업 서류의 완료 체크 상태를 변경하고 동일 태스크의 완료 개수를 반환합니다."
+            description = "작업 서류 체크 상태를 변경하고, 모든 서류가 체크되면 태스크를 완료 처리합니다."
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
