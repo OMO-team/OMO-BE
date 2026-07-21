@@ -28,7 +28,9 @@ public class TaskDocumentCommandService {
         taskDocument.updateChecked(request.checked());
 
         List<TaskDocument> taskDocuments =
-                taskDocumentRepository.findAllByTaskIdOrderByIdAsc(taskDocument.getTaskId());
+                taskDocumentRepository.findAllByTask_IdOrderByIdAsc(
+                        taskDocument.getTaskId()
+                );
 
         return TaskDocumentConverter.toUpdateCheckResultDTO(
                 taskDocument,

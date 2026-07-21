@@ -11,5 +11,5 @@ public interface TaskDocumentRepository
         extends JpaRepository<TaskDocument, Long> {
 
     @EntityGraph(attributePaths = "documentTemplate")
-    List<TaskDocument> findAllByTaskIdOrderByIdAsc(Long taskId);
+    List<TaskDocument> findAllByTask_IdOrderByIdAsc(Long taskId);
 }

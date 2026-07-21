@@ -20,7 +20,7 @@ public class TaskDocumentQueryService {
             Long taskId
     ) {
         List<TaskDocument> taskDocuments =
-                taskDocumentRepository.findAllByTaskIdOrderByIdAsc(taskId);
+                taskDocumentRepository.findAllByTask_IdOrderByIdAsc(taskId);
 
         return TaskDocumentConverter.toDocumentListResultDTO(
                 taskId,
