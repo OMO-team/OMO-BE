@@ -1,6 +1,5 @@
 package com.omo.backend.domain.task.entity;
 
-import com.omo.backend.common.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,7 +28,7 @@ import lombok.NoArgsConstructor;
                 columnNames = {"task_template_id", "prerequisite_task_template_id"}
         )
 )
-public class TaskTemplateDependency extends BaseEntity {
+public class TaskTemplateDependency {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

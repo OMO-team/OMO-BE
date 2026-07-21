@@ -1,6 +1,5 @@
 package com.omo.backend.domain.task.entity;
 
-import com.omo.backend.common.BaseEntity;
 import com.omo.backend.domain.document.entity.DocumentTemplate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,7 +29,7 @@ import lombok.NoArgsConstructor;
                 columnNames = {"task_template_id", "document_template_id"}
         )
 )
-public class TaskTemplateDocument extends BaseEntity {
+public class TaskTemplateDocument {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
