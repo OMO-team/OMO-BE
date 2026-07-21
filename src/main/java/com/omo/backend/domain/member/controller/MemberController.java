@@ -63,8 +63,8 @@ public class MemberController implements MemberControllerDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader
     ) {
-        memberCommandService.withdrawMember(userDetails.getMemberId());
         authCommandService.logout(userDetails.getMemberId(), extractToken(authorizationHeader));
+        memberCommandService.withdrawMember(userDetails.getMemberId());
         return ApiResponse.onSuccess(null);
     }
 
