@@ -26,11 +26,15 @@ public class RoadmapTemplateFinder {
     private final TaskTemplateDocumentRepository taskTemplateDocumentRepository;
 
     public TemplateData find(Long cityId, Long purposeId) {
-        RoadmapTemplate template = roadmapTemplateRepository
-                .findByCityCityIdAndPurposePurposeId(cityId, purposeId)
-                .orElseThrow(() -> new RoadmapException(
-                        RoadmapErrorCode.ROADMAP_TEMPLATE_NOT_FOUND
-                ));
+        List<RoadmapTemplate> templates = roadmapTemplateRepository
+                .findAllByCityCityIdAndPurposePurposeIdOrderByIdAsc(cityId, purposeId);
+        if (templates.isEmpty()) {
+            throw new RoadmapException(RoadmapErrorCode.ROADMAP_TEMPLATE_NOT_FOUND);
+        }
+        if (templates.size() > 1) {
+            throw new RoadmapException(RoadmapErrorCode.AMBIGUOUS_ROADMAP_TEMPLATE);
+        }
+        RoadmapTemplate template = templates.getFirst();
 
         List<TaskTemplate> taskTemplates = taskTemplateRepository
                 .findAllByRoadmapTemplateIdOrderByDisplayOrderAsc(template.getId());

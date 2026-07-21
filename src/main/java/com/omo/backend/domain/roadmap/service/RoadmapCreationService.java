@@ -80,7 +80,7 @@ public class RoadmapCreationService {
                 templateData.documents()
         );
 
-        Roadmap roadmap = createRoadmap(member, city, purpose, templateData.template(), request);
+        Roadmap roadmap = createRoadmap(member, templateData.template(), request);
         Map<Long, Task> tasksByTemplateId = createTasks(
                 roadmap,
                 request.departureDate(),
@@ -109,19 +109,15 @@ public class RoadmapCreationService {
 
     private Roadmap createRoadmap(
             Member member,
-            City city,
-            Purpose purpose,
             RoadmapTemplate template,
             RoadmapRequestDTO.CreateDTO request
     ) {
-        String title = city.getName() + " " + purpose.getName() + " 로드맵";
         Roadmap roadmap = Roadmap.create(
                 member,
-                city,
-                purpose,
                 template,
-                title,
-                request.departureDate()
+                request.title(),
+                request.departureDate(),
+                request.stayMonths()
         );
         return roadmapRepository.save(roadmap);
     }

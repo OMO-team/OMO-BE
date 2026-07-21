@@ -10,7 +10,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,8 +37,8 @@ public class TaskTemplate extends BaseEntity {
     @JoinColumn(name = "roadmap_template_id", nullable = false)
     private RoadmapTemplate roadmapTemplate;
 
-    @Column(name = "task_name", length = 100, nullable = false)
-    private String taskName;
+    @Column(name = "name", length = 100, nullable = false)
+    private String name;
 
     @Column(name = "description", length = 500)
     private String description;
@@ -45,4 +48,20 @@ public class TaskTemplate extends BaseEntity {
 
     @Column(name = "days_before_departure", nullable = false)
     private Integer daysBeforeDeparture;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "taskTemplate")
+    private List<Task> tasks = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "taskTemplate")
+    private List<TaskTemplateDependency> dependencies = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "prerequisiteTaskTemplate")
+    private List<TaskTemplateDependency> prerequisiteFor = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "taskTemplate")
+    private List<TaskTemplateDocument> documents = new ArrayList<>();
 }

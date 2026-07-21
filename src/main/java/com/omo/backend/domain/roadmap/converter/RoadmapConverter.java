@@ -15,8 +15,8 @@ public final class RoadmapConverter {
         return RoadmapResponseDTO.CreateResultDTO.builder()
                 .roadmapId(roadmap.getId())
                 .title(roadmap.getTitle())
-                .cityId(roadmap.getCity().getCityId())
-                .purposeId(roadmap.getPurpose().getPurposeId())
+                .cityId(roadmap.getRoadmapTemplate().getCity().getCityId())
+                .purposeId(roadmap.getRoadmapTemplate().getPurpose().getPurposeId())
                 .departureDate(roadmap.getDepartureDate())
                 .taskCount(taskCount)
                 .build();

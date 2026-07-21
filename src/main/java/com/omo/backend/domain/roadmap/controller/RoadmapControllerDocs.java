@@ -19,7 +19,7 @@ public interface RoadmapControllerDocs {
 
     @Operation(
             summary = "로드맵 생성",
-            description = "인증된 회원의 도시, 목적, 출국일에 맞는 템플릿으로 로드맵과 태스크를 생성합니다.",
+            description = "인증된 회원의 도시, 목적, 출국일, 체류 기간에 맞는 템플릿으로 로드맵과 태스크를 생성합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -40,6 +40,10 @@ public interface RoadmapControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
             description = "회원, 도시, 목적 또는 로드맵 템플릿을 찾을 수 없음"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "409",
+            description = "도시와 목적에 대응하는 템플릿이 여러 개여서 하나로 결정할 수 없음"
     )
     ApiResponse<RoadmapResponseDTO.CreateResultDTO> createRoadmap(
             @Parameter(hidden = true)

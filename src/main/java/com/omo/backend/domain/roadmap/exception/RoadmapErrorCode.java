@@ -63,6 +63,11 @@ public enum RoadmapErrorCode implements BaseErrorCode {
             HttpStatus.NOT_FOUND,
             "ROADMAP404_1",
             "도시와 목적에 대응하는 로드맵 템플릿이 없습니다."
+    ),
+    AMBIGUOUS_ROADMAP_TEMPLATE(
+            HttpStatus.CONFLICT,
+            "ROADMAP409_1",
+            "도시와 목적에 대응하는 로드맵 템플릿을 하나로 결정할 수 없습니다."
     );
 
     private final HttpStatus status;
