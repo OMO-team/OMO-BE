@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -76,8 +77,9 @@ public class AiSearchService {
 
     private AiSearchSession getOrCreateSession(Long sessionId, Boolean isRefine) {
         // 이어묻기(isRefine = true)이고, sessionId가 제공된 경우 -> 기존 세션 조회
-        if (Boolean.TRUE.equals(isRefine) && sessionId != null) {
-            return aiSearchSessionRepository.findById(sessionId)
+        if (Boolean.TRUE.equals(isRefine)) {
+            return Optional.ofNullable(sessionId)
+                    .flatMap(aiSearchSessionRepository::findById)
                     .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_SESSION_NOT_FOUND));
         }
 
