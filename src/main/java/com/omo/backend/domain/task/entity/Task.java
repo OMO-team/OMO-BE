@@ -55,7 +55,7 @@ public class Task extends BaseEntity {
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder;
 
-    @Column(name = "due_date", nullable = false)
+    @Column(name = "due_date")
     private LocalDate dueDate;
 
     @Column(name = "is_completed", nullable = false)
@@ -76,16 +76,26 @@ public class Task extends BaseEntity {
     @OneToMany(mappedBy = "task")
     private List<TaskDocument> taskDocuments = new ArrayList<>();
 
-    public static Task create(Roadmap roadmap, TaskTemplate template, LocalDate departureDate) {
+    public static Task create(Roadmap roadmap, TaskTemplate template) {
         return Task.builder()
                 .roadmap(roadmap)
                 .taskTemplate(template)
                 .name(template.getName())
                 .description(template.getDescription())
                 .displayOrder(template.getDisplayOrder())
-                .dueDate(departureDate.minusDays(template.getDaysBeforeDeparture()))
+                .dueDate(calculateDueDate(
+                        roadmap.getDepartureDate(),
+                        template.getDaysBeforeDeparture()
+                ))
                 .isCompleted(false)
                 .build();
+    }
+
+    public void updateDueDate(LocalDate departureDate) {
+        this.dueDate = calculateDueDate(
+                departureDate,
+                taskTemplate.getDaysBeforeDeparture()
+        );
     }
 
     public void complete() {
@@ -102,5 +112,15 @@ public class Task extends BaseEntity {
 
     public boolean isCompleted() {
         return Boolean.TRUE.equals(isCompleted);
+    }
+
+    private static LocalDate calculateDueDate(
+            LocalDate departureDate,
+            Integer daysBeforeDeparture
+    ) {
+        if (departureDate == null) {
+            return null;
+        }
+        return departureDate.minusDays(daysBeforeDeparture);
     }
 }

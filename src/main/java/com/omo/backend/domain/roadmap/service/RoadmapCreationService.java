@@ -32,7 +32,6 @@ import com.omo.backend.domain.task.entity.TaskTemplateDocument;
 import com.omo.backend.domain.task.repository.TaskDependencyRepository;
 import com.omo.backend.domain.task.repository.TaskRepository;
 import com.omo.backend.domain.task.service.TaskTemplateValidator;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -62,8 +61,6 @@ public class RoadmapCreationService {
             Long memberId,
             RoadmapRequestDTO.CreateDTO request
     ) {
-        validateDepartureDate(request.departureDate());
-
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         City city = cityRepository.findById(request.cityId())
@@ -80,22 +77,15 @@ public class RoadmapCreationService {
                 templateData.documents()
         );
 
-        Roadmap roadmap = createRoadmap(member, templateData.template(), request);
+        Roadmap roadmap = createRoadmap(member, templateData.template());
         Map<Long, Task> tasksByTemplateId = createTasks(
                 roadmap,
-                request.departureDate(),
                 templateData.taskTemplates()
         );
         createDependencies(templateData.dependencies(), tasksByTemplateId);
         createTaskDocuments(templateData.documents(), tasksByTemplateId);
 
         return RoadmapConverter.toCreateResultDTO(roadmap, tasksByTemplateId.size());
-    }
-
-    private void validateDepartureDate(LocalDate departureDate) {
-        if (departureDate == null || departureDate.isBefore(LocalDate.now())) {
-            throw new RoadmapException(RoadmapErrorCode.INVALID_DEPARTURE_DATE);
-        }
     }
 
     private void validateCityPurpose(City city, Purpose purpose) {
@@ -109,26 +99,21 @@ public class RoadmapCreationService {
 
     private Roadmap createRoadmap(
             Member member,
-            RoadmapTemplate template,
-            RoadmapRequestDTO.CreateDTO request
+            RoadmapTemplate template
     ) {
         Roadmap roadmap = Roadmap.create(
                 member,
-                template,
-                request.title(),
-                request.departureDate(),
-                request.stayMonths()
+                template
         );
         return roadmapRepository.save(roadmap);
     }
 
     private Map<Long, Task> createTasks(
             Roadmap roadmap,
-            LocalDate departureDate,
             List<TaskTemplate> taskTemplates
     ) {
         List<Task> tasks = taskTemplates.stream()
-                .map(template -> Task.create(roadmap, template, departureDate))
+                .map(template -> Task.create(roadmap, template))
                 .toList();
         taskRepository.saveAll(tasks);
 

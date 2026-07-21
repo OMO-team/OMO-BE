@@ -23,7 +23,7 @@ public class RoadmapResponseDTO {
             @Schema(description = "목적 ID", example = "2")
             Long purposeId,
 
-            @Schema(description = "출국일", example = "2026-12-01")
+            @Schema(description = "출국일(최초 생성 시 미설정)", nullable = true)
             LocalDate departureDate,
 
             @Schema(description = "생성된 전체 태스크 수", example = "12")

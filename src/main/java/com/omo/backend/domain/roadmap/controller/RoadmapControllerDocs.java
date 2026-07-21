@@ -19,7 +19,7 @@ public interface RoadmapControllerDocs {
 
     @Operation(
             summary = "로드맵 생성",
-            description = "인증된 회원의 도시, 목적, 출국일, 체류 기간에 맞는 템플릿으로 로드맵과 태스크를 생성합니다.",
+            description = "AI 탐색 리포트의 도시와 목적으로 로드맵을 생성합니다. 제목은 템플릿 이름을 사용하며 일정은 생성 후 설정합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(

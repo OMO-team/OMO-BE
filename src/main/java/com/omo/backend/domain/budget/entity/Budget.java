@@ -49,6 +49,9 @@ public class Budget extends BaseEntity {
     }
 
     public long calculateTotalCost() {
+        if (roadmap.getStayMonths() == null) {
+            throw new IllegalStateException("체류 기간 설정 후 총예산을 계산할 수 있습니다.");
+        }
         return initialCost + monthlyCost * roadmap.getStayMonths();
     }
 }

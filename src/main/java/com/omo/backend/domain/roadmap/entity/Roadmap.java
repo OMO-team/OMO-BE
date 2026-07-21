@@ -48,10 +48,10 @@ public class Roadmap extends BaseEntity {
     @Column(name = "title", length = 100, nullable = false)
     private String title;
 
-    @Column(name = "departure_date", nullable = false)
+    @Column(name = "departure_date")
     private LocalDate departureDate;
 
-    @Column(name = "stay_months", nullable = false)
+    @Column(name = "stay_months")
     private Integer stayMonths;
 
     @Builder.Default
@@ -63,17 +63,17 @@ public class Roadmap extends BaseEntity {
 
     public static Roadmap create(
             Member member,
-            RoadmapTemplate roadmapTemplate,
-            String title,
-            LocalDate departureDate,
-            Integer stayMonths
+            RoadmapTemplate roadmapTemplate
     ) {
         return Roadmap.builder()
                 .member(member)
                 .roadmapTemplate(roadmapTemplate)
-                .title(title)
-                .departureDate(departureDate)
-                .stayMonths(stayMonths)
+                .title(roadmapTemplate.getName())
                 .build();
+    }
+
+    public void updateSchedule(LocalDate departureDate, Integer stayMonths) {
+        this.departureDate = departureDate;
+        this.stayMonths = stayMonths;
     }
 }
