@@ -22,16 +22,21 @@ public class TaskDocumentCommandService {
 
     public TaskDocumentResponseDTO.UpdateCheckResultDTO updateCheckStatus(
             Long taskDocumentId,
+            Long memberId,
             TaskDocumentRequestDTO.UpdateCheckDTO request
     ) {
-        TaskDocument taskDocument = findTaskDocument(taskDocumentId);
+        TaskDocument foundTaskDocument = findTaskDocument(taskDocumentId);
+        List<TaskDocument> taskDocuments = taskDocumentRepository
+                .findAllForUpdateByTaskIdAndMemberId(
+                        foundTaskDocument.getTaskId(),
+                        memberId
+                );
+        TaskDocument taskDocument = findOwnedTaskDocument(
+                taskDocumentId,
+                taskDocuments
+        );
 
         taskDocument.updateChecked(request.checked());
-
-        List<TaskDocument> taskDocuments =
-                taskDocumentRepository.findAllByTask_IdOrderByIdAsc(
-                        taskDocument.getTaskId()
-                );
         synchronizeTaskCompletion(taskDocument.getTask(), taskDocuments);
 
         return TaskDocumentConverter.toUpdateCheckResultDTO(
@@ -42,6 +47,19 @@ public class TaskDocumentCommandService {
 
     private TaskDocument findTaskDocument(Long taskDocumentId) {
         return taskDocumentRepository.findById(taskDocumentId)
+                .orElseThrow(() -> new DocumentException(
+                        DocumentErrorCode.TASK_DOCUMENT_NOT_FOUND
+                ));
+    }
+
+    private TaskDocument findOwnedTaskDocument(
+            Long taskDocumentId,
+            List<TaskDocument> taskDocuments
+    ) {
+        return taskDocuments
+                .stream()
+                .filter(document -> document.getId().equals(taskDocumentId))
+                .findFirst()
                 .orElseThrow(() -> new DocumentException(
                         DocumentErrorCode.TASK_DOCUMENT_NOT_FOUND
                 ));
