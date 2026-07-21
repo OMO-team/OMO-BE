@@ -48,6 +48,8 @@ public class SecurityConfig {
             "/actuator/health",
             "/api/v1/members/signup",
             "/auth/v1/email/**",
+            "/auth/v1/password/reset/**",
+            "/auth/v1/password/reset",
             "/auth/v1/login/local",
             "/auth/v1/reissue",
             "/api/v1/terms"
