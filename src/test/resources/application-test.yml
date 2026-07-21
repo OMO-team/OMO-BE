@@ -22,7 +22,7 @@ spring:
     password: test
 
 jwt:
-  secret-key: YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWE=
+  secret-key: YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ==
   access-token-expiration: 1h
   refresh-token-expiration: 7d
 
