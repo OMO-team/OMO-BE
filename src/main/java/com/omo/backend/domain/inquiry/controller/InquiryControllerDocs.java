@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "Inquiry", description = "1:1 문의 API")
 public interface InquiryControllerDocs {
 
-    @Operation(summary = "1:1 문의 등록", description = "문의 유형, 이름, 이메일, 문의 내용으로 1:1 문의를 등록합니다.")
+    @Operation(
+            summary = "1:1 문의 등록",
+            description = "로그인 여부와 관계없이 문의 유형, 이름, 이메일, 문의 내용으로 1:1 문의를 등록합니다. 로그인한 경우 회원 정보가 문의에 연결됩니다."
+    )
     ApiResponse<InquiryResponseDTO.InquiryResultDTO> createInquiry(
             @Parameter(hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,

@@ -25,7 +25,8 @@ public class InquiryController implements InquiryControllerDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody InquiryRequestDTO.InquiryDTO request
     ) {
-        InquiryResponseDTO.InquiryResultDTO result = inquiryCommandService.createInquiry(userDetails.getMemberId(), request);
+        Long memberId = userDetails != null ? userDetails.getMemberId() : null;
+        InquiryResponseDTO.InquiryResultDTO result = inquiryCommandService.createInquiry(memberId, request);
         return ApiResponse.created(result);
     }
 }
