@@ -22,10 +22,18 @@ public class InquiryCommandService {
     private final MemberRepository memberRepository;
 
     public InquiryResponseDTO.InquiryResultDTO createInquiry(Long memberId, InquiryRequestDTO.InquiryDTO request) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Member member = findMemberIfPresent(memberId);
 
         Inquiry inquiry = inquiryRepository.save(InquiryConverter.toInquiry(request, member));
         return InquiryConverter.toInquiryResultDTO(inquiry);
+    }
+
+    private Member findMemberIfPresent(Long memberId) {
+        if (memberId == null) {
+            return null;
+        }
+
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
     }
 }
