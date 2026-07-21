@@ -45,4 +45,24 @@ public class MemberSettings extends BaseEntity {
                 .twoFactorEnabled(false)
                 .build();
     }
+
+    public void updateSettings(
+            Boolean pushNotification,
+            Boolean emailNotification,
+            Boolean autoSave,
+            Boolean twoFactorEnabled
+    ) {
+        if (pushNotification != null) {
+            this.pushNotification = pushNotification;
+        }
+        if (emailNotification != null) {
+            this.emailNotification = emailNotification;
+        }
+        if (autoSave != null) {
+            this.autoSave = autoSave;
+        }
+        if (twoFactorEnabled != null) {
+            this.twoFactorEnabled = twoFactorEnabled;
+        }
+    }
 }

@@ -5,7 +5,9 @@ import com.omo.backend.domain.member.converter.MemberConverter;
 import com.omo.backend.domain.member.dto.MemberRequestDTO;
 import com.omo.backend.domain.member.dto.MemberResponseDTO;
 import com.omo.backend.domain.member.entity.Member;
+import com.omo.backend.domain.member.entity.MemberSettings;
 import com.omo.backend.domain.member.entity.MemberTerms;
+import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
 import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
@@ -63,6 +65,42 @@ public class MemberCommandService {
         return MemberConverter.toJoinResultDTO(member);
     }
 
+    public MemberResponseDTO.UpdateProfileResultDTO updateProfile(Long memberId, MemberRequestDTO.UpdateProfileDTO request) {
+        Member member = getActiveMember(memberId);
+        member.updateProfile(request.name(), request.profileImageUrl());
+
+        return MemberConverter.toUpdateProfileResultDTO(member);
+    }
+
+    public void withdrawMember(Long memberId) {
+        Member member = getActiveMember(memberId);
+        member.withdraw();
+    }
+
+    public MemberResponseDTO.SettingsResultDTO updateSettings(Long memberId, MemberRequestDTO.UpdateSettingsDTO request) {
+        Member member = getActiveMember(memberId);
+        MemberSettings memberSettings = getMemberSettings(member.getId());
+
+        memberSettings.updateSettings(
+                request.pushNotification(),
+                request.emailNotification(),
+                request.autoSave(),
+                request.twoFactorEnabled()
+        );
+
+        return MemberConverter.toSettingsResultDTO(memberSettings);
+    }
+
+    public void changePassword(Long memberId, MemberRequestDTO.ChangePasswordDTO request) {
+        Member member = getActiveMember(memberId);
+
+        if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
+            throw new MemberException(MemberErrorCode.INVALID_CURRENT_PASSWORD);
+        }
+
+        member.changePassword(passwordEncoder.encode(request.newPassword()));
+    }
+
     private void validateDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new MemberException(MemberErrorCode.DUPLICATE_EMAIL);
@@ -92,5 +130,21 @@ public class MemberCommandService {
         if (hasMissingRequiredTerms) {
             throw new MemberException(MemberErrorCode.REQUIRED_TERMS_NOT_AGREED);
         }
+    }
+
+    private Member getActiveMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        return member;
+    }
+
+    private MemberSettings getMemberSettings(Long memberId) {
+        return memberSettingsRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_SETTINGS_NOT_FOUND));
     }
 }
