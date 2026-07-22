@@ -12,7 +12,7 @@ public class CitySpecification {
 
     // 목적 필터
     public static Specification<City> hasPurpose(String purpose){
-        if (purpose == null) return null;
+        if (purpose == null || purpose.isBlank()) return null;
         PurposeEnum purposeEnum = PurposeEnum.from(purpose);
         return (root, query, cb) -> {
             query.distinct(true);
@@ -62,7 +62,7 @@ public class CitySpecification {
 
     //숙소 난이도 -> 선택한 난이도값 이상의 도시들 반환
     public static Specification<City> hasHousingDifficulty(String difficulty){
-        if (difficulty == null) return null;
+        if (difficulty == null || difficulty.isBlank()) return null;
         BigDecimal threshold = CityEnum.from(difficulty).getMinScore();
         return ((root, query, cb) ->
                 cb.greaterThanOrEqualTo(root.get("housingScore"), threshold));
@@ -70,14 +70,16 @@ public class CitySpecification {
 
     //비자 난이도 -> 선택한 난이도값 이상의 도시들 반환
     public static Specification<City> hasVisaDifficulty(String difficulty){
-        if (difficulty == null) return null;
+        if (difficulty == null || difficulty.isBlank()) return null;
         BigDecimal threshold = CityEnum.from(difficulty).getMinScore();
         return (root, query, cb) ->
                 cb.greaterThanOrEqualTo(root.get("visaScore"), threshold);
     }
 
     public static Specification<City> isNotDeleted(){
-        return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
+
+        return (root, query, cb) ->
+                cb.isNull(root.get("deletedAt"));
     }
 }
 
