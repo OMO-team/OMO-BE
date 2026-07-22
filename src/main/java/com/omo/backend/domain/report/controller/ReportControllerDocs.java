@@ -34,4 +34,15 @@ public interface ReportControllerDocs {
             @Parameter(description = "도시 ID") Long cityId,
             @RequestBody(description = "질문 내용") ReportRequestDTO.AiReportRequestDTO request
     );
+
+    @Operation(summary = "도시 수치 스탯 조회", description = "도시의 생활비/치안/주거/비자/인프라 스탯을 조회합니다.")
+    ApiResponse<List<ReportResponseDTO.StatDTO>> getStats(
+            @Parameter(description = "도시 ID") Long cityId
+    );
+
+    @Operation(summary = "도시 비교 조회", description = "2~3개 도시의 수치 스탯을 비교합니다.")
+    ApiResponse<ReportResponseDTO.CompareResultDTO> compareCities(
+            @Parameter(description = "콤마로 구분된 도시 ID 목록, 2~3개", example = "1,2,3")
+            List<Long> cityIds
+    );
 }
