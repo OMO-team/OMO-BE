@@ -26,6 +26,21 @@ public interface AuthControllerDocs {
             @Valid @RequestBody AuthRequestDTO.EmailVerifyDTO request
     );
 
+    @Operation(summary = "비밀번호 찾기 인증번호 발송", description = "가입된 회원 이메일로 비밀번호 찾기용 6자리 인증번호를 발송합니다.")
+    ApiResponse<AuthResponseDTO.EmailSendResultDTO> sendPasswordResetVerificationCode(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetEmailSendDTO request
+    );
+
+    @Operation(summary = "비밀번호 찾기 인증번호 검증", description = "비밀번호 찾기용 인증번호를 검증하고 인증 완료 상태를 Redis에 저장합니다.")
+    ApiResponse<AuthResponseDTO.EmailVerifyResultDTO> verifyPasswordResetVerificationCode(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetEmailVerifyDTO request
+    );
+
+    @Operation(summary = "새 비밀번호 설정", description = "비밀번호 찾기 이메일 인증을 완료한 회원의 새 비밀번호를 설정합니다.")
+    ApiResponse<Void> resetPassword(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetDTO request
+    );
+
     @Operation(summary = "일반 로그인", description = "이메일과 비밀번호로 로그인합니다.")
     ApiResponse<AuthResponseDTO.LoginResultDTO> doLogin(
             @Valid @RequestBody AuthRequestDTO.LoginDTO request
