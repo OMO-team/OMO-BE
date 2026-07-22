@@ -2,13 +2,13 @@ package com.omo.backend.domain.purpose.enums;
 
 import com.omo.backend.domain.purpose.exception.PurposeErrorCode;
 import com.omo.backend.domain.purpose.exception.PurposeException;
-
+import java.util.Locale;
 public enum PurposeEnum {
     WORKING_HOLIDAY,
     EXCHANGE_STUDENT,
     INTERNSHIP
 ;
-import java.util.Locale;
+
 
     public static PurposeEnum from(String value){
         try{
