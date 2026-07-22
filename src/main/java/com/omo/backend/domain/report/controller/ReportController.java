@@ -53,4 +53,20 @@ public class ReportController implements ReportControllerDocs {
     ) {
         return ApiResponse.onSuccess(reportQueryService.getCityReviews(cityId));
     }
+
+    @Override
+    @GetMapping("/{cityId}/stats")
+    public ApiResponse<List<ReportResponseDTO.StatDTO>> getStats(
+            @PathVariable Long cityId
+    ) {
+        return ApiResponse.onSuccess(reportQueryService.getStats(cityId));
+    }
+
+    @Override
+    @GetMapping("/compare")
+    public ApiResponse<ReportResponseDTO.CompareResultDTO> compareCities(
+            @RequestParam List<Long> cityIds
+    ) {
+        return ApiResponse.onSuccess(reportQueryService.getCompareStats(cityIds));
+    }
 }
