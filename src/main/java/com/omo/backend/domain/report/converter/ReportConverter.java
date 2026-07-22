@@ -5,6 +5,7 @@ import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
+import com.omo.backend.domain.report.entity.MemberCompareItem;
 import com.omo.backend.domain.report.enums.ProsConsType;
 import com.omo.backend.domain.report.enums.StatType;
 
@@ -104,5 +105,15 @@ public class ReportConverter {
                 .map(city -> new ReportResponseDTO.CityValueDTO(city.getCityId(), toDouble(valueExtractor.apply(city))))
                 .toList();
         return new ReportResponseDTO.StatGroupDTO(statType, maxValue, unit, cityValues);
+    }
+
+    public static ReportResponseDTO.CompareItemDTO toCompareItemDTO(MemberCompareItem item) {
+        return new ReportResponseDTO.CompareItemDTO(item.getCityId(), item.getCreatedAt());
+    }
+
+    public static List<ReportResponseDTO.CompareItemDTO> toCompareItemDTOList(List<MemberCompareItem> items) {
+        return items.stream()
+                .map(ReportConverter::toCompareItemDTO)
+                .toList();
     }
 }

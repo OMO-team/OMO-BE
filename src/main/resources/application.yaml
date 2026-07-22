@@ -1,6 +1,3 @@
 spring:
   application:
     name: omo-backend
-
-  profiles:
-    active: dev

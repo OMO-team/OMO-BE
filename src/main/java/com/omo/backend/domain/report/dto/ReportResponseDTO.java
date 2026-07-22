@@ -4,6 +4,7 @@ import com.omo.backend.domain.report.enums.StatType;
 import com.omo.backend.domain.report.enums.SummaryCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ReportResponseDTO {
@@ -117,5 +118,13 @@ public class ReportResponseDTO {
 
             @Schema(description = "스탯별 그룹")
             List<StatGroupDTO> stats
+    ) {}
+
+    public record CompareItemDTO(
+            @Schema(description = "도시 ID", example = "1")
+            Long cityId,
+
+            @Schema(description = "담은 시각")
+            LocalDateTime createdAt
     ) {}
 }

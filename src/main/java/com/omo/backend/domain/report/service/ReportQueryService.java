@@ -7,12 +7,14 @@ import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
+import com.omo.backend.domain.report.entity.MemberCompareItem;
 import com.omo.backend.domain.report.exception.ReportErrorCode;
 import com.omo.backend.domain.report.exception.ReportException;
 import com.omo.backend.domain.report.enums.ResourceTopic;
 import com.omo.backend.domain.report.repository.CityCoreSummaryRepository;
 import com.omo.backend.domain.report.repository.CityProsConsRepository;
 import com.omo.backend.domain.report.repository.CityRelatedResourceRepository;
+import com.omo.backend.domain.report.repository.MemberCompareItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,7 @@ public class ReportQueryService {
     private final CityProsConsRepository cityProsConsRepository;
     private final CityRelatedResourceRepository cityRelatedResourceRepository;
     private final CityRepository cityRepository;
+    private final MemberCompareItemRepository memberCompareItemRepository;
 
     public List<ReportResponseDTO.CoreSummaryDTO> getCoreSummaries(Long cityId) {
         validateCityExists(cityId);
@@ -108,5 +111,10 @@ public class ReportQueryService {
         }
 
         return ReportConverter.toCompareResultDTO(cities);
+    }
+
+    public List<ReportResponseDTO.CompareItemDTO> getMyCompareItems(Long memberId) {
+        List<MemberCompareItem> items = memberCompareItemRepository.findByMemberIdOrderByCreatedAtAsc(memberId);
+        return ReportConverter.toCompareItemDTOList(items);
     }
 }
