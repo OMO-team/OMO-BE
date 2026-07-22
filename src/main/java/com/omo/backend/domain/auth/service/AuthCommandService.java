@@ -6,6 +6,7 @@ import com.omo.backend.domain.auth.dto.AuthResponseDTO;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.member.entity.Member;
+import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
 import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
@@ -34,6 +35,7 @@ public class AuthCommandService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final StringRedisTemplate redisTemplate;
+    private final EmailVerificationService emailVerificationService;
 
     public AuthResponseDTO.LoginResultDTO login(AuthRequestDTO.LoginDTO request) {
         // 이메일로 회원 조회
@@ -115,6 +117,23 @@ public class AuthCommandService {
         );
     }
 
+    public void resetPassword(AuthRequestDTO.PasswordResetDTO request) {
+        // 비밀번호 찾기 인증번호 검증이 완료된 이메일인지 확인
+        emailVerificationService.validatePasswordResetVerifiedEmail(request.email());
+
+        // 비밀번호와 비밀번호 확인이 일치하는지 확인
+        validatePasswordConfirm(request.newPassword(), request.newPasswordConfirm());
+
+        Member member = getActiveMember(request.email());
+
+        // 새 비밀번호를 암호화하여 저장
+        member.changePassword(passwordEncoder.encode(request.newPassword()));
+
+        // 비밀번호 변경 이후 기존 로그인 상태와 인증 완료 상태를 정리
+        redisTemplate.delete(refreshTokenKey(member.getId()));
+        emailVerificationService.deletePasswordResetVerifiedEmail(request.email());
+    }
+
     private void saveRefreshToken(Long memberId, String refreshToken) {
         long expiration = jwtTokenProvider.getExpiration(refreshToken);
         if (expiration <= 0) {
@@ -134,5 +153,22 @@ public class AuthCommandService {
 
     private String blacklistKey(String accessToken) {
         return BLACKLIST_KEY_PREFIX + accessToken;
+    }
+
+    private Member getActiveMember(String email) {
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        return member;
+    }
+
+    private void validatePasswordConfirm(String password, String passwordConfirm) {
+        if (!password.equals(passwordConfirm)) {
+            throw new MemberException(MemberErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
     }
 }
