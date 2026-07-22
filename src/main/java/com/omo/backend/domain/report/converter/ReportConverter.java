@@ -1,11 +1,13 @@
 package com.omo.backend.domain.report.converter;
 
+import com.omo.backend.domain.city.entity.City;
 import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
 import com.omo.backend.domain.report.entity.MemberCompareItem;
 import com.omo.backend.domain.report.enums.ProsConsType;
+import com.omo.backend.domain.report.enums.StatType;
 
 import java.util.List;
 
@@ -55,7 +57,55 @@ public class ReportConverter {
                 .toList();
     }
 
-    //4번 stat변환은 추후 city테이블 연동후 작성 예정
+    public static List<ReportResponseDTO.StatDTO> toStatDTOList(City city) {
+        return List.of(
+                new ReportResponseDTO.StatDTO(StatType.SAFETY, toDouble(city.getSafetyScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.COST, toDouble(city.getMonthlyCost()), null, "원"),
+                new ReportResponseDTO.StatDTO(StatType.HOUSING, toDouble(city.getHousingScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.VISA, toDouble(city.getVisaScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.INFRA, toDouble(city.getInfraScore()), 5.0, "점")
+        );
+    }
+
+    private static Double toDouble(Number number) {
+        return number == null ? null : number.doubleValue();
+    }
+
+    public static ReportResponseDTO.CityHeaderDTO toCityHeaderDTO(City city) {
+        return new ReportResponseDTO.CityHeaderDTO(
+                city.getCityId(),
+                city.getName(),
+                city.getCountry().getName(),
+                city.getImageUrl(),
+                toDouble(city.getRating())
+        );
+    }
+
+    public static ReportResponseDTO.CompareResultDTO toCompareResultDTO(List<City> cities) {
+        List<ReportResponseDTO.CityHeaderDTO> cityHeaders = cities.stream()
+                .map(ReportConverter::toCityHeaderDTO)
+                .toList();
+
+        List<ReportResponseDTO.StatGroupDTO> statGroups = List.of(
+                toStatGroupDTO(StatType.SAFETY, 5.0, "점", cities, City::getSafetyScore),
+                toStatGroupDTO(StatType.COST, null, "원", cities, City::getMonthlyCost),
+                toStatGroupDTO(StatType.HOUSING, 5.0, "점", cities, City::getHousingScore),
+                toStatGroupDTO(StatType.VISA, 5.0, "점", cities, City::getVisaScore),
+                toStatGroupDTO(StatType.INFRA, 5.0, "점", cities, City::getInfraScore)
+        );
+
+        return new ReportResponseDTO.CompareResultDTO(cityHeaders, statGroups);
+    }
+
+    private static ReportResponseDTO.StatGroupDTO toStatGroupDTO(
+            StatType statType, Double maxValue, String unit,
+            List<City> cities, java.util.function.Function<City, Number> valueExtractor
+    ) {
+        List<ReportResponseDTO.CityValueDTO> cityValues = cities.stream()
+                .map(city -> new ReportResponseDTO.CityValueDTO(city.getCityId(), toDouble(valueExtractor.apply(city))))
+                .toList();
+        return new ReportResponseDTO.StatGroupDTO(statType, maxValue, unit, cityValues);
+    }
 
     public static ReportResponseDTO.CompareItemDTO toCompareItemDTO(MemberCompareItem item) {
         return new ReportResponseDTO.CompareItemDTO(item.getCityId(), item.getCreatedAt());

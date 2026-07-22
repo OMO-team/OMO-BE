@@ -1,5 +1,7 @@
 package com.omo.backend.domain.report.service;
 
+import com.omo.backend.domain.city.entity.City;
+import com.omo.backend.domain.city.repository.CityRepository;
 import com.omo.backend.domain.report.converter.ReportConverter;
 import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +30,8 @@ public class ReportQueryService {
     private final CityCoreSummaryRepository cityCoreSummaryRepository;
     private final CityProsConsRepository cityProsConsRepository;
     private final CityRelatedResourceRepository cityRelatedResourceRepository;
+    private final CityRepository cityRepository;
     private final MemberCompareItemRepository memberCompareItemRepository;
-    // private final CityRepository cityRepository;
 
     public List<ReportResponseDTO.CoreSummaryDTO> getCoreSummaries(Long cityId) {
         validateCityExists(cityId);
@@ -36,7 +39,7 @@ public class ReportQueryService {
         return ReportConverter.toCoreSummaryDTOList(summaries);
     }
 
-    public ReportResponseDTO.ProsConsDTO getProsCons (Long cityId) {
+    public ReportResponseDTO.ProsConsDTO getProsCons(Long cityId) {
         validateCityExists(cityId);
         List<CityProsCons> prosCons =
                 cityProsConsRepository.findByCityIdAndDeletedAtIsNullOrderByDisplayOrderAsc(cityId);
@@ -83,9 +86,31 @@ public class ReportQueryService {
     }
 
     private void validateCityExists(Long cityId) {
-        // TODO: City entity 연동 후 존재 여부 검증 로직 추가 (CITY404_1)
-        // cityRepository.findById(cityId)
-        //         .orElseThrow(() -> new ReportException(ReportErrorCode.CITY_NOT_FOUND));
+        if (!cityRepository.existsById(cityId)) {
+            throw new ReportException(ReportErrorCode.CITY_NOT_FOUND);
+        }
+    }
+
+    public List<ReportResponseDTO.StatDTO> getStats(Long cityId) {
+        City city = cityRepository.findById(cityId)
+                .orElseThrow(() -> new ReportException(ReportErrorCode.CITY_NOT_FOUND));
+        return ReportConverter.toStatDTOList(city);
+    }
+
+    public ReportResponseDTO.CompareResultDTO getCompareStats(List<Long> cityIds) {
+        if (cityIds.size() < 2 || cityIds.size() > 3) {
+            throw new ReportException(ReportErrorCode.COMPARE_CITY_IDS_INVALID);
+        }
+        if (cityIds.size() != Set.copyOf(cityIds).size()) {
+            throw new ReportException(ReportErrorCode.COMPARE_CITY_IDS_DUPLICATED);
+        }
+
+        List<City> cities = cityRepository.findAllWithCountryByCityIdIn(cityIds);
+        if (cities.size() != cityIds.size()) {
+            throw new ReportException(ReportErrorCode.CITY_NOT_FOUND);
+        }
+
+        return ReportConverter.toCompareResultDTO(cities);
     }
 
     public List<ReportResponseDTO.CompareItemDTO> getMyCompareItems(Long memberId) {
