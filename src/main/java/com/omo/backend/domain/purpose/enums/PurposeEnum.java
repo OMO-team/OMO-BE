@@ -8,9 +8,11 @@ public enum PurposeEnum {
     EXCHANGE_STUDENT,
     INTERNSHIP
 ;
+import java.util.Locale;
+
     public static PurposeEnum from(String value){
         try{
-            return valueOf(value.toUpperCase());
+            return valueOf(value.toUpperCase(Locale.ROOT));
         }catch (IllegalArgumentException e){
             throw new PurposeException(PurposeErrorCode.INVALID_PURPOSE_TYPE);
         }
