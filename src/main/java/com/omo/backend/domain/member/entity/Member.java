@@ -69,4 +69,18 @@ public class Member extends BaseEntity {
                 .status(MemberStatus.ACTIVE)
                 .build();
     }
+
+    public void updateProfile(String name, String profileImageUrl) {
+        this.name = name;
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
+
+    public void withdraw() {
+        this.status = MemberStatus.DELETED;
+        this.deletedAt = LocalDateTime.now();
+    }
 }

@@ -5,9 +5,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class CityResponseDTO {
 
+    // AI 검색 브리핑 추천 도시용 DTO (
     @Builder
     public record CitySummary(
             @Schema(description = "도시 ID", example = "1")
@@ -59,4 +61,28 @@ public class CityResponseDTO {
                     .build();
         }
     }
+
+    // 도시 카드 단건 정보
+    @Builder
+    public record CityInfo(
+            Long cityId,
+            String name,
+            Long countryId,
+            String countryName,
+            String imageUrl,
+            BigDecimal rating,
+            String description,
+            Integer monthlyCost,
+            BigDecimal safetyScore,
+            BigDecimal housingScore,
+            BigDecimal visaScore,
+            BigDecimal languageScore,
+            BigDecimal infraScore
+    ) {}
+
+    // 도시 목록 조회 결과
+    public record CityListResult(
+            int totalCount,
+            List<CityInfo> cities
+    ) {}
 }

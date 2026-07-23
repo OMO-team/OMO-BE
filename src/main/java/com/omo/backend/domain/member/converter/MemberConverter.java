@@ -34,4 +34,34 @@ public class MemberConverter {
                 .createdAt(member.getCreatedAt())
                 .build();
     }
+
+    // entity -> 내 정보 조회 DTO
+    public static MemberResponseDTO.MyInfoResultDTO toMyInfoResultDTO(Member member) {
+        return MemberResponseDTO.MyInfoResultDTO.builder()
+                .memberId(member.getId())
+                .name(member.getName())
+                .email(member.getEmail())
+                .profileImageUrl(member.getProfileImageUrl())
+                .provider(member.getProvider())
+                .build();
+    }
+
+    // entity -> 프로필 수정 DTO
+    public static MemberResponseDTO.UpdateProfileResultDTO toUpdateProfileResultDTO(Member member) {
+        return MemberResponseDTO.UpdateProfileResultDTO.builder()
+                .memberId(member.getId())
+                .name(member.getName())
+                .profileImageUrl(member.getProfileImageUrl())
+                .build();
+    }
+
+    // entity -> 내 설정 조회/수정 DTO
+    public static MemberResponseDTO.SettingsResultDTO toSettingsResultDTO(MemberSettings memberSettings) {
+        return MemberResponseDTO.SettingsResultDTO.builder()
+                .pushNotification(memberSettings.getPushNotification())
+                .emailNotification(memberSettings.getEmailNotification())
+                .autoSave(memberSettings.getAutoSave())
+                .twoFactorEnabled(memberSettings.getTwoFactorEnabled())
+                .build();
+    }
 }

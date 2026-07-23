@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -42,6 +43,30 @@ public class AuthController implements AuthControllerDocs {
     ) {
         AuthResponseDTO.EmailVerifyResultDTO result = emailVerificationService.verify(request);
         return ApiResponse.onSuccess(result);
+    }
+
+    @PostMapping("/password/reset/email")
+    public ApiResponse<AuthResponseDTO.EmailSendResultDTO> sendPasswordResetVerificationCode(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetEmailSendDTO request
+    ) {
+        AuthResponseDTO.EmailSendResultDTO result = emailVerificationService.sendPasswordReset(request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @PostMapping("/password/reset/verify")
+    public ApiResponse<AuthResponseDTO.EmailVerifyResultDTO> verifyPasswordResetVerificationCode(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetEmailVerifyDTO request
+    ) {
+        AuthResponseDTO.EmailVerifyResultDTO result = emailVerificationService.verifyPasswordReset(request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @PatchMapping("/password/reset")
+    public ApiResponse<Void> resetPassword(
+            @Valid @RequestBody AuthRequestDTO.PasswordResetDTO request
+    ) {
+        authCommandService.resetPassword(request);
+        return ApiResponse.onSuccess(null);
     }
 
     @PostMapping("/login/local")

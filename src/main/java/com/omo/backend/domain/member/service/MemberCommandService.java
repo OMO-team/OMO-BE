@@ -5,7 +5,9 @@ import com.omo.backend.domain.member.converter.MemberConverter;
 import com.omo.backend.domain.member.dto.MemberRequestDTO;
 import com.omo.backend.domain.member.dto.MemberResponseDTO;
 import com.omo.backend.domain.member.entity.Member;
+import com.omo.backend.domain.member.entity.MemberSettings;
 import com.omo.backend.domain.member.entity.MemberTerms;
+import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
 import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
@@ -41,6 +43,9 @@ public class MemberCommandService {
         // 이메일 인증이 완료된 이메일인지 확인
         emailVerificationService.validateVerifiedEmail(request.email());
 
+        // 비밀번호와 비밀번호 확인이 일치하는지 확인
+        validatePasswordConfirm(request.password(), request.passwordConfirm());
+
         // 실제 존재하는 약관인지 확인
         List<Terms> agreedTerms = termsRepository.findAllById(request.agreedTermsIds());
         validateAgreedTerms(request.agreedTermsIds(), agreedTerms);
@@ -61,6 +66,50 @@ public class MemberCommandService {
         emailVerificationService.deleteVerifiedEmail(request.email());
 
         return MemberConverter.toJoinResultDTO(member);
+    }
+
+    public MemberResponseDTO.UpdateProfileResultDTO updateProfile(Long memberId, MemberRequestDTO.UpdateProfileDTO request) {
+        Member member = getActiveMember(memberId);
+        member.updateProfile(request.name(), request.profileImageUrl());
+
+        return MemberConverter.toUpdateProfileResultDTO(member);
+    }
+
+    public void withdrawMember(Long memberId) {
+        Member member = getActiveMember(memberId);
+        member.withdraw();
+    }
+
+    public MemberResponseDTO.SettingsResultDTO updateSettings(Long memberId, MemberRequestDTO.UpdateSettingsDTO request) {
+        Member member = getActiveMember(memberId);
+        MemberSettings memberSettings = getMemberSettings(member.getId());
+
+        memberSettings.updateSettings(
+                request.pushNotification(),
+                request.emailNotification(),
+                request.autoSave(),
+                request.twoFactorEnabled()
+        );
+
+        return MemberConverter.toSettingsResultDTO(memberSettings);
+    }
+
+    public void changePassword(Long memberId, MemberRequestDTO.ChangePasswordDTO request) {
+        Member member = getActiveMember(memberId);
+
+        if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
+            throw new MemberException(MemberErrorCode.INVALID_CURRENT_PASSWORD);
+        }
+
+        validatePasswordConfirm(request.newPassword(), request.newPasswordConfirm());
+
+        member.changePassword(passwordEncoder.encode(request.newPassword()));
+    }
+
+    private void validatePasswordConfirm(String password, String passwordConfirm) {
+        if (!password.equals(passwordConfirm)) {
+            throw new MemberException(MemberErrorCode.PASSWORD_CONFIRM_MISMATCH);
+        }
     }
 
     private void validateDuplicateEmail(String email) {
@@ -92,5 +141,21 @@ public class MemberCommandService {
         if (hasMissingRequiredTerms) {
             throw new MemberException(MemberErrorCode.REQUIRED_TERMS_NOT_AGREED);
         }
+    }
+
+    private Member getActiveMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        if (member.getStatus() != MemberStatus.ACTIVE) {
+            throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        return member;
+    }
+
+    private MemberSettings getMemberSettings(Long memberId) {
+        return memberSettingsRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_SETTINGS_NOT_FOUND));
     }
 }
