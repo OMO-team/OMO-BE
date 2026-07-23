@@ -38,6 +38,19 @@ public class TaskController implements TaskControllerDocs {
     }
 
     @Override
+    @GetMapping("/tasks/{taskId}")
+    public ApiResponse<TaskResponseDTO.DetailResultDTO> getTask(
+            @Positive(message = "태스크 ID는 양수여야 합니다.")
+            @PathVariable Long taskId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ApiResponse.onSuccess(taskQueryService.getTask(
+                taskId,
+                userDetails.getMemberId()
+        ));
+    }
+
+    @Override
     @PatchMapping("/tasks/{taskId}/complete")
     public ApiResponse<TaskResponseDTO.CompleteResultDTO> completeTask(
             @Positive(message = "태스크 ID는 양수여야 합니다.")

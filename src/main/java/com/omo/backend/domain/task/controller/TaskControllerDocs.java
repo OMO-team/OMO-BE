@@ -42,6 +42,31 @@ public interface TaskControllerDocs {
     );
 
     @Operation(
+            summary = "태스크 상세 조회",
+            description = "태스크 상태, 권장 완료일, D-Day와 일정 초과 여부를 조회합니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "태스크 상세 조회 성공",
+            content = @Content(schema = @Schema(
+                    implementation = TaskResponseDTO.DetailResultDTO.class
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "태스크를 찾을 수 없거나 다른 회원의 태스크"
+    )
+    ApiResponse<TaskResponseDTO.DetailResultDTO> getTask(
+            @Parameter(description = "태스크 ID", example = "10", required = true)
+            @Positive(message = "태스크 ID는 양수여야 합니다.")
+            @PathVariable Long taskId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
+    @Operation(
             summary = "서류 없는 태스크 수동 완료",
             description = "잠금 해제되고 연결 서류가 없는 미완료 태스크를 완료합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
