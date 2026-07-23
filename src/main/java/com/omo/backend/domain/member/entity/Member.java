@@ -65,7 +65,7 @@ public class Member extends BaseEntity {
                 .password(password)
                 .name(name)
                 .provider(MemberProvider.LOCAL)
-                .emailVerified(false)
+                .emailVerified(true)
                 .status(MemberStatus.ACTIVE)
                 .build();
     }
