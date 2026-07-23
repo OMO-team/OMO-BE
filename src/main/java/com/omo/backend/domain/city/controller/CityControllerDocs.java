@@ -7,17 +7,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "City", description = "도시 API")
 public interface CityControllerDocs {
 
     @Operation(
             summary = "필터링된 도시 목록 조회",
-            description = "검색어(도시명, 국가명, 설명) 및 다양한 필터 조건(월 생활비, 점수, 난이도 등)을 적용하여 도시 목록을 조회합니다. 모든 쿼리 파라미터는 선택 사항 입니다."
+            description = "필터 조건(월 생활비, 점수, 난이도 등)을 적용하여 도시 목록을 조회합니다. 모든 쿼리 파라미터는 선택 사항 입니다."
     )
     @Parameters({
-            @Parameter(name = "keyword", description = "검색어 (도시명, 국가명, 설명)"),
             @Parameter(name = "purposeType", description = "목적 (WORKING_HOLIDAY / EXCHANGE_STUDENT / INTERNSHIP)"),
             @Parameter(name = "countryCode", description = "국가 코드 (예: AU, JP)"),
             @Parameter(name = "maxMonthlyCost", description = "최대 월 생활비 (만원 단위, 예: 200)"),
@@ -27,5 +28,14 @@ public interface CityControllerDocs {
     })
     ApiResponse<CityResponseDTO.CityListResult> getCities(
             @ModelAttribute CityRequestDTO.CityFilterRequest request
+    );
+
+    @Operation(
+            summary = "단순 키워드 검색",
+            description = "도시명, 국가명, 설명을 대상으로 키워드를 검색하여 도시 목록을 반환합니다."
+    )
+    @Parameter(name = "keyword", description = "검색 키워드 (1자 이상 50자 이하)", required = true, example = "베를린")
+    ApiResponse<CityResponseDTO.CitySearchResultDTO> searchCities(
+        @ModelAttribute @Valid CityRequestDTO.SearchRequestDTO request
     );
 }

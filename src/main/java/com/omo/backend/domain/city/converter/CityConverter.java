@@ -34,6 +34,7 @@ public class CityConverter {
         return new CityResponseDTO.CityListResult(cityInfoList.size(), cityInfoList);
     }
 
+    // keyword 검색
     public static CityResponseDTO.CitySearchResultDTO toCitySearchResultDTO(String keyword, List<City> cities) {
         List<CityResponseDTO.CityDTO> cityDTOList = cities.stream()
                 .map(city -> CityResponseDTO.CityDTO.builder()

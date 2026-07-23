@@ -37,6 +37,7 @@ public class CityQueryService {
         return CityConverter.toCityListResult(cities);
     }
 
+    // 단순 키워드 검색
     public CityResponseDTO.CitySearchResultDTO searchCities(String keyword){
         if (keyword == null || keyword.isBlank()) {
             throw new CityException(CityErrorCode.KEYWORD_REQUIRED);
@@ -48,6 +49,6 @@ public class CityQueryService {
                 .and(CitySpecification.hasKeyword(trimmedKeyword));
 
         List<City> cities = cityRepository.findAll(spec);
-        return CityConverter.toCityListResult(keyword, cities);
+        return CityConverter.toCitySearchResultDTO(trimmedKeyword, cities);
     }
 }
