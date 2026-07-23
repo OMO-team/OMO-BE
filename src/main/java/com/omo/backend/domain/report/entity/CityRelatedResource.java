@@ -36,7 +36,7 @@ public class CityRelatedResource extends BaseEntity {
     @Column(name = "resource_type", nullable = false, length = 20)
     private ResourceType resourceType;
 
-    @Column(nullable = false, length = 200)
+    @Column(length = 200)
     private String title;
 
     @Column(length = 100)

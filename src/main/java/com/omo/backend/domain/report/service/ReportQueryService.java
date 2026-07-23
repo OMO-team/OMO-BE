@@ -7,13 +7,16 @@ import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
+import com.omo.backend.domain.report.entity.CityReview;
 import com.omo.backend.domain.report.entity.MemberCompareItem;
+import com.omo.backend.domain.report.enums.ResourceType;
 import com.omo.backend.domain.report.exception.ReportErrorCode;
 import com.omo.backend.domain.report.exception.ReportException;
 import com.omo.backend.domain.report.enums.ResourceTopic;
 import com.omo.backend.domain.report.repository.CityCoreSummaryRepository;
 import com.omo.backend.domain.report.repository.CityProsConsRepository;
 import com.omo.backend.domain.report.repository.CityRelatedResourceRepository;
+import com.omo.backend.domain.report.repository.CityReviewRepository;
 import com.omo.backend.domain.report.repository.MemberCompareItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,7 @@ public class ReportQueryService {
     private final CityCoreSummaryRepository cityCoreSummaryRepository;
     private final CityProsConsRepository cityProsConsRepository;
     private final CityRelatedResourceRepository cityRelatedResourceRepository;
+    private final CityReviewRepository cityReviewRepository;
     private final CityRepository cityRepository;
     private final MemberCompareItemRepository memberCompareItemRepository;
 
@@ -46,23 +50,38 @@ public class ReportQueryService {
         return ReportConverter.toProsConsDTO(prosCons);
     }
 
-    public List<ReportResponseDTO.ResourceDTO> getResources(Long cityId, String topic) {
+    public List<ReportResponseDTO.ResourceDTO> getResources(Long cityId, String topic, String resourceType) {
         validateCityExists(cityId);
 
-        if (topic == null || topic.isBlank()) {
-            List<CityRelatedResource> resources = cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
-            return ReportConverter.toResourceDTOList(resources);
+        ResourceTopic resourceTopic = null;
+        if (topic != null && !topic.isBlank()) {
+            try {
+                resourceTopic = ResourceTopic.valueOf(topic.toUpperCase(java.util.Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                throw new ReportException(ReportErrorCode.RESOURCE_TOPIC_INVALID);
+            }
         }
 
-        ResourceTopic resourceTopic;
-        try {
-            resourceTopic = ResourceTopic.valueOf(topic.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new ReportException(ReportErrorCode.RESOURCE_TOPIC_INVALID);
+        ResourceType type = null;
+        if (resourceType != null && !resourceType.isBlank()) {
+            try {
+                type = ResourceType.valueOf(resourceType.toUpperCase(java.util.Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                throw new ReportException(ReportErrorCode.RESOURCE_TYPE_INVALID);
+            }
         }
 
-        List<CityRelatedResource> resources =
-                cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, resourceTopic);
+        List<CityRelatedResource> resources;
+        if (resourceTopic != null && type != null) {
+            resources = cityRelatedResourceRepository.findByCityIdAndTopicAndResourceTypeAndDeletedAtIsNull(cityId, resourceTopic, type);
+        } else if (resourceTopic != null) {
+            resources = cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, resourceTopic);
+        } else if (type != null) {
+            resources = cityRelatedResourceRepository.findByCityIdAndResourceTypeAndDeletedAtIsNull(cityId, type);
+        } else {
+            resources = cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
+        }
+
         return ReportConverter.toResourceDTOList(resources);
     }
 
@@ -116,5 +135,11 @@ public class ReportQueryService {
     public List<ReportResponseDTO.CompareItemDTO> getMyCompareItems(Long memberId) {
         List<MemberCompareItem> items = memberCompareItemRepository.findByMemberIdOrderByCreatedAtAsc(memberId);
         return ReportConverter.toCompareItemDTOList(items);
+    }
+
+    public List<ReportResponseDTO.CityReviewDTO> getCityReviews(Long cityId) {
+        validateCityExists(cityId);
+        List<CityReview> reviews = cityReviewRepository.findByCityIdAndDeletedAtIsNull(cityId);
+        return ReportConverter.toCityReviewDTOList(reviews);
     }
 }
