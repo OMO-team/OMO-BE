@@ -2,6 +2,7 @@ package com.omo.backend.domain.task.dto;
 
 import com.omo.backend.domain.task.enums.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
@@ -59,6 +60,22 @@ public class TaskResponseDTO {
 
             @Schema(description = "완료 후 계산 상태", example = "COMPLETED")
             TaskStatus status
+    ) {
+    }
+
+    @Builder
+    public record DetailResultDTO(
+            Long taskId,
+            Long roadmapId,
+            String name,
+            String description,
+            Integer displayOrder,
+            TaskStatus status,
+            Boolean isCompleted,
+            LocalDate recommendedCompletionDate,
+            Long scheduleDDay,
+            Boolean isOverdue,
+            LocalDateTime completedAt
     ) {
     }
 }

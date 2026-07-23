@@ -2,6 +2,7 @@ package com.omo.backend.domain.roadmap.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.Builder;
 
 public class RoadmapResponseDTO {
@@ -28,6 +29,67 @@ public class RoadmapResponseDTO {
 
             @Schema(description = "생성된 전체 태스크 수", example = "12")
             Integer taskCount
+    ) {
+    }
+
+    @Builder
+    public record ListItemDTO(
+            Long roadmapId,
+            String title,
+            Long cityId,
+            String cityName,
+            Long purposeId,
+            String purposeName,
+            LocalDate departureDate,
+            Integer stayMonths,
+            Long departureDDay,
+            Long completedTaskCount,
+            Long totalTaskCount,
+            Double progressRate,
+            Long nextTaskId,
+            String nextTaskName,
+            LocalDate nextScheduleDate,
+            Long nextScheduleDDay,
+            Boolean isNextScheduleOverdue
+    ) {
+    }
+
+    @Builder
+    public record DetailResultDTO(
+            Long roadmapId,
+            String title,
+            Long cityId,
+            String cityName,
+            Long purposeId,
+            String purposeName,
+            LocalDate departureDate,
+            Integer stayMonths,
+            Long departureDDay,
+            Long completedTaskCount,
+            Long totalTaskCount,
+            Double progressRate,
+            Long nextTaskId,
+            String nextTaskName,
+            LocalDate nextScheduleDate,
+            Long nextScheduleDDay,
+            Boolean isNextScheduleOverdue
+    ) {
+    }
+
+    @Builder
+    public record TaskScheduleDTO(
+            Long taskId,
+            LocalDate recommendedCompletionDate
+    ) {
+    }
+
+    @Builder
+    public record UpdateScheduleResultDTO(
+            Long roadmapId,
+            LocalDate departureDate,
+            Integer stayMonths,
+            Long departureDDay,
+            List<TaskScheduleDTO> taskSchedules
     ) {
     }
 }

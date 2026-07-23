@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -19,6 +20,18 @@ public interface TaskDocumentRepository
 
     @EntityGraph(attributePaths = "task")
     List<TaskDocument> findAllByTask_Roadmap_Id(Long roadmapId);
+
+    @EntityGraph(attributePaths = "task")
+    List<TaskDocument> findAllByTask_Roadmap_IdIn(List<Long> roadmapIds);
+
+    @Modifying
+    @Query("""
+            delete from TaskDocument taskDocument
+            where taskDocument.task.id in (
+                select task.id from Task task where task.roadmap.id = :roadmapId
+            )
+            """)
+    void deleteAllByRoadmapId(@Param("roadmapId") Long roadmapId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
