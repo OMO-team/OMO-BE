@@ -118,7 +118,7 @@ public final class RoadmapConverter {
         List<RoadmapResponseDTO.TaskScheduleDTO> taskSchedules = tasks.stream()
                 .map(task -> RoadmapResponseDTO.TaskScheduleDTO.builder()
                         .taskId(task.getId())
-                        .recommendedCompletionDate(task.getDueDate())
+                        .dueDate(task.getDueDate())
                         .build())
                 .toList();
 

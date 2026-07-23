@@ -95,7 +95,7 @@ public class RoadmapResponseDTO {
     @Builder
     public record TaskScheduleDTO(
             Long taskId,
-            LocalDate recommendedCompletionDate
+            LocalDate dueDate
     ) {
     }
 
