@@ -30,4 +30,31 @@ public class CityResponseDTO {
             int totalCount,
             List<CityInfo> cities
     ) {}
+
+    //키워드 검색 결과
+    @Builder
+    public record CitySearchResultDTO(
+            String keyword,
+            Integer totalCount,
+            List<CityDTO> cities
+    ){}
+
+    //도시 1개 정보
+    @Builder
+    public record CityDTO(
+            Long cityId,
+            String name,
+            CountryDTO country,
+            String imageUrl,
+            BigDecimal rating,
+            Integer monthlyCost,
+            BigDecimal safetyScore
+    ){}
+
+    //국가 정보
+    @Builder
+    public record CountryDTO(
+            Long countryId,
+            String name
+    ){}
 }

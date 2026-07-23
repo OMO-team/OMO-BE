@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 @Getter
 @AllArgsConstructor
@@ -18,7 +19,7 @@ public enum CityEnum {
 
         public static CityEnum from(String value){
                 try{
-                        return valueOf(value.toUpperCase());
+                        return valueOf(value.toUpperCase(Locale.ROOT));
                 }catch (IllegalArgumentException e){
                         throw new CityException(CityErrorCode.INVALID_DIFFICULTY);
                 }

@@ -33,4 +33,26 @@ public class CityConverter {
                 .toList();
         return new CityResponseDTO.CityListResult(cityInfoList.size(), cityInfoList);
     }
+
+    public static CityResponseDTO.CitySearchResultDTO toCitySearchResultDTO(String keyword, List<City> cities) {
+        List<CityResponseDTO.CityDTO> cityDTOList = cities.stream()
+                .map(city -> CityResponseDTO.CityDTO.builder()
+                        .cityId(city.getCityId())
+                        .name(city.getName())
+                        .country(CityResponseDTO.CountryDTO.builder()
+                                .countryId(city.getCountry().getCountryId())
+                                .name(city.getCountry().getName())
+                                .build())
+                        .imageUrl(city.getImageUrl())
+                        .rating(city.getRating())
+                        .monthlyCost(city.getMonthlyCost())
+                        .safetyScore(city.getSafetyScore())
+                        .build())
+                .toList();
+        return CityResponseDTO.CitySearchResultDTO.builder()
+                .keyword(keyword)
+                .totalCount(cityDTOList.size())
+                .cities(cityDTOList)
+                .build();
+    }
 }

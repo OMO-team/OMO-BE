@@ -4,6 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class CityRequestDTO {
 
     // 필터 조회
@@ -32,4 +36,12 @@ public class CityRequestDTO {
                     allowableValues = {"EASY", "NORMAL", "HARD"})
             String visaDifficulty
     ) {}
+
+    //단순 키워드 검색
+    public record SearchRequestDTO(
+            @Schema(description = "검색 키워드", example = "독일", requiredMode = Schema.RequiredMode.REQUIRED)
+            @NotBlank(message = "검색 키워드는 필수 입력값입니다.")
+            @Size(min = 1, max = 50, message = "키워드는 2자 이상 50자 이하이어야 합니다.")
+            String keyword
+    ){}
 }

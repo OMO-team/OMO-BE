@@ -4,6 +4,8 @@ import com.omo.backend.domain.city.converter.CityConverter;
 import com.omo.backend.domain.city.dto.CityRequestDTO;
 import com.omo.backend.domain.city.dto.CityResponseDTO;
 import com.omo.backend.domain.city.entity.City;
+import com.omo.backend.domain.city.exception.CityErrorCode;
+import com.omo.backend.domain.city.exception.CityException;
 import com.omo.backend.domain.city.repository.CityRepository;
 import com.omo.backend.domain.city.specification.CitySpecification;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +35,19 @@ public class CityQueryService {
 
         List<City> cities = cityRepository.findAll(spec);
         return CityConverter.toCityListResult(cities);
+    }
+
+    public CityResponseDTO.CitySearchResultDTO searchCities(String keyword){
+        if (keyword == null || keyword.isBlank()) {
+            throw new CityException(CityErrorCode.KEYWORD_REQUIRED);
+        }
+        String trimmedKeyword = keyword.trim();
+
+        Specification<City> spec = Specification
+                .where(CitySpecification.isNotDeleted())
+                .and(CitySpecification.hasKeyword(trimmedKeyword));
+
+        List<City> cities = cityRepository.findAll(spec);
+        return CityConverter.toCityListResult(keyword, cities);
     }
 }
