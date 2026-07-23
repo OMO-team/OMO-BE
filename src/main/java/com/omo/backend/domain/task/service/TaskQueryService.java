@@ -45,7 +45,8 @@ public class TaskQueryService {
                         task.getDueDate(),
                         today,
                         task.isCompleted()
-                )
+                ),
+                documents
         );
     }
 }

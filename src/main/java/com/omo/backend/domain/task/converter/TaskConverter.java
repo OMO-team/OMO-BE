@@ -1,8 +1,11 @@
 package com.omo.backend.domain.task.converter;
 
+import com.omo.backend.domain.document.converter.TaskDocumentConverter;
+import com.omo.backend.domain.document.entity.TaskDocument;
 import com.omo.backend.domain.task.dto.TaskResponseDTO;
 import com.omo.backend.domain.task.entity.Task;
 import com.omo.backend.domain.task.enums.TaskStatus;
+import java.util.List;
 
 public final class TaskConverter {
 
@@ -25,20 +28,27 @@ public final class TaskConverter {
             Task task,
             TaskStatus status,
             Long scheduleDDay,
-            Boolean isOverdue
+            Boolean isOverdue,
+            List<TaskDocument> documents
     ) {
         return TaskResponseDTO.DetailResultDTO.builder()
                 .taskId(task.getId())
                 .roadmapId(task.getRoadmap().getId())
                 .name(task.getName())
                 .description(task.getDescription())
+                .category(task.getCategory())
                 .displayOrder(task.getDisplayOrder())
                 .status(status)
                 .isCompleted(task.isCompleted())
-                .recommendedCompletionDate(task.getDueDate())
+                .dueDate(task.getDueDate())
                 .scheduleDDay(scheduleDDay)
                 .isOverdue(isOverdue)
                 .completedAt(task.getCompletedAt())
+                .completedDocumentCount(TaskDocumentConverter.countCompleted(documents))
+                .totalDocumentCount(TaskDocumentConverter.countTotal(documents))
+                .documents(documents.stream()
+                        .map(TaskDocumentConverter::toDocumentItemDTO)
+                        .toList())
                 .build();
     }
 

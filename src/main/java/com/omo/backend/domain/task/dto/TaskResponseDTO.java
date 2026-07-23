@@ -1,9 +1,12 @@
 package com.omo.backend.domain.task.dto;
 
+import com.omo.backend.domain.document.dto.TaskDocumentResponseDTO;
+import com.omo.backend.domain.task.enums.TaskCategory;
 import com.omo.backend.domain.task.enums.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Builder;
 
 public class TaskResponseDTO {
@@ -33,13 +36,17 @@ public class TaskResponseDTO {
             Long roadmapId,
             String name,
             String description,
+            TaskCategory category,
             Integer displayOrder,
             TaskStatus status,
             Boolean isCompleted,
-            LocalDate recommendedCompletionDate,
+            LocalDate dueDate,
             Long scheduleDDay,
             Boolean isOverdue,
-            LocalDateTime completedAt
+            LocalDateTime completedAt,
+            Long completedDocumentCount,
+            Long totalDocumentCount,
+            List<TaskDocumentResponseDTO.DocumentItemDTO> documents
     ) {
     }
 

@@ -21,7 +21,7 @@ public interface TaskControllerDocs {
 
     @Operation(
             summary = "태스크 상세 조회",
-            description = "태스크 상태, 권장 완료일, D-Day와 일정 초과 여부를 조회합니다.",
+            description = "태스크 이름, 카테고리, 일정, 상태와 필요한 전체 서류를 조회합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
