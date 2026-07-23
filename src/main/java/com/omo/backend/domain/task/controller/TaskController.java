@@ -28,19 +28,6 @@ public class TaskController implements TaskControllerDocs {
     private final TaskCommandService taskCommandService;
 
     @Override
-    @GetMapping("/roadmaps/{roadmapId}/tasks")
-    public ApiResponse<TaskResponseDTO.TaskListResultDTO> getTasks(
-            @Positive(message = "로드맵 ID는 양수여야 합니다.")
-            @PathVariable Long roadmapId,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        return ApiResponse.onSuccess(taskQueryService.getTasks(
-                roadmapId,
-                userDetails.getMemberId()
-        ));
-    }
-
-    @Override
     @GetMapping("/tasks/{taskId}")
     public ApiResponse<TaskResponseDTO.DetailResultDTO> getTask(
             @Positive(message = "태스크 ID는 양수여야 합니다.")

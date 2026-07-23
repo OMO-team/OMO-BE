@@ -12,9 +12,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskDependencyRepository extends JpaRepository<TaskDependency, Long> {
 
-    @EntityGraph(attributePaths = {"task", "prerequisiteTask"})
-    List<TaskDependency> findAllByTask_Roadmap_Id(Long roadmapId);
-
     @EntityGraph(attributePaths = "prerequisiteTask")
     List<TaskDependency> findAllByTask_Id(Long taskId);
 

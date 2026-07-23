@@ -19,9 +19,6 @@ public interface TaskDocumentRepository
     List<TaskDocument> findAllByTask_IdOrderByIdAsc(Long taskId);
 
     @EntityGraph(attributePaths = "task")
-    List<TaskDocument> findAllByTask_Roadmap_Id(Long roadmapId);
-
-    @EntityGraph(attributePaths = "task")
     List<TaskDocument> findAllByTask_Roadmap_IdIn(List<Long> roadmapIds);
 
     @Modifying

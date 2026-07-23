@@ -75,7 +75,7 @@ public interface RoadmapControllerDocs {
 
     @Operation(
             summary = "로드맵 상세 조회",
-            description = "로드맵 기본 정보, 진행률, 다음 태스크와 다음 일정을 조회합니다.",
+            description = "로드맵 기본 정보, 진행률과 표시 순서대로 정렬된 전체 태스크를 조회합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(

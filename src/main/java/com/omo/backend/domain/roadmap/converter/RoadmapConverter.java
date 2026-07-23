@@ -3,6 +3,7 @@ package com.omo.backend.domain.roadmap.converter;
 import com.omo.backend.domain.roadmap.dto.RoadmapResponseDTO;
 import com.omo.backend.domain.roadmap.entity.Roadmap;
 import com.omo.backend.domain.task.entity.Task;
+import com.omo.backend.domain.task.enums.TaskStatus;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -57,6 +58,24 @@ public final class RoadmapConverter {
                 .build();
     }
 
+    public static RoadmapResponseDTO.TaskItemDTO toTaskItemDTO(
+            Task task,
+            TaskStatus status,
+            Long scheduleDDay,
+            Boolean isOverdue
+    ) {
+        return RoadmapResponseDTO.TaskItemDTO.builder()
+                .taskId(task.getId())
+                .name(task.getName())
+                .category(task.getCategory())
+                .dueDate(task.getDueDate())
+                .scheduleDDay(scheduleDDay)
+                .isOverdue(isOverdue)
+                .status(status)
+                .isCompleted(task.isCompleted())
+                .build();
+    }
+
     public static RoadmapResponseDTO.DetailResultDTO toDetailResultDTO(
             Roadmap roadmap,
             long completedTaskCount,
@@ -66,7 +85,8 @@ public final class RoadmapConverter {
             Task nextScheduleTask,
             Long departureDDay,
             Long nextScheduleDDay,
-            Boolean isNextScheduleOverdue
+            Boolean isNextScheduleOverdue,
+            List<RoadmapResponseDTO.TaskItemDTO> tasks
     ) {
         return RoadmapResponseDTO.DetailResultDTO.builder()
                 .roadmapId(roadmap.getId())
@@ -86,6 +106,7 @@ public final class RoadmapConverter {
                 .nextScheduleDate(nextScheduleTask == null ? null : nextScheduleTask.getDueDate())
                 .nextScheduleDDay(nextScheduleDDay)
                 .isNextScheduleOverdue(isNextScheduleOverdue)
+                .tasks(tasks)
                 .build();
     }
 

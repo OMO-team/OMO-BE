@@ -1,5 +1,7 @@
 package com.omo.backend.domain.roadmap.dto;
 
+import com.omo.backend.domain.task.enums.TaskCategory;
+import com.omo.backend.domain.task.enums.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -72,7 +74,21 @@ public class RoadmapResponseDTO {
             String nextTaskName,
             LocalDate nextScheduleDate,
             Long nextScheduleDDay,
-            Boolean isNextScheduleOverdue
+            Boolean isNextScheduleOverdue,
+            List<TaskItemDTO> tasks
+    ) {
+    }
+
+    @Builder
+    public record TaskItemDTO(
+            Long taskId,
+            String name,
+            TaskCategory category,
+            LocalDate dueDate,
+            Long scheduleDDay,
+            Boolean isOverdue,
+            TaskStatus status,
+            Boolean isCompleted
     ) {
     }
 

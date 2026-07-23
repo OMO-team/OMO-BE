@@ -94,7 +94,8 @@ public class RoadmapQueryService {
                 overview.nextScheduleTask(),
                 overview.departureDDay(),
                 overview.nextScheduleDDay(),
-                overview.isNextScheduleOverdue()
+                overview.isNextScheduleOverdue(),
+                overview.taskItems()
         );
     }
 
@@ -157,6 +158,18 @@ public class RoadmapQueryService {
                 .flatMap(List::stream)
                 .toList();
         long completedTaskCount = tasks.stream().filter(Task::isCompleted).count();
+        List<RoadmapResponseDTO.TaskItemDTO> taskItems = tasks.stream()
+                .map(task -> RoadmapConverter.toTaskItemDTO(
+                        task,
+                        statusByTaskId.get(task.getId()),
+                        roadmapScheduleCalculator.calculateDDay(task.getDueDate(), today),
+                        roadmapScheduleCalculator.isOverdue(
+                                task.getDueDate(),
+                                today,
+                                task.isCompleted()
+                        )
+                ))
+                .toList();
         Long nextScheduleDDay = nextScheduleTask == null
                 ? null
                 : roadmapScheduleCalculator.calculateDDay(nextScheduleTask.getDueDate(), today);
@@ -176,7 +189,8 @@ public class RoadmapQueryService {
                 nextScheduleTask,
                 roadmapScheduleCalculator.calculateDDay(roadmap.getDepartureDate(), today),
                 nextScheduleDDay,
-                isNextScheduleOverdue
+                isNextScheduleOverdue,
+                taskItems
         );
     }
 
@@ -195,7 +209,8 @@ public class RoadmapQueryService {
             Task nextScheduleTask,
             Long departureDDay,
             Long nextScheduleDDay,
-            Boolean isNextScheduleOverdue
+            Boolean isNextScheduleOverdue,
+            List<RoadmapResponseDTO.TaskItemDTO> taskItems
     ) {
     }
 }

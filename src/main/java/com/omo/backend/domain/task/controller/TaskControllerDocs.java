@@ -20,31 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface TaskControllerDocs {
 
     @Operation(
-            summary = "로드맵 태스크 목록 조회",
-            description = "선행 태스크, 완료 사실, 서류 체크 상태로 현재 상태와 진행률을 계산합니다.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "200",
-            description = "태스크 목록 조회 성공",
-            content = @Content(schema = @Schema(
-                    implementation = TaskResponseDTO.TaskListResultDTO.class
-            ))
-    )
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "404",
-            description = "로드맵을 찾을 수 없음"
-    )
-    ApiResponse<TaskResponseDTO.TaskListResultDTO> getTasks(
-            @Parameter(description = "로드맵 ID", example = "1", required = true)
-            @Positive(message = "로드맵 ID는 양수여야 합니다.")
-            @PathVariable Long roadmapId,
-
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    );
-
-    @Operation(
             summary = "태스크 상세 조회",
             description = "태스크 상태, 권장 완료일, D-Day와 일정 초과 여부를 조회합니다.",
             security = @SecurityRequirement(name = "bearerAuth")

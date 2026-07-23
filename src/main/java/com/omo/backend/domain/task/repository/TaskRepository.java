@@ -13,8 +13,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
-    List<Task> findAllByRoadmap_IdOrderByDisplayOrderAscIdAsc(Long roadmapId);
-
     Optional<Task> findByIdAndRoadmap_Member_Id(Long taskId, Long memberId);
 
     @EntityGraph(attributePaths = {"roadmap", "taskTemplate"})
