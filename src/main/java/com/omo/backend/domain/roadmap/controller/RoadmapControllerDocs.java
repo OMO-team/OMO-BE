@@ -100,7 +100,7 @@ public interface RoadmapControllerDocs {
 
     @Operation(
             summary = "로드맵 일정 설정 및 변경",
-            description = "출국일과 체류 기간을 변경하고 전체 태스크의 권장 완료일을 다시 계산합니다.",
+            description = "출국일을 최초 설정하면 태스크 권장 완료일을 초기화합니다. 이후 출국일 변경은 태스크 일정에 영향을 주지 않습니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -112,7 +112,7 @@ public interface RoadmapControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "출국일 또는 체류 기간이 유효하지 않음"
+            description = "출국일이 유효하지 않음"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",

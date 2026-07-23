@@ -69,4 +69,17 @@ public final class TaskConverter {
                 .completedAt(task.getCompletedAt())
                 .build();
     }
+
+    public static TaskResponseDTO.UpdateScheduleResultDTO toUpdateScheduleResultDTO(
+            Task task,
+            Long scheduleDDay,
+            Boolean isOverdue
+    ) {
+        return TaskResponseDTO.UpdateScheduleResultDTO.builder()
+                .taskId(task.getId())
+                .dueDate(task.getDueDate())
+                .scheduleDDay(scheduleDDay)
+                .isOverdue(isOverdue)
+                .build();
+    }
 }

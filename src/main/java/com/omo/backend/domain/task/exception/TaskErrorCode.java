@@ -24,6 +24,11 @@ public enum TaskErrorCode implements BaseErrorCode {
             "TASK409_3",
             "이미 완료된 태스크입니다."
     ),
+    TASK_SCHEDULE_NOT_AVAILABLE(
+            HttpStatus.CONFLICT,
+            "TASK409_4",
+            "로드맵 출국일 설정 후 태스크 일정을 변경할 수 있습니다."
+    ),
     TASK_NOT_FOUND(
             HttpStatus.NOT_FOUND,
             "TASK404_1",

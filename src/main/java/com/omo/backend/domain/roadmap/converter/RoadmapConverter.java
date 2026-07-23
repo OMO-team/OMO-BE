@@ -104,7 +104,6 @@ public final class RoadmapConverter {
         return RoadmapResponseDTO.UpdateScheduleResultDTO.builder()
                 .roadmapId(roadmap.getId())
                 .departureDate(roadmap.getDepartureDate())
-                .stayMonths(roadmap.getStayMonths())
                 .departureDDay(departureDDay)
                 .taskSchedules(taskSchedules)
                 .build();

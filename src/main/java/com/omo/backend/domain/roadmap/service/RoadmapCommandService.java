@@ -38,11 +38,14 @@ public class RoadmapCommandService {
         LocalDate today = LocalDate.now();
         validateDepartureDate(request.departureDate(), today);
         Roadmap roadmap = getOwnedRoadmap(roadmapId, memberId);
+        boolean isInitialDepartureDate = roadmap.getDepartureDate() == null;
         List<Task> tasks = taskRepository
                 .findAllWithTaskTemplateByRoadmap_IdOrderByDisplayOrderAscIdAsc(roadmapId);
 
-        roadmap.updateSchedule(request.departureDate(), request.stayMonths());
-        tasks.forEach(task -> task.updateDueDate(request.departureDate()));
+        roadmap.updateDepartureDate(request.departureDate());
+        if (isInitialDepartureDate) {
+            tasks.forEach(task -> task.initializeDueDate(request.departureDate()));
+        }
 
         return RoadmapConverter.toUpdateScheduleResultDTO(
                 roadmap,

@@ -78,4 +78,20 @@ public class TaskResponseDTO {
             LocalDateTime completedAt
     ) {
     }
+
+    @Builder
+    public record UpdateScheduleResultDTO(
+            @Schema(description = "태스크 ID", example = "10")
+            Long taskId,
+
+            @Schema(description = "변경된 권장 완료일", example = "2026-12-01")
+            LocalDate dueDate,
+
+            @Schema(description = "권장 완료일까지 남은 일수", example = "45")
+            Long scheduleDDay,
+
+            @Schema(description = "일정 초과 여부", example = "false")
+            Boolean isOverdue
+    ) {
+    }
 }

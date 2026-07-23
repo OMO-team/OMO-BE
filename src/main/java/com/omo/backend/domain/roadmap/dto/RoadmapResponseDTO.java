@@ -87,7 +87,6 @@ public class RoadmapResponseDTO {
     public record UpdateScheduleResultDTO(
             Long roadmapId,
             LocalDate departureDate,
-            Integer stayMonths,
             Long departureDDay,
             List<TaskScheduleDTO> taskSchedules
     ) {
