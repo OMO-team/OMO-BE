@@ -1,7 +1,8 @@
 package com.omo.backend.domain.city.specification;
 
 import com.omo.backend.domain.city.entity.City;
-import com.omo.backend.domain.city.enums.CityEnum;
+import com.omo.backend.domain.city.enums.CityDifficulty;
+import com.omo.backend.domain.city.enums.CityStayDuration;
 import com.omo.backend.domain.purpose.enums.PurposeEnum;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -63,7 +64,7 @@ public class CitySpecification {
     //숙소 난이도 -> 선택한 난이도값 이상의 도시들 반환
     public static Specification<City> hasHousingDifficulty(String difficulty){
         if (difficulty == null || difficulty.isBlank()) return null;
-        BigDecimal threshold = CityEnum.from(difficulty).getMinScore();
+        BigDecimal threshold = CityDifficulty.from(difficulty).getMinScore();
         return ((root, query, cb) ->
                 cb.greaterThanOrEqualTo(root.get("housingScore"), threshold));
     }
@@ -71,9 +72,16 @@ public class CitySpecification {
     //비자 난이도 -> 선택한 난이도값 이상의 도시들 반환
     public static Specification<City> hasVisaDifficulty(String difficulty){
         if (difficulty == null || difficulty.isBlank()) return null;
-        BigDecimal threshold = CityEnum.from(difficulty).getMinScore();
+        BigDecimal threshold = CityDifficulty.from(difficulty).getMinScore();
         return (root, query, cb) ->
                 cb.greaterThanOrEqualTo(root.get("visaScore"), threshold);
+    }
+
+    public static Specification<City> hasStayDuration(String stayDuration){
+        if (stayDuration == null || stayDuration.isBlank()) return null;
+        CityStayDuration duration = CityStayDuration.from(stayDuration);
+        return (root, query, cb) ->
+                cb.equal(root.get("stayDuration"), duration);
     }
 
     public static Specification<City> isNotDeleted(){
