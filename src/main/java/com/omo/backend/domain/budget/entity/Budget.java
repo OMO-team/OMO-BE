@@ -34,24 +34,28 @@ public class Budget extends BaseEntity {
     @JoinColumn(name = "roadmap_id", nullable = false, unique = true)
     private Roadmap roadmap;
 
-    @Column(name = "initial_cost", nullable = false)
-    private Long initialCost;
+    @Column(name = "initial_settlement_cost", nullable = false)
+    private Long initialSettlementCost;
 
     @Column(name = "monthly_cost", nullable = false)
     private Long monthlyCost;
 
-    public static Budget create(Roadmap roadmap, Long initialCost, Long monthlyCost) {
+    public static Budget create(
+            Roadmap roadmap,
+            Long initialSettlementCost,
+            Long monthlyCost
+    ) {
         return Budget.builder()
                 .roadmap(roadmap)
-                .initialCost(initialCost)
+                .initialSettlementCost(initialSettlementCost)
                 .monthlyCost(monthlyCost)
                 .build();
     }
 
-    public long calculateTotalCost() {
+    public Long calculateTotalCost() {
         if (roadmap.getStayMonths() == null) {
-            throw new IllegalStateException("체류 기간 설정 후 총예산을 계산할 수 있습니다.");
+            return null;
         }
-        return initialCost + monthlyCost * roadmap.getStayMonths();
+        return initialSettlementCost + monthlyCost * roadmap.getStayMonths();
     }
 }
