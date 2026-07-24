@@ -72,8 +72,7 @@ public class Roadmap extends BaseEntity {
                 .build();
     }
 
-    public void updateSchedule(LocalDate departureDate, Integer stayMonths) {
+    public void updateDepartureDate(LocalDate departureDate) {
         this.departureDate = departureDate;
-        this.stayMonths = stayMonths;
     }
 }

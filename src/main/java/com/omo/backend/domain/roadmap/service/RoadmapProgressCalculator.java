@@ -1,20 +1,20 @@
 package com.omo.backend.domain.roadmap.service;
 
-import com.omo.backend.domain.task.entity.Task;
+import com.omo.backend.domain.document.entity.TaskDocument;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RoadmapProgressCalculator {
 
-    public double calculate(List<Task> tasks) {
-        if (tasks.isEmpty()) {
+    public double calculate(List<TaskDocument> documents) {
+        if (documents.isEmpty()) {
             return 0.0;
         }
 
-        long completedCount = tasks.stream()
-                .filter(Task::isCompleted)
+        long checkedCount = documents.stream()
+                .filter(document -> Boolean.TRUE.equals(document.getChecked()))
                 .count();
-        return completedCount * 100.0 / tasks.size();
+        return checkedCount * 100.0 / documents.size();
     }
 }
