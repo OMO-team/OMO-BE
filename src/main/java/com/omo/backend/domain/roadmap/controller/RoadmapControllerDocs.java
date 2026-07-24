@@ -11,7 +11,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "Roadmap", description = "로드맵 API")
@@ -54,5 +57,101 @@ public interface RoadmapControllerDocs {
                     required = true
             )
             @Valid @RequestBody RoadmapRequestDTO.CreateDTO request
+    );
+
+    @Operation(
+            summary = "내 로드맵 목록 조회",
+            description = "로그인한 회원의 로드맵을 페이지네이션 없는 배열로 조회합니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "로드맵 목록 조회 성공"
+    )
+    ApiResponse<List<RoadmapResponseDTO.ListItemDTO>> getRoadmaps(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
+    @Operation(
+            summary = "로드맵 상세 조회",
+            description = "로드맵 기본 정보, 진행률과 표시 순서대로 정렬된 전체 태스크를 조회합니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "로드맵 상세 조회 성공",
+            content = @Content(schema = @Schema(
+                    implementation = RoadmapResponseDTO.DetailResultDTO.class
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵"
+    )
+    ApiResponse<RoadmapResponseDTO.DetailResultDTO> getRoadmap(
+            @Parameter(description = "로드맵 ID", example = "1", required = true)
+            @Positive(message = "로드맵 ID는 양수여야 합니다.")
+            @PathVariable Long roadmapId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
+    @Operation(
+            summary = "로드맵 일정 설정 및 변경",
+            description = "출국일을 최초 설정하면 태스크 권장 완료일을 초기화합니다. 이후 출국일 변경은 태스크 일정에 영향을 주지 않습니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "로드맵 일정 변경 성공",
+            content = @Content(schema = @Schema(
+                    implementation = RoadmapResponseDTO.UpdateScheduleResultDTO.class
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "출국일이 유효하지 않음"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵"
+    )
+    ApiResponse<RoadmapResponseDTO.UpdateScheduleResultDTO> updateSchedule(
+            @Parameter(description = "로드맵 ID", example = "1", required = true)
+            @Positive(message = "로드맵 ID는 양수여야 합니다.")
+            @PathVariable Long roadmapId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "변경할 일정 정보",
+                    required = true
+            )
+            @Valid @RequestBody RoadmapRequestDTO.UpdateScheduleDTO request
+    );
+
+    @Operation(
+            summary = "로드맵 삭제",
+            description = "로그인한 회원 소유의 로드맵과 하위 데이터를 삭제합니다.",
+            security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "로드맵 삭제 성공"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵"
+    )
+    ApiResponse<Void> deleteRoadmap(
+            @Parameter(description = "로드맵 ID", example = "1", required = true)
+            @Positive(message = "로드맵 ID는 양수여야 합니다.")
+            @PathVariable Long roadmapId,
+
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
     );
 }
