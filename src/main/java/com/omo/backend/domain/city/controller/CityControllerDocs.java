@@ -9,33 +9,26 @@ import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "City", description = "도시 API")
 public interface CityControllerDocs {
 
     @Operation(
-            summary = "필터링된 도시 목록 조회",
-            description = "필터 조건(월 생활비, 점수, 난이도 등)을 적용하여 도시 목록을 조회합니다. 모든 쿼리 파라미터는 선택 사항 입니다."
+            summary = "도시 목록 조회",
+            description = "키워드 검색 + 필터 조건(월 생활비, 점수, 난이도 등)을 적용하여 도시 목록을 조회합니다. 모든 쿼리 파라미터는 선택 사항 입니다."
     )
     @Parameters({
+            @Parameter(name = "keyword", description = "검색 키워드 (1자 이상 50자 이하)", required = false, example = "베를린"),
             @Parameter(name = "purposeType", description = "목적 (WORKING_HOLIDAY / EXCHANGE_STUDENT / INTERNSHIP)"),
             @Parameter(name = "countryCode", description = "국가 코드 (예: AU, JP)"),
             @Parameter(name = "maxMonthlyCost", description = "최대 월 생활비 (만원 단위, 예: 200)"),
             @Parameter(name = "minSafetyScore", description = "최소 치안 점수 (예: 4.0)"),
             @Parameter(name = "housingDifficulty", description = "숙소 난이도 (EASY / NORMAL / HARD)"),
-            @Parameter(name = "visaDifficulty", description = "비자 난이도 (EASY / NORMAL / HARD)")
+            @Parameter(name = "visaDifficulty", description = "비자 난이도 (EASY / NORMAL / HARD)"),
+            @Parameter(name = "stayDuration", description = "체류 기간(SHORT / MEDIUM / LONG / VERY_LONG)")
+
     })
     ApiResponse<CityResponseDTO.CityListResult> getCities(
-            @ModelAttribute CityRequestDTO.CityFilterRequest request
-    );
-
-    @Operation(
-            summary = "단순 키워드 검색",
-            description = "도시명, 국가명, 설명을 대상으로 키워드를 검색하여 도시 목록을 반환합니다."
-    )
-    @Parameter(name = "keyword", description = "검색 키워드 (1자 이상 50자 이하)", required = true, example = "베를린")
-    ApiResponse<CityResponseDTO.CitySearchResultDTO> searchCities(
-        @ModelAttribute @Valid CityRequestDTO.SearchRequestDTO request
+            @ModelAttribute @Valid CityRequestDTO.CityFilterRequest request
     );
 }

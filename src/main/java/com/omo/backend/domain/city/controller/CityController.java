@@ -5,8 +5,6 @@ import com.omo.backend.domain.city.dto.CityResponseDTO;
 import com.omo.backend.domain.city.service.CityQueryService;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,14 +20,7 @@ public class CityController implements CityControllerDocs {
 
     @GetMapping
     public ApiResponse<CityResponseDTO.CityListResult> getCities(
-            @ModelAttribute CityRequestDTO.CityFilterRequest request){
+            @Valid @ModelAttribute CityRequestDTO.CityFilterRequest request){
         return ApiResponse.onSuccess(cityQueryService.getCities(request));
-    }
-
-    @GetMapping("/search")
-    public ApiResponse<CityResponseDTO.CitySearchResultDTO> searchCities(
-            @ModelAttribute @Valid CityRequestDTO.SearchRequestDTO request
-    ){
-       return ApiResponse.onSuccess(cityQueryService.searchCities(request.keyword()));
     }
 }

@@ -3,14 +3,16 @@ package com.omo.backend.domain.city.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public class CityRequestDTO {
 
     // 필터 조회
     public record CityFilterRequest(
+
+            // keyword는 선택사항. keyword 검색 시 프론트에서 필수로 값을 보장해야 함
             @Schema(description = "검색어 (도시명, 국가명, 설명)", example = "베를린")
+            @Size(max = 50, message = "키워드는 50자 이하이어야 합니다.")
             String keyword,
 
             @Schema(description = "목적 탭", example = "WORKING_HOLIDAY",
@@ -32,14 +34,11 @@ public class CityRequestDTO {
 
             @Schema(description = "비자 난이도", example = "NORMAL",
                     allowableValues = {"EASY", "NORMAL", "HARD"})
-            String visaDifficulty
-    ) {}
+            String visaDifficulty,
 
-    //단순 키워드 검색
-    public record SearchRequestDTO(
-            @Schema(description = "검색 키워드", example = "독일", requiredMode = Schema.RequiredMode.REQUIRED)
-            @NotBlank(message = "검색 키워드는 필수 입력값입니다.")
-            @Size(min = 1, max = 50, message = "키워드는 1자 이상 50자 이하이어야 합니다.")
-            String keyword
-    ){}
+            @Schema(description = "체류 기간", example = "SHORT",
+                    allowableValues = {"SHORT", "MEDIUM", "LONG", "VERY_LONG"})
+            String stayDuration
+
+    ) {}
 }

@@ -4,6 +4,7 @@ import com.omo.backend.domain.city.entity.City;
 import com.omo.backend.domain.city.enums.CityDifficulty;
 import com.omo.backend.domain.city.enums.CityStayDuration;
 import com.omo.backend.domain.purpose.enums.PurposeEnum;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
@@ -16,9 +17,10 @@ public class CitySpecification {
         if (purpose == null || purpose.isBlank()) return null;
         PurposeEnum purposeEnum = PurposeEnum.from(purpose);
         return (root, query, cb) -> {
-            query.distinct(true);
             return cb.equal(
-                    root.join("cityPurposes").join("purpose").get("type"),
+                    root.join("cityPurposes")
+                            .join("purpose")
+                            .get("type"),
                     purposeEnum
             );
         };
@@ -32,7 +34,7 @@ public class CitySpecification {
         return cb.or(
                 cb.like(root.get("name"), like),
                 cb.like(root.get("description"), like),
-                cb.like(root.join("country").get("name"), like)
+                cb.like(root.join("country", JoinType.LEFT).get("name"), like)
             );
         };
     }
@@ -84,10 +86,11 @@ public class CitySpecification {
                 cb.equal(root.get("stayDuration"), duration);
     }
 
-    public static Specification<City> isNotDeleted(){
-
-        return (root, query, cb) ->
-                cb.isNull(root.get("deletedAt"));
+    public static Specification<City> isNotDeleted() {
+        return (root, query, cb) -> {
+            query.distinct(true);
+            return cb.isNull(root.get("deletedAt"));  // ← 여기 return 있어야 함
+        };
     }
 }
 
