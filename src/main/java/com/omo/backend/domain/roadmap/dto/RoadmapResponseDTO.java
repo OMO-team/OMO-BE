@@ -75,7 +75,16 @@ public class RoadmapResponseDTO {
             LocalDate nextScheduleDate,
             Long nextScheduleDDay,
             Boolean isNextScheduleOverdue,
+            BudgetDTO budget,
             List<TaskItemDTO> tasks
+    ) {
+    }
+
+    @Builder
+    public record BudgetDTO(
+            Long initialSettlementCost,
+            Long monthlyCost,
+            Long totalCost
     ) {
     }
 

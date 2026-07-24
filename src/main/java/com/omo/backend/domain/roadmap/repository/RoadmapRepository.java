@@ -19,7 +19,8 @@ public interface RoadmapRepository extends JpaRepository<Roadmap, Long> {
     @EntityGraph(attributePaths = {
             "roadmapTemplate",
             "roadmapTemplate.city",
-            "roadmapTemplate.purpose"
+            "roadmapTemplate.purpose",
+            "budget"
     })
     List<Roadmap> findAllByMember_IdOrderByCreatedAtDescIdDesc(Long memberId);
 
