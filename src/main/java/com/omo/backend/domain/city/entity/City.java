@@ -51,6 +51,12 @@ public class City extends BaseEntity {
     @Column(name = "infra_score", precision = 2, scale = 1)
     private BigDecimal infraScore;
 
+    @Column(name = "internet_score", precision = 2, scale = 1)
+    private BigDecimal internetScore;
+
+    @Column(name = "preference_score", precision = 2, scale = 1)
+    private BigDecimal preferenceScore;
+
 // language_score >= 4.0을 영어권 도시 기준으로 사용
     @Column(name = "language_score", precision = 2, scale = 1)
     private BigDecimal languageScore;
