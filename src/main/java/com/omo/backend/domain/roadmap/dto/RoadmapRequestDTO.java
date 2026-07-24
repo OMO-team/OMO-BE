@@ -23,6 +23,7 @@ public class RoadmapRequestDTO {
     ) {
     }
 
+    @Schema(name = "RoadmapUpdateScheduleRequest")
     public record UpdateScheduleDTO(
             @Schema(description = "출국일", example = "2026-12-01")
             @NotNull(message = "출국일은 필수입니다.")
