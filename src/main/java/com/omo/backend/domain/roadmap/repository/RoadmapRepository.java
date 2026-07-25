@@ -43,4 +43,17 @@ public interface RoadmapRepository extends JpaRepository<Roadmap, Long> {
             @Param("roadmapId") Long roadmapId,
             @Param("memberId") Long memberId
     );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select roadmap
+            from Task task
+            join task.roadmap roadmap
+            where task.id = :taskId
+              and roadmap.member.id = :memberId
+            """)
+    Optional<Roadmap> findOwnedByTaskIdForUpdate(
+            @Param("taskId") Long taskId,
+            @Param("memberId") Long memberId
+    );
 }
