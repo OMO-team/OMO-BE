@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +22,7 @@ public class WishlistController implements WishlistControllerDocs {
     private final WishlistCommandService wishlistCommandService;
 
     @Override
-    @PatchMapping("/{cityId}")
+    @PostMapping("/{cityId}")
     public ApiResponse<Void> addWishlist(
             @Positive(message = "도시 ID는 양수여야 합니다.")
             @PathVariable Long cityId,

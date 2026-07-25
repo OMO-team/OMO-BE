@@ -15,7 +15,7 @@ public interface WishlistControllerDocs {
 
     @Operation(
             summary = "위시리스트 도시 추가",
-            description = "로그인한 회원의 위시리스트에 삭제되지 않은 도시를 추가합니다. 이미 추가된 도시는 성공 처리합니다.",
+            description = "POST 요청으로 로그인한 회원의 위시리스트에 삭제되지 않은 도시를 추가합니다. 이미 추가된 도시는 성공 처리합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
