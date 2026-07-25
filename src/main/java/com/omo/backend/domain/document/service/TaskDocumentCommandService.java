@@ -7,6 +7,7 @@ import com.omo.backend.domain.document.entity.TaskDocument;
 import com.omo.backend.domain.document.exception.DocumentErrorCode;
 import com.omo.backend.domain.document.exception.DocumentException;
 import com.omo.backend.domain.document.repository.TaskDocumentRepository;
+import com.omo.backend.domain.task.entity.Task;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,14 +22,22 @@ public class TaskDocumentCommandService {
 
     public TaskDocumentResponseDTO.UpdateCheckResultDTO updateCheckStatus(
             Long taskDocumentId,
+            Long memberId,
             TaskDocumentRequestDTO.UpdateCheckDTO request
     ) {
-        TaskDocument taskDocument = findTaskDocument(taskDocumentId);
+        TaskDocument foundTaskDocument = findTaskDocument(taskDocumentId);
+        List<TaskDocument> taskDocuments = taskDocumentRepository
+                .findAllForUpdateByTaskIdAndMemberId(
+                        foundTaskDocument.getTaskId(),
+                        memberId
+                );
+        TaskDocument taskDocument = findOwnedTaskDocument(
+                taskDocumentId,
+                taskDocuments
+        );
 
         taskDocument.updateChecked(request.checked());
-
-        List<TaskDocument> taskDocuments =
-                taskDocumentRepository.findAllByTaskIdOrderByIdAsc(taskDocument.getTaskId());
+        synchronizeTaskCompletion(taskDocument.getTask(), taskDocuments);
 
         return TaskDocumentConverter.toUpdateCheckResultDTO(
                 taskDocument,
@@ -41,5 +50,33 @@ public class TaskDocumentCommandService {
                 .orElseThrow(() -> new DocumentException(
                         DocumentErrorCode.TASK_DOCUMENT_NOT_FOUND
                 ));
+    }
+
+    private TaskDocument findOwnedTaskDocument(
+            Long taskDocumentId,
+            List<TaskDocument> taskDocuments
+    ) {
+        return taskDocuments
+                .stream()
+                .filter(document -> document.getId().equals(taskDocumentId))
+                .findFirst()
+                .orElseThrow(() -> new DocumentException(
+                        DocumentErrorCode.TASK_DOCUMENT_NOT_FOUND
+                ));
+    }
+
+    private void synchronizeTaskCompletion(
+            Task task,
+            List<TaskDocument> taskDocuments
+    ) {
+        boolean allChecked = !taskDocuments.isEmpty()
+                && taskDocuments.stream()
+                .allMatch(document -> Boolean.TRUE.equals(document.getChecked()));
+
+        if (allChecked) {
+            task.complete();
+            return;
+        }
+        task.uncomplete();
     }
 }
