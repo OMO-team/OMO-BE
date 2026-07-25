@@ -8,6 +8,7 @@ import com.omo.backend.domain.aisearch.entity.AiSearchLog;
 import com.omo.backend.domain.aisearch.entity.AiSearchSession;
 import com.omo.backend.domain.aisearch.entity.RecommendPromptChip;
 import com.omo.backend.domain.aisearch.enums.TaskStatus;
+import com.omo.backend.domain.aisearch.event.AiBriefingRequestedEvent;
 import com.omo.backend.domain.aisearch.exception.AiSearchErrorCode;
 import com.omo.backend.domain.aisearch.repository.AiSearchLogRepository;
 import com.omo.backend.domain.aisearch.repository.AiSearchSessionRepository;
@@ -15,6 +16,7 @@ import com.omo.backend.domain.aisearch.repository.RecommendPromptChipRepository;
 import com.omo.backend.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,7 @@ public class AiSearchService {
     private final AiSearchLogRepository aiSearchLogRepository;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ApplicationEventPublisher eventPublisher;
 
     // Redis Key Prefix 및 만료시간(TTL)
     private static final String TASK_PREFIX = "ai_task:";
@@ -70,6 +73,10 @@ public class AiSearchService {
         // 4. Redis에 taskId 초기 작업 상태 저장
         saveInitialTaskStatus(taskId);
 
+        // 커밋 이후에만 실행되도록 이벤트 발행
+        eventPublisher.publishEvent(new AiBriefingRequestedEvent(
+                taskId, session.getId(), request.searchQuery(), request.isRefine()
+        ));
 
         // 5. 응답 DTO 반환
         return AiSearchConverter.toBriefingInitResult(session.getId(), taskId);
