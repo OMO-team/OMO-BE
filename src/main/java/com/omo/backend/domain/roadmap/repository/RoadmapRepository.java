@@ -14,8 +14,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoadmapRepository extends JpaRepository<Roadmap, Long> {
 
-    Optional<Roadmap> findByIdAndMember_Id(Long roadmapId, Long memberId);
-
     @EntityGraph(attributePaths = {
             "roadmapTemplate",
             "roadmapTemplate.city",
