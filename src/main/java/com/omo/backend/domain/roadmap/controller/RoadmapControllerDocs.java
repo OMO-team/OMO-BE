@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -57,20 +56,6 @@ public interface RoadmapControllerDocs {
                     required = true
             )
             @Valid @RequestBody RoadmapRequestDTO.CreateDTO request
-    );
-
-    @Operation(
-            summary = "내 로드맵 목록 조회",
-            description = "로그인한 회원의 로드맵을 페이지네이션 없는 배열로 조회합니다.",
-            security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "200",
-            description = "로드맵 목록 조회 성공"
-    )
-    ApiResponse<List<RoadmapResponseDTO.ListItemDTO>> getRoadmaps(
-            @Parameter(hidden = true)
-            @AuthenticationPrincipal CustomUserDetails userDetails
     );
 
     @Operation(
