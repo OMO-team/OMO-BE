@@ -99,7 +99,7 @@ public class Task extends BaseEntity {
                 .build();
     }
 
-    public void initializeDueDate(LocalDate departureDate) {
+    public void recalculateDueDate(LocalDate departureDate) {
         this.dueDate = calculateDueDate(
                 departureDate,
                 taskTemplate.getDaysBeforeDeparture()

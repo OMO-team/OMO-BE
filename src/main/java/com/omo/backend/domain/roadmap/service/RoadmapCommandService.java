@@ -37,15 +37,12 @@ public class RoadmapCommandService {
     ) {
         LocalDate today = LocalDate.now();
         validateDepartureDate(request.departureDate(), today);
-        Roadmap roadmap = getOwnedRoadmap(roadmapId, memberId);
-        boolean isInitialDepartureDate = roadmap.getDepartureDate() == null;
+        Roadmap roadmap = getOwnedRoadmapForUpdate(roadmapId, memberId);
         List<Task> tasks = taskRepository
                 .findAllWithTaskTemplateByRoadmap_IdOrderByDisplayOrderAscIdAsc(roadmapId);
 
         roadmap.updateDepartureDate(request.departureDate());
-        if (isInitialDepartureDate) {
-            tasks.forEach(task -> task.initializeDueDate(request.departureDate()));
-        }
+        tasks.forEach(task -> task.recalculateDueDate(request.departureDate()));
 
         return RoadmapConverter.toUpdateScheduleResultDTO(
                 roadmap,
@@ -58,7 +55,7 @@ public class RoadmapCommandService {
     }
 
     public void deleteRoadmap(Long roadmapId, Long memberId) {
-        Roadmap roadmap = getOwnedRoadmap(roadmapId, memberId);
+        Roadmap roadmap = getOwnedRoadmapForUpdate(roadmapId, memberId);
 
         taskDependencyRepository.deleteAllByRoadmapId(roadmapId);
         taskDocumentRepository.deleteAllByRoadmapId(roadmapId);
@@ -67,8 +64,8 @@ public class RoadmapCommandService {
         roadmapRepository.delete(roadmap);
     }
 
-    private Roadmap getOwnedRoadmap(Long roadmapId, Long memberId) {
-        return roadmapRepository.findByIdAndMember_Id(roadmapId, memberId)
+    private Roadmap getOwnedRoadmapForUpdate(Long roadmapId, Long memberId) {
+        return roadmapRepository.findOwnedByIdForUpdate(roadmapId, memberId)
                 .orElseThrow(() -> new RoadmapException(RoadmapErrorCode.ROADMAP_NOT_FOUND));
     }
 

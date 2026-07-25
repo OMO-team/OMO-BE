@@ -46,7 +46,7 @@ public interface TaskControllerDocs {
 
     @Operation(
             summary = "태스크 일정 변경",
-            description = "로드맵 출국일 설정 후 태스크의 권장 완료일을 변경합니다.",
+            description = "로드맵 출국일 설정 후 태스크의 권장 완료일을 출국일 이전 또는 당일로 변경합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -55,6 +55,10 @@ public interface TaskControllerDocs {
             content = @Content(schema = @Schema(
                     implementation = TaskResponseDTO.UpdateScheduleResultDTO.class
             ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "태스크 권장 완료일이 출국일 이후임"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "409",

@@ -151,12 +151,6 @@ public class RoadmapQueryService {
                         .thenComparing(Task::getDisplayOrder)
                         .thenComparing(Task::getId))
                 .orElse(null);
-        List<TaskDocument> documents = tasks.stream()
-                .map(Task::getId)
-                .map(taskId -> data.documentsByTaskId()
-                        .getOrDefault(taskId, Collections.emptyList()))
-                .flatMap(List::stream)
-                .toList();
         long completedTaskCount = tasks.stream().filter(Task::isCompleted).count();
         List<RoadmapResponseDTO.TaskItemDTO> taskItems = tasks.stream()
                 .map(task -> RoadmapConverter.toTaskItemDTO(
@@ -184,7 +178,7 @@ public class RoadmapQueryService {
         return new RoadmapOverview(
                 tasks,
                 completedTaskCount,
-                roadmapProgressCalculator.calculate(documents),
+                roadmapProgressCalculator.calculate(tasks, data.documentsByTaskId()),
                 nextTask,
                 nextScheduleTask,
                 roadmapScheduleCalculator.calculateDDay(roadmap.getDepartureDate(), today),

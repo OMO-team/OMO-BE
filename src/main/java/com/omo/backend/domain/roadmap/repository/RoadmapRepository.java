@@ -14,20 +14,18 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RoadmapRepository extends JpaRepository<Roadmap, Long> {
 
-    Optional<Roadmap> findByIdAndMember_Id(Long roadmapId, Long memberId);
-
     @EntityGraph(attributePaths = {
             "roadmapTemplate",
             "roadmapTemplate.city",
-            "roadmapTemplate.purpose",
-            "budget"
+            "roadmapTemplate.purpose"
     })
     List<Roadmap> findAllByMember_IdOrderByCreatedAtDescIdDesc(Long memberId);
 
     @EntityGraph(attributePaths = {
             "roadmapTemplate",
             "roadmapTemplate.city",
-            "roadmapTemplate.purpose"
+            "roadmapTemplate.purpose",
+            "budget"
     })
     Optional<Roadmap> findWithRoadmapTemplateByIdAndMember_Id(
             Long roadmapId,
@@ -43,6 +41,19 @@ public interface RoadmapRepository extends JpaRepository<Roadmap, Long> {
             """)
     Optional<Roadmap> findOwnedByIdForUpdate(
             @Param("roadmapId") Long roadmapId,
+            @Param("memberId") Long memberId
+    );
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            select roadmap
+            from Task task
+            join task.roadmap roadmap
+            where task.id = :taskId
+              and roadmap.member.id = :memberId
+            """)
+    Optional<Roadmap> findOwnedByTaskIdForUpdate(
+            @Param("taskId") Long taskId,
             @Param("memberId") Long memberId
     );
 }
