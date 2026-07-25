@@ -1,5 +1,6 @@
 package com.omo.backend.domain.aisearch.dto;
 
+import com.omo.backend.domain.aisearch.enums.ConditionType;
 import com.omo.backend.domain.aisearch.enums.TaskStatus;
 import com.omo.backend.domain.city.dto.CityResponseDTO;
 import com.omo.backend.domain.report.dto.ReportResponseDTO;
@@ -118,4 +119,60 @@ public class AiSearchResponseDTO {
                     .build();
         }
     }
+
+    // AI가 자연어 분석해 필터 조건으로 추출한 파싱 DTO
+    @Builder
+    public record ParsedConditions(
+            @Schema(description = "치안 우수 조건 선호 여부 (true/false, 언급 없으면 null)", example = "true")
+            Boolean requireHighSafety,
+
+            @Schema(description = "비자 용이성 선호 여부 (true/false, 언급 없으면 null)", example = "true")
+            Boolean requireEasyVisa,
+
+            @Schema(description = "주거 환경 우수 선호 여부 (true/false, 언급 없으면 null)", example = "false")
+            Boolean requireGoodHousing,
+
+            @Schema(description = "인프라 우수 선호 여부 (true/false, 언급 없으면 null)", example = "true")
+            Boolean requireGoodInfra,
+
+            @Schema(description = "영어 소통 필수 여부 (true/false, 언급 없으면 null)", example = "true")
+            Boolean requireEnglishOnly,
+
+            @Schema(description = "최대 월 예산 (원 단위 정수, 언급 없으면 null)", example = "2000000")
+            Integer maxBudgetKrw,
+
+            @Schema(description = "언급된 국가명 (없으면 null)", example = "Malta")
+            String mentionedCountry,
+
+            @Schema(description = "언급된 목적 (없으면 null)", example = "어학연수")
+            String mentionedPurpose
+    ) {}
+
+    // AI가 후보 도시들 중 최종 선택하고 요약문 작성을 내뱉은 AI 원본 응답 DTO
+    @Builder
+    public record AiRawResult(
+            @Schema(description = "AI 분석 소요 시간 (초)", example = "21")
+            Integer thinkingTime,
+
+            @Schema(description = "AI 서술 요약 문장", example = "치안과 예산 조건을 만족하는 슬리에마를 추천합니다.")
+            String summary,
+
+            @Schema(description = "추출된 조건 태그 목록", example = "치안 우수, 200만원 이하")
+            List<String> extractedTags,
+
+            @Schema(description = "추천 도시 ID 목록", example = "[1, 3]")
+            List<Long> recommendedCityIds,
+
+            @Schema(description = "주요 강조 조건 유형 (SAFETY, BUDGET, LANGUAGE, VISA, HOUSING, INFRA), example = SAFETY")
+            ConditionType primaryConditionType,
+
+            @Schema(description = "활성화된 목적", example = "어학연수")
+            String activePurpose,
+
+            @Schema(description = "선택된 국가", example = "Malta")
+            String selectedCountry,
+
+            @Schema(description = "결과 0건 여부", example = "false")
+            Boolean isEmptyResult
+    ) {}
 }

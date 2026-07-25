@@ -47,4 +47,9 @@ public class AiSearchLog extends BaseEntity {
                 .build();
     }
 
+    public void updateAiResponse(String aiResponse, boolean isEmptyResult) {
+        this.aiResponse = aiResponse;
+        this.isEmptyResult = isEmptyResult;
+    }
+
 }
