@@ -7,12 +7,15 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CityRepository extends JpaRepository<City, Long>, JpaSpecificationExecutor<City> {
 
     @EntityGraph(attributePaths = "country")
     List<City> findAllWithCountryByCityIdIn(List<Long> cityIds);
+
+    Optional<City> findByCityIdAndDeletedAtIsNull(Long cityId);
 
     @Override
     @EntityGraph(attributePaths = "country")
