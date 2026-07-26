@@ -61,7 +61,6 @@ public class MemberConverter {
                 .pushNotification(memberSettings.getPushNotification())
                 .emailNotification(memberSettings.getEmailNotification())
                 .autoSave(memberSettings.getAutoSave())
-                .twoFactorEnabled(memberSettings.getTwoFactorEnabled())
                 .build();
     }
 }

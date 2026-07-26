@@ -87,8 +87,7 @@ public class MemberCommandService {
         memberSettings.updateSettings(
                 request.pushNotification(),
                 request.emailNotification(),
-                request.autoSave(),
-                request.twoFactorEnabled()
+                request.autoSave()
         );
 
         return MemberConverter.toSettingsResultDTO(memberSettings);

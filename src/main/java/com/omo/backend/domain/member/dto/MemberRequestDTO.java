@@ -65,10 +65,7 @@ public class MemberRequestDTO {
             Boolean emailNotification,
 
             @Schema(description = "자동 저장 여부", example = "true")
-            Boolean autoSave,
-
-            @Schema(description = "2단계 인증 활성화 여부", example = "false")
-            Boolean twoFactorEnabled
+            Boolean autoSave
     ) {}
 
     // 비밀번호 변경

@@ -38,7 +38,6 @@ public class MemberResponseDTO {
     public record SettingsResultDTO(
             Boolean pushNotification,
             Boolean emailNotification,
-            Boolean autoSave,
-            Boolean twoFactorEnabled
+            Boolean autoSave
     ) {}
 }
