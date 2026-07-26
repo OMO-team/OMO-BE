@@ -21,8 +21,12 @@ public class ProfileImageUploadService {
     private final FileValidationPolicy fileValidationPolicy;
     private final S3PresignedUrlService s3PresignedUrlService;
     private final S3Properties s3Properties;
+    private final MemberQueryService memberQueryService;
 
     public MemberResponseDTO.ProfileImageUploadUrlResultDTO createUploadUrl(Long memberId, MemberRequestDTO.ProfileImageUploadUrlDTO request) {
+        // 탈퇴 또는 존재하지 않는 회원에게는 업로드 URL을 발급하지 않음
+        memberQueryService.validateActiveMember(memberId);
+
         // 요청한 파일의 크기와 확장자 및 MIME 타입 조합을 검증
         FileType fileType = fileValidationPolicy.validateUploadRequest(request.fileName(), request.contentType(), request.fileSize());
 

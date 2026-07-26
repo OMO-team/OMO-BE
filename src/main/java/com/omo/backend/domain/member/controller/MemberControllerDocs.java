@@ -34,6 +34,13 @@ public interface MemberControllerDocs {
             @Valid @RequestBody MemberRequestDTO.UpdateProfileDTO request
     );
 
+    @Operation(summary = "프로필 이미지 업로드 URL 발급", description = "프로필 이미지를 S3에 직접 업로드할 수 있는 임시 PUT URL을 발급합니다.")
+    ApiResponse<MemberResponseDTO.ProfileImageUploadUrlResultDTO> createProfileImageUploadUrl(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody MemberRequestDTO.ProfileImageUploadUrlDTO request
+    );
+
     @Operation(summary = "회원탈퇴", description = "로그인한 회원을 탈퇴 처리합니다.")
     ApiResponse<Void> withdraw(
             @Parameter(hidden = true)

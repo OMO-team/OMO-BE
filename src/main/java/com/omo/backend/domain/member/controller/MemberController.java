@@ -4,6 +4,7 @@ import com.omo.backend.domain.member.dto.MemberRequestDTO;
 import com.omo.backend.domain.member.dto.MemberResponseDTO;
 import com.omo.backend.domain.member.service.MemberCommandService;
 import com.omo.backend.domain.member.service.MemberQueryService;
+import com.omo.backend.domain.member.service.ProfileImageUploadService;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.auth.service.AuthCommandService;
@@ -31,6 +32,7 @@ public class MemberController implements MemberControllerDocs {
 
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
+    private final ProfileImageUploadService profileImageUploadService;
     private final AuthCommandService authCommandService;
 
     @PostMapping("/signup")
@@ -55,6 +57,15 @@ public class MemberController implements MemberControllerDocs {
             @Valid @RequestBody MemberRequestDTO.UpdateProfileDTO request
     ) {
         MemberResponseDTO.UpdateProfileResultDTO result = memberCommandService.updateProfile(userDetails.getMemberId(), request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @PostMapping("/me/profile-image/upload-url")
+    public ApiResponse<MemberResponseDTO.ProfileImageUploadUrlResultDTO> createProfileImageUploadUrl(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody MemberRequestDTO.ProfileImageUploadUrlDTO request
+    ) {
+        MemberResponseDTO.ProfileImageUploadUrlResultDTO result = profileImageUploadService.createUploadUrl(userDetails.getMemberId(), request);
         return ApiResponse.onSuccess(result);
     }
 

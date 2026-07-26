@@ -31,6 +31,10 @@ public class MemberQueryService {
         return MemberConverter.toSettingsResultDTO(memberSettings);
     }
 
+    public void validateActiveMember(Long memberId) {
+        getActiveMember(memberId);
+    }
+
     private Member getActiveMember(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
