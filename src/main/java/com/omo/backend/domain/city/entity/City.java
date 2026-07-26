@@ -57,7 +57,7 @@ public class City extends BaseEntity {
     @Column(name = "language_score", precision = 2, scale = 1)
     private BigDecimal languageScore;
 
-    @Column(name = "stay_duration")
+    @Column(name = "stay_duration", nullable = true)
     @Enumerated(EnumType.STRING)
     private CityStayDuration stayDuration;
 
