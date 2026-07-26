@@ -62,6 +62,15 @@ public interface MemberControllerDocs {
             @Valid @RequestBody MemberRequestDTO.ProfileImageUpdateDTO request
     );
 
+    @Operation(
+            summary = "프로필 이미지 삭제",
+            description = "로그인한 회원의 프로필 이미지 연결을 제거하고 기존 S3 객체를 삭제합니다. 이미지가 없어도 성공 처리합니다."
+    )
+    ApiResponse<Void> deleteProfileImage(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
     @Operation(summary = "회원탈퇴", description = "로그인한 회원을 탈퇴 처리합니다.")
     ApiResponse<Void> withdraw(
             @Parameter(hidden = true)

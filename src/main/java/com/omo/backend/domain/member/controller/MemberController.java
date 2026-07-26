@@ -78,6 +78,14 @@ public class MemberController implements MemberControllerDocs {
         return ApiResponse.onSuccess(result);
     }
 
+    @DeleteMapping("/me/profile-image")
+    public ApiResponse<Void> deleteProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        memberCommandService.deleteProfileImage(userDetails.getMemberId());
+        return ApiResponse.onSuccess(null);
+    }
+
     @DeleteMapping("/me")
     public ApiResponse<Void> withdraw(
             @AuthenticationPrincipal CustomUserDetails userDetails,

@@ -104,6 +104,20 @@ public class MemberCommandService {
         return MemberConverter.toProfileImageUpdateResultDTO(member);
     }
 
+    public void deleteProfileImage(Long memberId) {
+        Member member = getActiveMember(memberId);
+        String objectKey = member.getProfileImageKey();
+
+        // 이미 프로필 이미지가 없는 경우에도 삭제 요청을 성공 처리
+        if (objectKey == null) {
+            return;
+        }
+
+        // DB에서 프로필 이미지 연결을 제거하고 기존 S3 객체를 삭제
+        member.deleteProfileImage();
+        s3FileService.delete(s3Properties.profileBucket(), objectKey);
+    }
+
     public void withdrawMember(Long memberId) {
         Member member = getActiveMember(memberId);
         member.withdraw();

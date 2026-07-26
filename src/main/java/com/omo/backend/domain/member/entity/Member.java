@@ -78,6 +78,10 @@ public class Member extends BaseEntity {
         this.profileImageKey = profileImageKey;
     }
 
+    public void deleteProfileImage() {
+        this.profileImageKey = null;
+    }
+
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
