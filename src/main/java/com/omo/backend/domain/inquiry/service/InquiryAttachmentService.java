@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,14 +32,7 @@ public class InquiryAttachmentService {
         }
 
         List<InquiryAttachment> attachments = validatedAttachments.stream()
-                .map(attachment -> InquiryAttachment.createInquiryAttachment(
-                        inquiry,
-                        attachment.originalName(),
-                        extractStoredName(attachment.objectKey()),
-                        attachment.objectKey(),
-                        attachment.contentType(),
-                        attachment.fileSize()
-                ))
+                .map(attachment -> moveAndCreateAttachment(inquiry, attachment))
                 .toList();
 
         inquiryAttachmentRepository.saveAll(attachments);
@@ -66,31 +60,36 @@ public class InquiryAttachmentService {
                 .toList();
     }
 
-    private ValidatedAttachment validateAttachment(
-            String uploadToken,
-            String expectedPrefix,
-            String objectKey
-    ) {
+    private ValidatedAttachment validateAttachment(String uploadToken, String expectedPrefix, String objectKey) {
         if (!objectKey.startsWith(expectedPrefix)) {
             throw new InquiryException(InquiryErrorCode.INVALID_UPLOAD_TOKEN);
         }
 
         String originalName = inquiryUploadSessionStore.findOriginalName(uploadToken, objectKey)
                 .orElseThrow(() -> new InquiryException(InquiryErrorCode.INVALID_UPLOAD_TOKEN));
-        S3FileService.ObjectMetadata metadata =
-                s3FileService.getObjectMetadata(s3Properties.inquiryBucket(), objectKey);
-        fileValidationPolicy.validateStoredObject(
-                objectKey,
-                metadata.contentType(),
-                metadata.contentLength()
-        );
+        S3FileService.ObjectMetadata metadata = s3FileService.getObjectMetadata(s3Properties.inquiryBucket(), objectKey);
+        fileValidationPolicy.validateStoredObject(objectKey, metadata.contentType(), metadata.contentLength());
 
-        return new ValidatedAttachment(
-                originalName,
-                objectKey,
-                metadata.contentType(),
-                metadata.contentLength()
+        return new ValidatedAttachment(originalName, objectKey, metadata.contentType(), metadata.contentLength());
+    }
+
+    private InquiryAttachment moveAndCreateAttachment(Inquiry inquiry, ValidatedAttachment attachment) {
+        String destinationObjectKey = generatePermanentObjectKey(inquiry.getId(), attachment.objectKey());
+        s3FileService.move(s3Properties.inquiryBucket(), attachment.objectKey(), destinationObjectKey);
+
+        return InquiryAttachment.createInquiryAttachment(
+                inquiry,
+                attachment.originalName(),
+                extractStoredName(destinationObjectKey),
+                destinationObjectKey,
+                attachment.contentType(),
+                attachment.fileSize()
         );
+    }
+
+    private String generatePermanentObjectKey(Long inquiryId, String tempObjectKey) {
+        String extension = tempObjectKey.substring(tempObjectKey.lastIndexOf('.'));
+        return "inquiries/%d/%s%s".formatted(inquiryId, UUID.randomUUID(), extension);
     }
 
     private String extractStoredName(String objectKey) {
