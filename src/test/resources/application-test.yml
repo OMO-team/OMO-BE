@@ -28,3 +28,10 @@ jwt:
 
 cors:
   allowed-origins: http://localhost:3000
+
+aws:
+  s3:
+    region: ap-northeast-2
+    profile-bucket: test-profile-bucket
+    inquiry-bucket: test-inquiry-bucket
+    presigned-url-expiration: 5m
