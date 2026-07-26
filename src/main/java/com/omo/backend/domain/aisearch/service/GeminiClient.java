@@ -2,6 +2,7 @@ package com.omo.backend.domain.aisearch.service;
 
 import com.google.genai.types.HttpOptions;
 import jakarta.annotation.PostConstruct;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentConfig;
@@ -58,14 +59,25 @@ public class GeminiClient implements AiClient {
         for (int attempt = 0; attempt <= MAX_RETRY; attempt++) {
             try {
                 GenerateContentResponse response = client.models.generateContent(model, prompt, config);
-                return objectMapper.readValue(response.text(), responseType);
+
+                // 1. JSON 파싱은 별도 try-catch로 감싸서 실패 시 재시도 없이 즉시 예외 방출
+                try {
+                    return objectMapper.readValue(response.text(), responseType);
+                } catch (JacksonException e) {
+                    log.error("[Gemini 응답 JSON 파싱 실패] type={}, text={}", responseType.getSimpleName(), response.text(), e);
+                    throw new GeneralException(AiSearchErrorCode.AI_ANALYSIS_FAILED);
+                }
+            } catch (GeneralException e) {
+                throw e;
             } catch (Exception e) {
                 lastException = e;
                 log.warn("[Gemini Call 실패] attempt={}, type={}, error={}",
                         attempt, responseType.getSimpleName(), e.getMessage());
 
                 if (attempt < MAX_RETRY) {
-                    sleepBeforeRetry(attempt);
+                    if (!sleepBeforeRetry(attempt)) {
+                        break;
+                    }
                 }
             }
         }
@@ -73,13 +85,16 @@ public class GeminiClient implements AiClient {
         throw new GeneralException(AiSearchErrorCode.AI_ANALYSIS_FAILED);
     }
 
-    private void sleepBeforeRetry(int attempt) {
+    private boolean sleepBeforeRetry(int attempt) {
         try {
             long baseDelayMs = 500L * (attempt + 1);
             long jitterMs = (long) (Math.random() * 200);
             Thread.sleep(baseDelayMs + jitterMs);
+            return true;
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
+            log.warn("[GeminiClient] 재시도 대기 중 인터럽트 발생 - 재시도 중단");
+            return false;
         }
     }
 }
