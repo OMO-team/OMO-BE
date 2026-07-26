@@ -37,6 +37,8 @@ jobs:
         run: chmod +x gradlew
 
       - name: Test and build
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: ./gradlew clean test bootJar --no-daemon
 
       - name: Configure AWS credentials
