@@ -42,8 +42,7 @@ public class InquiryAttachment extends BaseEntity {
     @Column(name = "stored_name", length = 255, nullable = false)
     private String storedName;
 
-    // 기존 file_url 컬럼은 추후 스키마 정리 전까지 S3 object key 저장 용도로 사용
-    @Column(name = "file_url", length = 500, nullable = false)
+    @Column(name = "object_key", length = 500, nullable = false)
     private String objectKey;
 
     @Column(name = "content_type", length = 100, nullable = false)
