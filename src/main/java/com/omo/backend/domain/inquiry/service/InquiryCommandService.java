@@ -20,11 +20,13 @@ public class InquiryCommandService {
 
     private final InquiryRepository inquiryRepository;
     private final MemberRepository memberRepository;
+    private final InquiryAttachmentService inquiryAttachmentService;
 
     public InquiryResponseDTO.InquiryResultDTO createInquiry(Long memberId, InquiryRequestDTO.InquiryDTO request) {
         Member member = findMemberIfPresent(memberId);
 
         Inquiry inquiry = inquiryRepository.save(InquiryConverter.toInquiry(request, member));
+        inquiryAttachmentService.saveAttachments(inquiry, request.uploadToken(), request.attachmentKeys());
         return InquiryConverter.toInquiryResultDTO(inquiry);
     }
 

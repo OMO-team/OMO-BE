@@ -36,8 +36,7 @@ public class InquiryController implements InquiryControllerDocs {
     public ApiResponse<InquiryResponseDTO.AttachmentUploadUrlsResultDTO> createAttachmentUploadUrls(
             @Valid @RequestBody InquiryRequestDTO.AttachmentUploadUrlsDTO request
     ) {
-        InquiryResponseDTO.AttachmentUploadUrlsResultDTO result =
-                inquiryAttachmentUploadService.createUploadUrls(request);
+        InquiryResponseDTO.AttachmentUploadUrlsResultDTO result = inquiryAttachmentUploadService.createUploadUrls(request);
         return ApiResponse.onSuccess(result);
     }
 }

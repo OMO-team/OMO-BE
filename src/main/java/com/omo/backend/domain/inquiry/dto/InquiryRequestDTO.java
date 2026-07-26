@@ -35,7 +35,14 @@ public class InquiryRequestDTO {
             @Schema(description = "문의 내용", example = "로그인 중 오류가 발생합니다.")
             @NotBlank(message = "문의 내용은 필수 입력값입니다.")
             @Size(min = 10, max = 1000, message = "문의 내용은 10자 이상 1,000자 이하로 입력해 주세요.")
-            String content
+            String content,
+
+            @Schema(description = "첨부파일 업로드 URL 발급 응답의 uploadToken")
+            String uploadToken,
+
+            @Schema(description = "S3 업로드를 완료한 임시 object key 목록")
+            @Size(max = 3, message = "문의 이미지는 최대 3개까지 첨부할 수 있습니다.")
+            List<@NotBlank(message = "첨부파일 object key는 공백일 수 없습니다.") @Size(max = 500, message = "첨부파일 object key는 500자 이하여야 합니다.") String> attachmentKeys
     ) {}
 
     // 문의 첨부파일 업로드 URL 일괄 발급

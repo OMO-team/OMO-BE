@@ -30,6 +30,7 @@ public class InquiryConverter {
                 .build();
     }
 
+    // 업로드 정보 -> 문의 첨부파일 업로드 URL DTO
     public static InquiryResponseDTO.AttachmentUploadUrlDTO toAttachmentUploadUrlDTO(
             String uploadUrl,
             String objectKey,
@@ -44,6 +45,7 @@ public class InquiryConverter {
                 .build();
     }
 
+    // uploadToken 및 업로드 URL 목록 -> 문의 첨부파일 업로드 URL 일괄 발급 결과 DTO
     public static InquiryResponseDTO.AttachmentUploadUrlsResultDTO toAttachmentUploadUrlsResultDTO(
             String uploadToken,
             List<InquiryResponseDTO.AttachmentUploadUrlDTO> uploads
