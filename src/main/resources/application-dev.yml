@@ -57,5 +57,5 @@ management:
 
 gemini:
   api:
-    key: ${GEMINI_API_KEY}
+    key: ${GEMINI_API_KEY:jwt-test-key}
     model: gemini-3.1-flash-lite
