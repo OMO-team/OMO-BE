@@ -67,6 +67,7 @@ public class InquiryAttachmentService {
 
         String originalName = inquiryUploadSessionStore.findOriginalName(uploadToken, objectKey)
                 .orElseThrow(() -> new InquiryException(InquiryErrorCode.INVALID_UPLOAD_TOKEN));
+
         S3FileService.ObjectMetadata metadata = s3FileService.getObjectMetadata(s3Properties.inquiryBucket(), objectKey);
         fileValidationPolicy.validateStoredObject(objectKey, metadata.contentType(), metadata.contentLength());
 

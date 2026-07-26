@@ -27,9 +27,7 @@ public class InquiryAttachmentUploadService {
     private final S3Properties s3Properties;
     private final InquiryUploadSessionStore inquiryUploadSessionStore;
 
-    public InquiryResponseDTO.AttachmentUploadUrlsResultDTO createUploadUrls(
-            InquiryRequestDTO.AttachmentUploadUrlsDTO request
-    ) {
+    public InquiryResponseDTO.AttachmentUploadUrlsResultDTO createUploadUrls(InquiryRequestDTO.AttachmentUploadUrlsDTO request) {
         // 한 번에 발급한 첨부파일들을 묶고 문의 등록 시 검증할 일회성 업로드 토큰 생성
         String uploadToken = UUID.randomUUID().toString();
         List<InquiryResponseDTO.AttachmentUploadUrlDTO> uploads = new ArrayList<>(request.files().size());
