@@ -21,7 +21,15 @@ public interface MemberControllerDocs {
             @Valid @RequestBody MemberRequestDTO.JoinDTO request
     );
 
-    @Operation(summary = "내 정보 조회", description = "로그인한 회원의 기본 정보를 조회합니다.")
+    @Operation(
+            summary = "내 정보 조회",
+            description = """
+                    로그인한 회원의 기본 정보를 조회합니다.
+
+                    프로필 이미지가 등록되어 있으면 제한된 시간 동안 유효한 조회 URL과 만료 시각을 반환합니다.
+                    URL이 만료된 경우 이 API를 다시 호출해 새로운 URL을 발급받아야 하며, 프로필 이미지가 없으면 profileImageUrl과 profileImageUrlExpiresAt은 null입니다.
+                    """
+    )
     ApiResponse<MemberResponseDTO.MyInfoResultDTO> getMyInfo(
             @Parameter(hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails

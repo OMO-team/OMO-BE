@@ -37,12 +37,13 @@ public class MemberConverter {
     }
 
     // entity -> 내 정보 조회 DTO
-    public static MemberResponseDTO.MyInfoResultDTO toMyInfoResultDTO(Member member) {
+    public static MemberResponseDTO.MyInfoResultDTO toMyInfoResultDTO(Member member, String profileImageUrl, Instant profileImageUrlExpiresAt) {
         return MemberResponseDTO.MyInfoResultDTO.builder()
                 .memberId(member.getId())
                 .name(member.getName())
                 .email(member.getEmail())
-                .profileImageKey(member.getProfileImageKey())
+                .profileImageUrl(profileImageUrl)
+                .profileImageUrlExpiresAt(profileImageUrlExpiresAt)
                 .provider(member.getProvider())
                 .build();
     }

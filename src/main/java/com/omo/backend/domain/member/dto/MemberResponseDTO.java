@@ -22,7 +22,8 @@ public class MemberResponseDTO {
             Long memberId,
             String name,
             String email,
-            String profileImageKey,
+            String profileImageUrl,
+            Instant profileImageUrlExpiresAt,
             MemberProvider provider
     ) {}
 
