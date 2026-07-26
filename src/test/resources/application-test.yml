@@ -28,3 +28,8 @@ jwt:
 
 cors:
   allowed-origins: http://localhost:3000
+
+gemini:
+  api:
+    key: test-key
+    model: gemini-3.1-flash-lite
