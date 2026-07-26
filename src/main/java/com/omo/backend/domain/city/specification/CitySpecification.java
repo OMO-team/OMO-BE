@@ -29,14 +29,17 @@ public class CitySpecification {
     // 키워드 검색 (도시명, 국가명, 설명)
     public static Specification<City> hasKeyword(String keyword){
         if (keyword == null || keyword.isBlank()) return null;
-        return (root, query, cb) -> {
-        String like = "%" + keyword + "%";
-        return cb.or(
-                cb.like(root.get("name"), like),
-                cb.like(root.get("description"), like),
-                cb.like(root.join("country", JoinType.LEFT).get("name"), like)
-            );
-        };
+        // SQL LIKE 특수문자 이스케이프 (순서 중요: \ 먼저)
+        String escaped = keyword
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
+        String like = "%" + escaped + "%";
+        return (root, query, cb) -> cb.or(
+                cb.like(root.get("name"), like, '\\'),
+                cb.like(root.get("description"), like, '\\'),
+                cb.like(root.join("country", JoinType.LEFT).get("name"), like, '\\')
+        );
     }
 
     //국가 코드 필터
