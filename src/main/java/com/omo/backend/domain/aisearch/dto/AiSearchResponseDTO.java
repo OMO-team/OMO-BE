@@ -151,8 +151,6 @@ public class AiSearchResponseDTO {
     // AI가 후보 도시들 중 최종 선택하고 요약문 작성을 내뱉은 AI 원본 응답 DTO
     @Builder
     public record AiRawResult(
-            @Schema(description = "AI 분석 소요 시간 (초)", example = "21")
-            Integer thinkingTime,
 
             @Schema(description = "AI 서술 요약 문장", example = "치안과 예산 조건을 만족하는 슬리에마를 추천합니다.")
             String summary,
