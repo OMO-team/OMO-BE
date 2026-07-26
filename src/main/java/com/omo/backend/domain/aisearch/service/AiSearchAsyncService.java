@@ -1,49 +1,22 @@
 package com.omo.backend.domain.aisearch.service;
-
-import com.omo.backend.domain.aisearch.dto.AiSearchResponseDTO;
-import com.omo.backend.domain.aisearch.entity.AiSearchLog;
-import com.omo.backend.domain.aisearch.entity.AiSearchSession;
-import com.omo.backend.domain.aisearch.enums.ConditionType;
-import com.omo.backend.domain.aisearch.enums.TaskStatus;
 import com.omo.backend.domain.aisearch.event.AiBriefingRequestedEvent;
-import com.omo.backend.domain.aisearch.exception.AiSearchErrorCode;
-import com.omo.backend.domain.aisearch.repository.AiSearchLogRepository;
-import com.omo.backend.domain.aisearch.repository.AiSearchSessionRepository;
-import com.omo.backend.domain.city.dto.CityResponseDTO;
-import com.omo.backend.domain.city.entity.City;
-import com.omo.backend.domain.city.repository.CityRepository;
-import com.omo.backend.domain.report.converter.ReportConverter;
-import com.omo.backend.domain.report.dto.ReportResponseDTO;
-import com.omo.backend.domain.report.enums.ResourceTopic;
-import com.omo.backend.domain.report.repository.CityRelatedResourceRepository;
-import com.omo.backend.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AiSearchAsyncService {
-    private final AiSearchLogRepository aiSearchLogRepository;
-    private final AiSearchSessionRepository aiSearchSessionRepository;
+    private final AiSearchProcessor aiSearchProcessor;
     private final StringRedisTemplate redisTemplate;
-    private final CityRelatedResourceRepository cityRelatedResourceRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final CityRepository cityRepository;
-    private final AiClient aiClient;
+
     private static final String TASK_PREFIX = "ai_task:";
     private static final long TASK_TTL_MINUTES = 30;
 
@@ -55,249 +28,11 @@ public class AiSearchAsyncService {
     public void handleBriefingRequest(AiBriefingRequestedEvent event) {
         String taskId = event.taskId();
         try  {
-            process(taskId, event.sessionId(), event.searchQuery(), event.isRefine());
-        } catch (Exception e) {
-            log.error("[AI Async 오류] TaskId: {}", taskId, e);
-            markFailed(taskId);
-        }
-    }
-
-    /**
-     *  실제 AI 모델 호출 및 파싱
-     */
-    @Transactional
-    public void process(String taskId, Long sessionId, String searchQuery, boolean isRefine) {
-        AiSearchSession session = aiSearchSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_SESSION_NOT_FOUND));
-
-        // 1. 자연어 -> 파싱
-        AiSearchResponseDTO.ParsedConditions currentParsed;
-        try {
-            currentParsed = aiClient.callWithSchema(
-                    buildParsePrompt(searchQuery),
-                    AiSearchResponseDTO.ParsedConditions.class);
-        } catch (Exception e) {
-            log.error("[AI 파싱 오류] TaskId: {}", taskId, e);
-            markFailed(taskId);
-            return;
-        }
-
-        // 2. 세션에 누적된 이전 조건과 병합
-        AiSearchResponseDTO.ParsedConditions previousParsed = parsePreviousConditions(session);
-        AiSearchResponseDTO.ParsedConditions parsed = Boolean.TRUE.equals(isRefine)
-                ? mergeConditions(previousParsed, currentParsed)
-                : currentParsed;
-
-        // 3. DB 필터링
-        List<City> candidates = cityRepository.findCandidatesByConditions(
-                parsed.maxBudgetKrw(),
-                parsed.requireHighSafety(),
-                parsed.requireEnglishOnly(),
-                parsed.requireEasyVisa(),
-                parsed.requireGoodHousing(),
-                parsed.requireGoodInfra(),
-                parsed.mentionedCountry()
-        );
-
-        if (candidates.isEmpty()) {
-            saveEmptyResult(taskId, session, isRefine, parsed);
-            return;
-        }
-
-        // 4. 후보 중 선택 + 서술 AI 호출
-        AiSearchResponseDTO.AiRawResult raw;
-        try {
-            raw = aiClient.callWithSchema(
-                    buildSelectPrompt(searchQuery, parsed, candidates),
-                    AiSearchResponseDTO.AiRawResult.class
-            );
-        } catch (Exception e) {
-            log.error("[AI 선택 오류] TaskId: {}", taskId, e);
-            markFailed(taskId);
-            return;
-        }
-
-        // 5. 화이트리스트 검증
-        Set<Long> candidateIds = candidates.stream().map(City::getCityId).collect(Collectors.toSet());
-        List<Long> validatedIds = raw.recommendedCityIds() == null ? List.of() :
-                raw.recommendedCityIds().stream().filter(candidateIds::contains).toList();
-
-        if (validatedIds.isEmpty()) {
-            log.warn("[AI 환각 감지] TaskId: {}, raw={}, candidateIds={}",
-                    taskId, raw.recommendedCityIds(), candidateIds);
-            saveEmptyResult(taskId, session, isRefine, parsed);
-            return;
-        }
-
-        // 6. 실제 DB 값으로 재조립
-        List<CityResponseDTO.CitySummary> recommendedCities = candidates.stream()
-                .filter(c -> validatedIds.contains(c.getCityId()))
-                .map(CityResponseDTO.CitySummary::from)
-                .toList();
-
-        List<ReportResponseDTO.ResourceDTO> resources = buildResources(validatedIds, raw.primaryConditionType());
-
-        AiSearchResponseDTO.BriefingData briefingData = AiSearchResponseDTO.BriefingData.of(
-                raw.thinkingTime(), raw.summary(), raw.extractedTags(), recommendedCities, resources
-        );
-
-        AiSearchResponseDTO.BriefingStatusResult finalResult = AiSearchResponseDTO.BriefingStatusResult.of(
-                TaskStatus.COMPLETED, isRefine, parsed.mentionedPurpose(), parsed.mentionedCountry(),
-                briefingData, null, null
-        );
-
-        saveResultAndComplete(taskId, session, finalResult, parsed);
-
-    }
-
-    // ── 참고자료 조회 (ConditionType → ResourceTopic 매핑, 없으면 도시 전체 참고자료 중 상위 2개 폴백) ──
-    private List<ReportResponseDTO.ResourceDTO> buildResources(List<Long> cityIds, ConditionType conditionType) {
-        Optional<ResourceTopic> topic = mapToResourceTopic(conditionType);
-
-        if (topic.isPresent()) {
-            return cityIds.stream()
-                    .flatMap(cityId -> cityRelatedResourceRepository
-                            .findByCityIdAndTopicAndDeletedAtIsNull(cityId, topic.get())
-                            .stream())
-                    .map(ReportConverter::toResourceDTO)
-                    .toList();
-        }
-
-        // 매핑 안 되는 조건(LANGUAGE, INFRA)이면 도시별 전체 참고자료 중 상위 2개로 폴백
-        return cityIds.stream()
-                .flatMap(cityId -> cityRelatedResourceRepository
-                        .findByCityIdAndDeletedAtIsNull(cityId)
-                        .stream())
-                .limit(2)
-                .map(ReportConverter::toResourceDTO)
-                .toList();
-    }
-
-    // ── 빈 결과 처리: 조건 완화 제안은 backend 룰 기반 (AI 호출 불필요, 비용 절감) ──
-    private void saveEmptyResult(String taskId, AiSearchSession session, Boolean isRefine,
-                                 AiSearchResponseDTO.ParsedConditions parsed) {
-        List<AiSearchResponseDTO.SuggestedRelaxation> relaxations = List.of(); // TODO: 룰 기반 완화 제안 구현체 연결
-
-        AiSearchResponseDTO.BriefingStatusResult result = AiSearchResponseDTO.BriefingStatusResult.of(
-                TaskStatus.COMPLETED, isRefine, parsed.mentionedPurpose(), parsed.mentionedCountry(),
-                null, "선택하신 조건에 맞는 도시가 존재하지 않습니다.", relaxations
-        );
-        saveResultAndComplete(taskId, session, result, parsed);
-    }
-
-    private void saveResultAndComplete(String taskId, AiSearchSession session,
-                                       AiSearchResponseDTO.BriefingStatusResult result,
-                                       AiSearchResponseDTO.ParsedConditions parsed) {
-        try {
-            String json = objectMapper.writeValueAsString(result);
-            AiSearchLog searchLog = aiSearchLogRepository.findByTaskId(taskId)
-                    .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_TASK_ID_INVALID));
-            searchLog.updateAiResponse(json, result.emptyResultMessage() != null);
-
-            session.updateAccumulatedConditions(objectMapper.writeValueAsString(parsed));
-
+            aiSearchProcessor.process(taskId, event.sessionId(), event.searchQuery(), event.isRefine());
             redisTemplate.opsForValue().set(TASK_PREFIX + taskId, "COMPLETED", Duration.ofMinutes(TASK_TTL_MINUTES));
         } catch (Exception e) {
-            log.error("[AI 저장 오류] TaskId: {}", taskId, e);
-            markFailed(taskId);
+            log.error("[AI Async 오류] TaskId: {}", taskId, e);
+            redisTemplate.opsForValue().set(TASK_PREFIX + taskId, "FAILED", Duration.ofMinutes(TASK_TTL_MINUTES));
         }
-    }
-
-    private void markFailed(String taskId) {
-        redisTemplate.opsForValue().set(TASK_PREFIX + taskId, "FAILED", Duration.ofMinutes(TASK_TTL_MINUTES));
-    }
-
-    private AiSearchResponseDTO.ParsedConditions parsePreviousConditions(AiSearchSession session) {
-        try {
-            return objectMapper.readValue(session.getAccumulatedConditions(), AiSearchResponseDTO.ParsedConditions.class);
-        } catch (Exception e) {
-            return null; // 최초 검색("{}") 또는 파싱 불가
-        }
-    }
-
-    private AiSearchResponseDTO.ParsedConditions mergeConditions(
-            AiSearchResponseDTO.ParsedConditions previous, AiSearchResponseDTO.ParsedConditions current) {
-        if (previous == null) return current;
-        return AiSearchResponseDTO.ParsedConditions.builder()
-                .requireHighSafety(current.requireHighSafety() != null ? current.requireHighSafety() : previous.requireHighSafety())
-                .requireEasyVisa(current.requireEasyVisa() != null ? current.requireEasyVisa() : previous.requireEasyVisa())
-                .requireGoodHousing(current.requireGoodHousing() != null ? current.requireGoodHousing() : previous.requireGoodHousing())
-                .requireGoodInfra(current.requireGoodInfra() != null ? current.requireGoodInfra() : previous.requireGoodInfra())
-                .requireEnglishOnly(current.requireEnglishOnly() != null ? current.requireEnglishOnly() : previous.requireEnglishOnly())
-                .maxBudgetKrw(current.maxBudgetKrw() != null ? current.maxBudgetKrw() : previous.maxBudgetKrw())
-                .mentionedCountry(current.mentionedCountry() != null ? current.mentionedCountry() : previous.mentionedCountry())
-                .mentionedPurpose(current.mentionedPurpose() != null ? current.mentionedPurpose() : previous.mentionedPurpose())
-                .build();
-    }
-
-    private Optional<ResourceTopic> mapToResourceTopic(ConditionType conditionType) {
-        return switch (conditionType) {
-            case SAFETY -> Optional.of(ResourceTopic.SAFETY);
-            case VISA -> Optional.of(ResourceTopic.VISA);
-            case HOUSING -> Optional.of(ResourceTopic.HOUSING);
-            case BUDGET -> Optional.of(ResourceTopic.COST);
-            case LANGUAGE, INFRA -> Optional.empty();
-        };
-    }
-
-    private String buildParsePrompt(String searchQuery) {
-        return """
-        너는 해외 이주/어학연수 도시 추천 서비스의 조건 분석기다.
-        아래 사용자 문장을 분석해서 조건을 구조화된 값으로만 추출해라.
-
-        규칙:
-        1. 문장에 명시적으로 언급되거나 강하게 암시된 조건만 값을 채워라.
-        2. 언급이 없는 항목은 반드시 null로 남겨라. 임의로 추측해서 채우지 마라.
-        3. 불리언 항목
-              - "치안 좋은", "안전한" → requireHighSafety=true
-              - "비자 쉬운", "무비자" → requireEasyVisa=true
-              - "영어 소통", "영어권" → requireEnglishOnly=true
-              - "주거 우수", "집 구하기 쉬운" → requireGoodHousing=true
-              - "인프라 우수", "편의시설" → requireGoodInfra=true
-              - 조건이 필요하지 않거나 상관 없다는 의미가 명시되면 false를 채운다.
-              - 조건에 대한 언급 자체가 없으면 null이다.
-        4. maxBudgetKrw는 월 예산 기준 원 단위 정수로 변환한다.
-             예) "200만원" → 2000000
-        5. mentionedCountry는 문장에 국가명이 명시된 경우에만 채운다.
-        6. 국가명, 예산, 조건을 임의로 만들어 넣지 마라.
-        7. 반드시 ParsedConditions JSON만 출력한다. 설명, 코드블록, 마크다운은 출력하지 않는다.
-        8. JSON 외의 설명, 코드블록(```), 마크다운, 자연어 문장을 출력하지 마라.
-
-        사용자 문장: "%s"
-        """.formatted(searchQuery);
-    }
-
-    private String buildSelectPrompt(String searchQuery, AiSearchResponseDTO.ParsedConditions parsed, List<City> candidates) {
-        String candidateJson = candidates.stream()
-                .map(c -> """
-        {"cityId": %d, "cityName": "%s", "countryName": "%s", "safetyScore": %s, "monthlyCost": %d, "visaScore": %s, "housingScore": %s, "infraScore": %s, "languageScore": %s}\
-        """.formatted(
-                        c.getCityId(), c.getName(), c.getCountry().getName(),
-                        c.getSafetyScore(), c.getMonthlyCost(), c.getVisaScore(),
-                        c.getHousingScore(), c.getInfraScore(), c.getLanguageScore()
-                ))
-                .collect(Collectors.joining(",\n"));
-
-        return """
-        너는 해외 이주/어학연수 도시 추천 서비스의 브리핑 작성자다.
-        아래는 사용자 질문과, 조건 필터링을 이미 통과한 후보 도시 목록(실제 DB 데이터)이다.
-
-        절대 규칙:
-        - recommendedCityIds에는 아래 후보 목록에 있는 cityId만 넣어라. 목록에 없는 ID를 지어내면 안 된다.
-        - summary(서술)에서 도시의 구체적 수치(점수, 순위, 금액)를 언급할 때는 반드시 아래 후보 데이터에 있는 값에 근거해야 한다. 데이터에 없는 수치나 순위를 지어내지 마라.
-        - summary(서술)에는 후보 데이터에 존재하는 정보와 사용자 질문만 근거로 작성한다. 후보 도시의 비교 및 추천 근거는 반드시 후보 데이터에 포함된 정보만 사용한다.
-        - 후보 데이터에 없는 특징(기후, 문화, 치안 수준, 생활비, 한국인 비율 등)을 추론하거나 추가하지 않는다. 
-        - 조건을 만족하는 후보가 3개 이상이면 상위 3개만 추천한다.
-        - 조건을 만족하는 후보가 1~2개이면 해당 도시만 추천한다. 
-        - 왜 골랐는지 자연스러운 한국어 문장으로 요약해라.
-        - primaryConditionType은 사용자가 가장 중요하게 여긴 조건 하나를 SAFETY/BUDGET/LANGUAGE/VISA/HOUSING/INFRA 중에서 골라라.
-        - 후보 중 필수 조건을 만족하는 도시가 하나도 없으면 isEmptyResult를 true로, recommendedCityIds는 빈 배열로 해라.
-        - 반드시 RecommendationResponse JSON만 출력한다. 설명, 코드블록, 마크다운 금지.
-        
-        사용자 질문: "%s"
-        추출된 조건: %s
-        후보 도시 목록:
-        [%s]
-        """.formatted(searchQuery, parsed.toString(), candidateJson);
     }
 }
