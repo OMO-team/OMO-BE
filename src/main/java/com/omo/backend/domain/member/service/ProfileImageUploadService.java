@@ -37,7 +37,8 @@ public class ProfileImageUploadService {
         S3PresignedUrlService.PresignedPutUrl presignedPutUrl = s3PresignedUrlService.createPutUrl(
                 s3Properties.profileBucket(),
                 objectKey,
-                fileType.getContentType()
+                fileType.getContentType(),
+                request.fileSize()
         );
 
         // 프론트가 직접 업로드할 때 필요한 URL, key, Content-Type, 만료시각을 반환

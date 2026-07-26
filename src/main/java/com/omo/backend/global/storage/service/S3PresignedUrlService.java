@@ -24,12 +24,13 @@ public class S3PresignedUrlService {
     private final S3Presigner s3Presigner;
     private final S3Properties properties;
 
-    public PresignedPutUrl createPutUrl(String bucket, String objectKey, String contentType) {
-        // 업로드를 허용할 버킷, object key, Content-Type을 고정
+    public PresignedPutUrl createPutUrl(String bucket, String objectKey, String contentType, long contentLength) {
+        // 업로드를 허용할 버킷, object key, Content-Type, 파일 크기를 고정
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(objectKey)
                 .contentType(contentType)
+                .contentLength(contentLength)
                 .build();
 
         // 위 PUT 요청에 환경설정의 유효시간을 적용해 서명 요청 생성
