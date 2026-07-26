@@ -3,6 +3,7 @@ package com.omo.backend.domain.member.dto;
 import com.omo.backend.domain.member.enums.MemberProvider;
 import lombok.Builder;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class MemberResponseDTO {
@@ -31,6 +32,15 @@ public class MemberResponseDTO {
             Long memberId,
             String name,
             String profileImageUrl
+    ) {}
+
+    // 프로필 이미지 업로드 URL 발급 결과
+    @Builder
+    public record ProfileImageUploadUrlResultDTO(
+            String uploadUrl,
+            String objectKey,
+            String contentType,
+            Instant expiresAt
     ) {}
 
     // 내 설정 조회/수정 결과
