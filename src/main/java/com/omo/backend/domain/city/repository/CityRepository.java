@@ -38,4 +38,7 @@ public interface CityRepository extends JpaRepository<City, Long>, JpaSpecificat
             @Param("goodInfra") Boolean goodInfra,
             @Param("country") String country
     );
+
+    @Query("SELECT DISTINCT c.country.name FROM City c")
+    List<String> findDistinctCountryNames();
 }
