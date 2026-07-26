@@ -1,6 +1,6 @@
 package com.omo.backend.domain.aisearch.service;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.omo.backend.domain.aisearch.dto.AiSearchResponseDTO;
 import com.omo.backend.domain.aisearch.entity.AiSearchLog;
 import com.omo.backend.domain.aisearch.entity.AiSearchSession;
@@ -36,9 +36,9 @@ public class AiSearchProcessor {
     private final AiSearchSessionRepository aiSearchSessionRepository;
     private final CityRepository cityRepository;
     private final CityRelatedResourceRepository cityRelatedResourceRepository;
-    private final JsonMapper objectMapper = new JsonMapper();
+    private final JsonMapper objectMapper;
     private final AiClient aiClient;
-    private final RelaxationSuggester relaxationSuggester = new RelaxationSuggester();
+    private final RelaxationSuggester relaxationSuggester;
 
     @Transactional
     public void process(String taskId, Long sessionId, String searchQuery, boolean isRefine) {
@@ -48,9 +48,11 @@ public class AiSearchProcessor {
 
         // 1. 자연어 -> 파싱
         AiSearchResponseDTO.ParsedConditions currentParsed;
+        List<String> validCountryNames = cityRepository.findDistinctCountryNames();
         try {
             currentParsed = aiClient.callWithSchema(
-                    buildParsePrompt(searchQuery),
+                    buildParsePrompt(searchQuery, validCountryNames),
+                    GeminiSchemas.parsedConditionsSchema(validCountryNames),
                     AiSearchResponseDTO.ParsedConditions.class);
         } catch (Exception e) {
             log.error("[AI 파싱 오류] TaskId: {}", taskId, e);
@@ -128,7 +130,7 @@ public class AiSearchProcessor {
 
     }
 
-    private String buildParsePrompt(String searchQuery) {
+    private String buildParsePrompt(String searchQuery, List<String> validCountryNames) {
         return """
         너는 해외 이주/어학연수 도시 추천 서비스의 조건 분석기다.
         아래 사용자 문장을 분석해서 조건을 구조화된 값으로만 추출해라.
@@ -146,7 +148,10 @@ public class AiSearchProcessor {
               - 조건에 대한 언급 자체가 없으면 null이다.
         4. maxBudgetKrw는 월 예산 기준 원 단위 정수로 변환한다.
              예) "200만원" → 2000000
-        5. mentionedCountry는 문장에 국가명이 명시된 경우에만 채운다.
+        5. mentionedCountry는 문장에 국가명이 언급된 경우에만 채우되, 반드시 아래 국가 목록 중 정확히 일치하는 표기로 채워라.
+           국가 목록: %s
+              - 한국어로 언급되어도(예: "몰타") 반드시 목록에 있는 정확한 표기로 변환해서 채워라.
+              - 목록에 없는 국가가 언급되면 null로 남겨라.
         6. mentionedPurpose는 반드시 다음 중 하나여야 한다: WORKING_HOLIDAY, EXCHANGE_STUDENT, INTERNSHIP.
              - "워킹홀리데이", "워홀" → WORKING_HOLIDAY
              - "교환학생" → EXCHANGE_STUDENT
@@ -157,7 +162,7 @@ public class AiSearchProcessor {
         9. JSON 외의 설명, 코드블록(```), 마크다운, 자연어 문장을 출력하지 마라.
 
         사용자 문장: "%s"
-        """.formatted(searchQuery);
+        """.formatted(String.join(", ", validCountryNames), searchQuery);
     }
 
     private String buildSelectPrompt(String searchQuery, AiSearchResponseDTO.ParsedConditions parsed, List<City> candidates) {
@@ -234,6 +239,7 @@ public class AiSearchProcessor {
                     .flatMap(cityId -> cityRelatedResourceRepository
                             .findByCityIdAndTopicAndDeletedAtIsNull(cityId, topic.get())
                             .stream())
+                            .limit(2)
                     .map(ReportConverter::toResourceDTO)
                     .toList();
         }
@@ -243,7 +249,7 @@ public class AiSearchProcessor {
                 .flatMap(cityId -> cityRelatedResourceRepository
                         .findByCityIdAndDeletedAtIsNull(cityId)
                         .stream())
-                .limit(2)
+                        .limit(2)
                 .map(ReportConverter::toResourceDTO)
                 .toList();
     }

@@ -62,7 +62,7 @@ public class AiSearchService {
         AiSearchSession session = getOrCreateSession(request.sessionId(), request.isRefine());
 
         // 2. 고유 taskId 생성
-        String taskId = "task_" + UUID.randomUUID().toString().replace("-", "").substring(0,12);
+        String taskId = "task_" + UUID.randomUUID().toString().replace("-", "");
         log.info("[AI Search Request] SessionId: {}, TaskId: {}, Query: {}, isRefine: {}",
                 session.getId(), taskId, request.searchQuery(), request.isRefine());
 

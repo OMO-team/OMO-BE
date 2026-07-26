@@ -34,7 +34,7 @@ public class AiSearchLog extends BaseEntity {
     @Column(name = "ai_response", columnDefinition = "TEXT")
     private String aiResponse;
 
-    @Column(name = "task_id", length = 50)
+    @Column(name = "task_id", length = 50, nullable = false, unique = true)
     private String taskId;
 
     public static AiSearchLog createSearchLog(AiSearchSession session, String searchQuery, Boolean isRefine, String taskId) {

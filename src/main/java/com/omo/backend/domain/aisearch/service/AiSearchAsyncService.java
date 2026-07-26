@@ -1,4 +1,5 @@
 package com.omo.backend.domain.aisearch.service;
+import com.omo.backend.domain.aisearch.enums.TaskStatus;
 import com.omo.backend.domain.aisearch.event.AiBriefingRequestedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +30,12 @@ public class AiSearchAsyncService {
         String taskId = event.taskId();
         try  {
             aiSearchProcessor.process(taskId, event.sessionId(), event.searchQuery(), event.isRefine());
-            redisTemplate.opsForValue().set(TASK_PREFIX + taskId, "COMPLETED", Duration.ofMinutes(TASK_TTL_MINUTES));
         } catch (Exception e) {
             log.error("[AI Async 오류] TaskId: {}", taskId, e);
-            redisTemplate.opsForValue().set(TASK_PREFIX + taskId, "FAILED", Duration.ofMinutes(TASK_TTL_MINUTES));
+            redisTemplate.opsForValue().set(TASK_PREFIX + taskId, TaskStatus.FAILED.name(), Duration.ofMinutes(TASK_TTL_MINUTES));
+            return;
         }
+        redisTemplate.opsForValue().set(TASK_PREFIX + taskId, TaskStatus.COMPLETED.name(), Duration.ofMinutes(TASK_TTL_MINUTES));
+
     }
 }
