@@ -2,6 +2,7 @@ package com.omo.backend.domain.inquiry.controller;
 
 import com.omo.backend.domain.inquiry.dto.InquiryRequestDTO;
 import com.omo.backend.domain.inquiry.dto.InquiryResponseDTO;
+import com.omo.backend.domain.inquiry.service.InquiryAttachmentUploadService;
 import com.omo.backend.domain.inquiry.service.InquiryCommandService;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class InquiryController implements InquiryControllerDocs {
 
     private final InquiryCommandService inquiryCommandService;
+    private final InquiryAttachmentUploadService inquiryAttachmentUploadService;
 
     @PostMapping
     public ApiResponse<InquiryResponseDTO.InquiryResultDTO> createInquiry(
@@ -28,5 +30,14 @@ public class InquiryController implements InquiryControllerDocs {
         Long memberId = userDetails != null ? userDetails.getMemberId() : null;
         InquiryResponseDTO.InquiryResultDTO result = inquiryCommandService.createInquiry(memberId, request);
         return ApiResponse.created(result);
+    }
+
+    @PostMapping("/attachments/upload-urls")
+    public ApiResponse<InquiryResponseDTO.AttachmentUploadUrlsResultDTO> createAttachmentUploadUrls(
+            @Valid @RequestBody InquiryRequestDTO.AttachmentUploadUrlsDTO request
+    ) {
+        InquiryResponseDTO.AttachmentUploadUrlsResultDTO result =
+                inquiryAttachmentUploadService.createUploadUrls(request);
+        return ApiResponse.onSuccess(result);
     }
 }

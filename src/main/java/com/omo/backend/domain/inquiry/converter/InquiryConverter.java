@@ -5,6 +5,9 @@ import com.omo.backend.domain.inquiry.dto.InquiryResponseDTO;
 import com.omo.backend.domain.inquiry.entity.Inquiry;
 import com.omo.backend.domain.member.entity.Member;
 
+import java.time.Instant;
+import java.util.List;
+
 public class InquiryConverter {
 
     // DTO -> Inquiry 엔티티
@@ -24,6 +27,30 @@ public class InquiryConverter {
                 .inquiryId(inquiry.getId())
                 .status(inquiry.getStatus())
                 .createdAt(inquiry.getCreatedAt())
+                .build();
+    }
+
+    public static InquiryResponseDTO.AttachmentUploadUrlDTO toAttachmentUploadUrlDTO(
+            String uploadUrl,
+            String objectKey,
+            String contentType,
+            Instant expiresAt
+    ) {
+        return InquiryResponseDTO.AttachmentUploadUrlDTO.builder()
+                .uploadUrl(uploadUrl)
+                .objectKey(objectKey)
+                .contentType(contentType)
+                .expiresAt(expiresAt)
+                .build();
+    }
+
+    public static InquiryResponseDTO.AttachmentUploadUrlsResultDTO toAttachmentUploadUrlsResultDTO(
+            String uploadToken,
+            List<InquiryResponseDTO.AttachmentUploadUrlDTO> uploads
+    ) {
+        return InquiryResponseDTO.AttachmentUploadUrlsResultDTO.builder()
+                .uploadToken(uploadToken)
+                .uploads(uploads)
                 .build();
     }
 }
