@@ -22,7 +22,7 @@ public class MemberResponseDTO {
             Long memberId,
             String name,
             String email,
-            String profileImageUrl,
+            String profileImageKey,
             MemberProvider provider
     ) {}
 
@@ -30,8 +30,7 @@ public class MemberResponseDTO {
     @Builder
     public record UpdateProfileResultDTO(
             Long memberId,
-            String name,
-            String profileImageUrl
+            String name
     ) {}
 
     // 프로필 이미지 업로드 URL 발급 결과
@@ -41,6 +40,13 @@ public class MemberResponseDTO {
             String objectKey,
             String contentType,
             Instant expiresAt
+    ) {}
+
+    // 프로필 이미지 등록 결과
+    @Builder
+    public record ProfileImageUpdateResultDTO(
+            Long memberId,
+            String objectKey
     ) {}
 
     // 내 설정 조회/수정 결과

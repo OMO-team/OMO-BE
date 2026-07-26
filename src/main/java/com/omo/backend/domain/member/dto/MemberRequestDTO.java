@@ -51,11 +51,7 @@ public class MemberRequestDTO {
             @Schema(description = "회원 이름", example = "홍길동")
             @NotBlank(message = "이름은 필수 입력값입니다.")
             @Size(max = 20, message = "이름은 20자 이하로 입력해 주세요.")
-            String name,
-
-            @Schema(description = "프로필 이미지 URL", example = "https://example.com/profile.png")
-            @Size(max = 500, message = "프로필 이미지 URL은 500자 이하로 입력해 주세요.")
-            String profileImageUrl
+            String name
     ) {}
 
     // 프로필 이미지 업로드 URL 발급
@@ -73,6 +69,14 @@ public class MemberRequestDTO {
             @Positive(message = "파일 크기는 0보다 커야 합니다.")
             @Max(value = 5L * 1024 * 1024, message = "파일 크기는 5MB 이하여야 합니다.")
             Long fileSize
+    ) {}
+
+    // 프로필 이미지 등록
+    public record ProfileImageUpdateDTO(
+            @Schema(description = "업로드 URL 발급 API에서 반환된 S3 object key", example = "profiles/1/550e8400-e29b-41d4-a716-446655440000.jpg")
+            @NotBlank(message = "프로필 이미지 object key는 필수 입력값입니다.")
+            @Size(max = 500, message = "프로필 이미지 object key는 500자 이하여야 합니다.")
+            String objectKey
     ) {}
 
     // 내 설정 수정

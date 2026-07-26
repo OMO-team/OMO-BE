@@ -42,7 +42,7 @@ public class MemberConverter {
                 .memberId(member.getId())
                 .name(member.getName())
                 .email(member.getEmail())
-                .profileImageUrl(member.getProfileImageUrl())
+                .profileImageKey(member.getProfileImageKey())
                 .provider(member.getProvider())
                 .build();
     }
@@ -52,7 +52,6 @@ public class MemberConverter {
         return MemberResponseDTO.UpdateProfileResultDTO.builder()
                 .memberId(member.getId())
                 .name(member.getName())
-                .profileImageUrl(member.getProfileImageUrl())
                 .build();
     }
 
@@ -68,6 +67,14 @@ public class MemberConverter {
                 .objectKey(objectKey)
                 .contentType(contentType)
                 .expiresAt(expiresAt)
+                .build();
+    }
+
+    // entity -> 프로필 이미지 등록 DTO
+    public static MemberResponseDTO.ProfileImageUpdateResultDTO toProfileImageUpdateResultDTO(Member member) {
+        return MemberResponseDTO.ProfileImageUpdateResultDTO.builder()
+                .memberId(member.getId())
+                .objectKey(member.getProfileImageKey())
                 .build();
     }
 

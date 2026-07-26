@@ -69,6 +69,15 @@ public class MemberController implements MemberControllerDocs {
         return ApiResponse.onSuccess(result);
     }
 
+    @PatchMapping("/me/profile-image")
+    public ApiResponse<MemberResponseDTO.ProfileImageUpdateResultDTO> updateProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody MemberRequestDTO.ProfileImageUpdateDTO request
+    ) {
+        MemberResponseDTO.ProfileImageUpdateResultDTO result = memberCommandService.updateProfileImage(userDetails.getMemberId(), request);
+        return ApiResponse.onSuccess(result);
+    }
+
     @DeleteMapping("/me")
     public ApiResponse<Void> withdraw(
             @AuthenticationPrincipal CustomUserDetails userDetails,
