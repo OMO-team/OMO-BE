@@ -5,10 +5,12 @@ import com.omo.backend.global.storage.exception.StorageException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Service
@@ -42,6 +44,22 @@ public class S3FileService {
                     .bucket(bucket)
                     .key(objectKey)
                     .build());
+        } catch (SdkException exception) {
+            throw new StorageException(StorageErrorCode.S3_OPERATION_FAILED);
+        }
+    }
+
+    public void upload(String bucket, String objectKey, String contentType, byte[] content) {
+        try {
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(objectKey)
+                            .contentType(contentType)
+                            .contentLength((long) content.length)
+                            .build(),
+                    RequestBody.fromBytes(content)
+            );
         } catch (SdkException exception) {
             throw new StorageException(StorageErrorCode.S3_OPERATION_FAILED);
         }

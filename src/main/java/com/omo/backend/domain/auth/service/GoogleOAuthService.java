@@ -44,6 +44,7 @@ public class GoogleOAuthService {
     private final SocialAccountRepository socialAccountRepository;
     private final MemberRepository memberRepository;
     private final MemberSettingsRepository memberSettingsRepository;
+    private final GoogleProfileImageService googleProfileImageService;
     private final AuthCommandService authCommandService;
     private final StringRedisTemplate redisTemplate;
 
@@ -156,6 +157,12 @@ public class GoogleOAuthService {
         Member member = memberRepository.save(OAuthConverter.toGoogleMember(userInfo));
         memberSettingsRepository.save(MemberConverter.toDefaultMemberSettings(member));
         socialAccountRepository.save(OAuthConverter.toGoogleSocialAccount(member, userInfo));
+
+        String profileImageKey = googleProfileImageService.upload(member.getId(), userInfo.picture());
+        if (profileImageKey != null) {
+            member.updateProfileImage(profileImageKey);
+        }
+
         return member;
     }
 
