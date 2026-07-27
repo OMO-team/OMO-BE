@@ -29,7 +29,9 @@ public interface InquiryControllerDocs {
             description = """
                     문의에 첨부할 이미지를 S3에 직접 업로드할 수 있는 임시 PUT URL을 최대 3개까지 발급합니다.
 
-                    응답의 각 uploadUrl로 파일을 PUT 업로드하고, Content-Type은 응답의 contentType과 동일하게 설정해야 합니다.
+                    응답의 각 uploadUrl로 파일을 PUT 업로드해야 합니다.
+                    PUT 요청의 Content-Type은 응답의 contentType과 동일해야 하며,
+                    요청 본문의 크기는 업로드 URL 발급 요청에 전달한 fileSize와 정확히 일치해야 합니다.
                     업로드가 완료되면 uploadToken과 objectKey 목록을 문의 등록 API에 전달해야 합니다.
                     """
     )
