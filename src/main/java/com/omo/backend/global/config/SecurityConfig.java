@@ -44,7 +44,7 @@ public class SecurityConfig {
             "/webjars/**",
     };
 
-    // 인증 없이 접근할 수 있는 공개 API URL 배열
+    // HTTP 메서드와 관계없이 인증 없이 접근할 수 있는 공개 API URL 배열
     private static final String[] PUBLIC_API_URLS = {
             "/actuator/health",
             "/api/v1/members/signup",
@@ -54,6 +54,33 @@ public class SecurityConfig {
             "/auth/v1/login/local",
             "/auth/v1/reissue",
             "/api/v1/terms"
+    };
+
+    // 인증 없이 GET 요청을 허용하는 공개 API URL 배열
+    private static final String[] PUBLIC_GET_API_URLS = {
+            "/api/v1/purposes",
+            "/api/v1/countries",
+            "/api/v1/cities",
+            "/api/v1/cities/**",
+            "/api/v1/ai-search/recommend-chips",
+            "/api/v1/ai-search/briefing/status/**"
+    };
+
+    // 인증 없이 POST 요청을 허용하는 공개 API URL 배열
+    private static final String[] PUBLIC_POST_API_URLS = {
+            "/api/v1/inquiries",
+            "/api/v1/ai-search/briefing",
+            "/api/v1/cities/*/ai-report"
+    };
+
+    // 인증 없이 PATCH 요청을 허용하는 공개 API URL 배열
+    private static final String[] PUBLIC_PATCH_API_URLS = {
+            "/api/v1/ai-search/briefing/tags"
+    };
+
+    // 인증 없이 DELETE 요청을 허용하는 공개 API URL 배열
+    private static final String[] PUBLIC_DELETE_API_URLS = {
+            "/api/v1/ai-search/sessions/**"
     };
 
     @Bean
@@ -68,7 +95,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(SWAGGER_URLS).permitAll()
                         .requestMatchers(PUBLIC_API_URLS).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/inquiries").permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_API_URLS).permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_API_URLS).permitAll()
+                        .requestMatchers(HttpMethod.PATCH, PUBLIC_PATCH_API_URLS).permitAll()
+                        .requestMatchers(HttpMethod.DELETE, PUBLIC_DELETE_API_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
