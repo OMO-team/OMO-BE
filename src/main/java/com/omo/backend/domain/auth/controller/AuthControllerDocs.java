@@ -9,9 +9,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Auth", description = "인증 API")
 public interface AuthControllerDocs {
@@ -44,6 +46,19 @@ public interface AuthControllerDocs {
     @Operation(summary = "일반 로그인", description = "이메일과 비밀번호로 로그인합니다.")
     ApiResponse<AuthResponseDTO.LoginResultDTO> doLogin(
             @Valid @RequestBody AuthRequestDTO.LoginDTO request
+    );
+
+    @Operation(summary = "Google 로그인", description = "Google OAuth 인증 화면으로 리다이렉트합니다.")
+    ResponseEntity<Void> doGoogleLogin();
+
+    @Operation(summary = "Google 로그인 콜백", description = "Google 인가 코드를 검증하고 OMO 액세스 토큰과 리프레시 토큰을 발급합니다.")
+    ApiResponse<AuthResponseDTO.LoginResultDTO> doGoogleLoginCallback(
+            @Parameter(description = "Google 인가 코드")
+            @RequestParam(required = false) String code,
+            @Parameter(description = "OAuth 요청 위조 방지 상태값")
+            @RequestParam(required = false) String state,
+            @Parameter(description = "Google 인증 실패 코드")
+            @RequestParam(required = false) String error
     );
 
     @Operation(summary = "토큰 재발급", description = "리프레시 토큰을 검증하고 새로운 액세스 토큰과 리프레시 토큰을 발급합니다.")

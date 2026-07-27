@@ -6,18 +6,25 @@ import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.auth.service.AuthCommandService;
 import com.omo.backend.domain.auth.service.EmailVerificationService;
+import com.omo.backend.domain.auth.service.GoogleOAuthService;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,6 +35,7 @@ public class AuthController implements AuthControllerDocs {
 
     private final EmailVerificationService emailVerificationService;
     private final AuthCommandService authCommandService;
+    private final GoogleOAuthService googleOAuthService;
 
     @PostMapping("/email/send")
     public ApiResponse<AuthResponseDTO.EmailSendResultDTO> sendEmailVerificationCode(
@@ -74,6 +82,25 @@ public class AuthController implements AuthControllerDocs {
             @RequestBody @Valid AuthRequestDTO.LoginDTO request
     ) {
         AuthResponseDTO.LoginResultDTO result = authCommandService.login(request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @GetMapping("/oauth/google/login")
+    public ResponseEntity<Void> doGoogleLogin() {
+        String authorizationUrl = googleOAuthService.createAuthorizationUrl();
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(authorizationUrl))
+                .build();
+    }
+
+    @GetMapping("/oauth/google/callback")
+    public ApiResponse<AuthResponseDTO.LoginResultDTO> doGoogleLoginCallback(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String error
+    ) {
+        AuthResponseDTO.LoginResultDTO result = googleOAuthService.login(code, state, error);
         return ApiResponse.onSuccess(result);
     }
 
