@@ -35,8 +35,8 @@ public class Member extends BaseEntity {
     @Column(name = "name", length = 20, nullable = false)
     private String name;
 
-    @Column(name = "profile_image_url", length = 500)
-    private String profileImageUrl;
+    @Column(name = "profile_image_key", length = 500)
+    private String profileImageKey;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "provider", length = 20, nullable = false)
@@ -70,9 +70,16 @@ public class Member extends BaseEntity {
                 .build();
     }
 
-    public void updateProfile(String name, String profileImageUrl) {
+    public void updateProfile(String name) {
         this.name = name;
-        this.profileImageUrl = profileImageUrl;
+    }
+
+    public void updateProfileImage(String profileImageKey) {
+        this.profileImageKey = profileImageKey;
+    }
+
+    public void deleteProfileImage() {
+        this.profileImageKey = null;
     }
 
     public void changePassword(String encodedPassword) {
