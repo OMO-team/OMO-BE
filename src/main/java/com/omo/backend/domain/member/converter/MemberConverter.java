@@ -7,6 +7,7 @@ import com.omo.backend.domain.member.entity.MemberTerms;
 import com.omo.backend.domain.member.entity.MemberSettings;
 import com.omo.backend.domain.terms.entity.Terms;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class MemberConverter {
@@ -36,12 +37,13 @@ public class MemberConverter {
     }
 
     // entity -> 내 정보 조회 DTO
-    public static MemberResponseDTO.MyInfoResultDTO toMyInfoResultDTO(Member member) {
+    public static MemberResponseDTO.MyInfoResultDTO toMyInfoResultDTO(Member member, String profileImageUrl, Instant profileImageUrlExpiresAt) {
         return MemberResponseDTO.MyInfoResultDTO.builder()
                 .memberId(member.getId())
                 .name(member.getName())
                 .email(member.getEmail())
-                .profileImageUrl(member.getProfileImageUrl())
+                .profileImageUrl(profileImageUrl)
+                .profileImageUrlExpiresAt(profileImageUrlExpiresAt)
                 .provider(member.getProvider())
                 .build();
     }
@@ -51,7 +53,29 @@ public class MemberConverter {
         return MemberResponseDTO.UpdateProfileResultDTO.builder()
                 .memberId(member.getId())
                 .name(member.getName())
-                .profileImageUrl(member.getProfileImageUrl())
+                .build();
+    }
+
+    // 업로드 정보 -> 프로필 이미지 업로드 URL 발급 DTO
+    public static MemberResponseDTO.ProfileImageUploadUrlResultDTO toProfileImageUploadUrlResultDTO(
+            String uploadUrl,
+            String objectKey,
+            String contentType,
+            Instant expiresAt
+    ) {
+        return MemberResponseDTO.ProfileImageUploadUrlResultDTO.builder()
+                .uploadUrl(uploadUrl)
+                .objectKey(objectKey)
+                .contentType(contentType)
+                .expiresAt(expiresAt)
+                .build();
+    }
+
+    // entity -> 프로필 이미지 등록 DTO
+    public static MemberResponseDTO.ProfileImageUpdateResultDTO toProfileImageUpdateResultDTO(Member member) {
+        return MemberResponseDTO.ProfileImageUpdateResultDTO.builder()
+                .memberId(member.getId())
+                .objectKey(member.getProfileImageKey())
                 .build();
     }
 
@@ -61,7 +85,6 @@ public class MemberConverter {
                 .pushNotification(memberSettings.getPushNotification())
                 .emailNotification(memberSettings.getEmailNotification())
                 .autoSave(memberSettings.getAutoSave())
-                .twoFactorEnabled(memberSettings.getTwoFactorEnabled())
                 .build();
     }
 }
