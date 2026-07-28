@@ -29,9 +29,6 @@ public class MemberSettings extends BaseEntity {
     @Column(name = "auto_save", nullable = false)
     private Boolean autoSave;
 
-    @Column(name = "two_factor_enabled", nullable = false)
-    private Boolean twoFactorEnabled;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
@@ -42,15 +39,13 @@ public class MemberSettings extends BaseEntity {
                 .pushNotification(true)
                 .emailNotification(true)
                 .autoSave(true)
-                .twoFactorEnabled(false)
                 .build();
     }
 
     public void updateSettings(
             Boolean pushNotification,
             Boolean emailNotification,
-            Boolean autoSave,
-            Boolean twoFactorEnabled
+            Boolean autoSave
     ) {
         if (pushNotification != null) {
             this.pushNotification = pushNotification;
@@ -60,9 +55,6 @@ public class MemberSettings extends BaseEntity {
         }
         if (autoSave != null) {
             this.autoSave = autoSave;
-        }
-        if (twoFactorEnabled != null) {
-            this.twoFactorEnabled = twoFactorEnabled;
         }
     }
 }
