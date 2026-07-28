@@ -45,6 +45,13 @@ jwt:
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
 
+aws:
+  s3:
+    region: ${AWS_REGION:ap-northeast-2}
+    profile-bucket: ${PROFILE_BUCKET}
+    inquiry-bucket: ${INQUIRY_BUCKET}
+    presigned-url-expiration: ${S3_PRESIGNED_URL_EXPIRATION:5m}
+
 management:
   endpoints:
     web:
