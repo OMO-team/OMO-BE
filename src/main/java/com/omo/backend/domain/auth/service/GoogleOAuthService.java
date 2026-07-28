@@ -72,31 +72,49 @@ public class GoogleOAuthService {
     @Value("${oauth.frontend-redirect-uri}")
     private String frontendRedirectUri;
 
+    @Value("${oauth.google-link-redirect-uri}")
+    private String googleLinkRedirectUri;
+
     // 필수 약관을 검증하고 회원가입용 state를 Redis에 저장한 뒤 Google 인증 URL 생성
     @Transactional(readOnly = true)
     public OAuthResponseDTO.GoogleAuthorizationUrlDTO createSignupAuthorizationUrl(OAuthRequestDTO.GoogleSignupStartDTO request) {
         termsAgreementService.validateAndGetAgreedTerms(request.agreedTermsIds());
 
         String state = UUID.randomUUID().toString();
-        OAuthStateDTO.GoogleOAuthStateDTO oauthState = new OAuthStateDTO.GoogleOAuthStateDTO(OAuthPurpose.SIGNUP, List.copyOf(request.agreedTermsIds()));
+        OAuthStateDTO.GoogleOAuthStateDTO oauthState = new OAuthStateDTO.GoogleOAuthStateDTO(OAuthPurpose.SIGNUP, List.copyOf(request.agreedTermsIds()), null);
         saveOAuthState(state, oauthState);
 
-        return new OAuthResponseDTO.GoogleAuthorizationUrlDTO(createGoogleAuthorizationUrl(state));
+        return new OAuthResponseDTO.GoogleAuthorizationUrlDTO(createGoogleAuthorizationUrl(state, redirectUri));
     }
 
     // 로그인용 state를 Redis에 저장한 뒤 Google 인증 URL 생성
     public OAuthResponseDTO.GoogleAuthorizationUrlDTO createLoginAuthorizationUrl() {
         String state = UUID.randomUUID().toString();
-        OAuthStateDTO.GoogleOAuthStateDTO oauthState = new OAuthStateDTO.GoogleOAuthStateDTO(OAuthPurpose.LOGIN, List.of());
+        OAuthStateDTO.GoogleOAuthStateDTO oauthState = new OAuthStateDTO.GoogleOAuthStateDTO(OAuthPurpose.LOGIN, List.of(), null);
         saveOAuthState(state, oauthState);
 
-        return new OAuthResponseDTO.GoogleAuthorizationUrlDTO(createGoogleAuthorizationUrl(state));
+        return new OAuthResponseDTO.GoogleAuthorizationUrlDTO(createGoogleAuthorizationUrl(state, redirectUri));
     }
 
-    private String createGoogleAuthorizationUrl(String state) {
+    // 로그인 회원의 ID를 state에 저장하고 Google 계정 연결 인증 URL 생성
+    @Transactional(readOnly = true)
+    public OAuthResponseDTO.GoogleAuthorizationUrlDTO createLinkAuthorizationUrl(Long memberId) {
+        Member member = getActiveMember(memberId);
+        if (socialAccountRepository.existsByMemberIdAndProvider(member.getId(), MemberProvider.GOOGLE)) {
+            throw new AuthException(AuthErrorCode.SOCIAL_ACCOUNT_ALREADY_LINKED);
+        }
+
+        String state = UUID.randomUUID().toString();
+        OAuthStateDTO.GoogleOAuthStateDTO oauthState = new OAuthStateDTO.GoogleOAuthStateDTO(OAuthPurpose.LINK, List.of(), member.getId());
+        saveOAuthState(state, oauthState);
+
+        return new OAuthResponseDTO.GoogleAuthorizationUrlDTO(createGoogleAuthorizationUrl(state, googleLinkRedirectUri));
+    }
+
+    private String createGoogleAuthorizationUrl(String state, String callbackUri) {
         return UriComponentsBuilder.fromUriString(GOOGLE_AUTHORIZATION_URI)
                 .queryParam("client_id", clientId)
-                .queryParam("redirect_uri", redirectUri)
+                .queryParam("redirect_uri", callbackUri)
                 .queryParam("response_type", "code")
                 .queryParam("scope", "openid email profile")
                 .queryParam("state", state)
@@ -120,6 +138,7 @@ public class GoogleOAuthService {
         Member member = switch (oauthState.purpose()) {
             case SIGNUP -> createGoogleMember(userInfo, oauthState.agreedTermsIds());
             case LOGIN -> getGoogleMember(userInfo);
+            case LINK -> throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
         };
         validateActiveMember(member);
 
@@ -234,6 +253,13 @@ public class GoogleOAuthService {
             throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_LINK_REQUIRED);
         }
         throw new AuthException(AuthErrorCode.OAUTH_SIGNUP_REQUIRED);
+    }
+
+    private Member getActiveMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        validateActiveMember(member);
+        return member;
     }
 
     // OAuth 요청 목적과 약관 정보를 JSON으로 변환해 state와 함께 Redis에 저장

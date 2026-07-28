@@ -8,6 +8,8 @@ import com.omo.backend.domain.member.service.ProfileImageUploadService;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.auth.service.AuthCommandService;
+import com.omo.backend.domain.auth.service.GoogleOAuthService;
+import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -34,6 +36,7 @@ public class MemberController implements MemberControllerDocs {
     private final MemberQueryService memberQueryService;
     private final ProfileImageUploadService profileImageUploadService;
     private final AuthCommandService authCommandService;
+    private final GoogleOAuthService googleOAuthService;
 
     @PostMapping("/signup")
     public ApiResponse<MemberResponseDTO.JoinResultDTO> signup(
@@ -56,6 +59,14 @@ public class MemberController implements MemberControllerDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         MemberResponseDTO.SocialAccountStatusDTO result = memberQueryService.getSocialAccountStatus(userDetails.getMemberId());
+        return ApiResponse.onSuccess(result);
+    }
+
+    @GetMapping("/me/social-accounts/google/link")
+    public ApiResponse<OAuthResponseDTO.GoogleAuthorizationUrlDTO> createGoogleLinkAuthorizationUrl(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        OAuthResponseDTO.GoogleAuthorizationUrlDTO result = googleOAuthService.createLinkAuthorizationUrl(userDetails.getMemberId());
         return ApiResponse.onSuccess(result);
     }
 
