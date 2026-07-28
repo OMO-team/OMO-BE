@@ -52,6 +52,11 @@ dependencies {
 	// redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+	// gemini
+	implementation 'com.google.genai:google-genai:1.+'
+
+	// json
+	implementation 'org.springframework.boot:spring-boot-starter-json'
 	// AWS SDK
 	implementation platform('software.amazon.awssdk:bom:2.47.3')
 	implementation 'software.amazon.awssdk:s3'

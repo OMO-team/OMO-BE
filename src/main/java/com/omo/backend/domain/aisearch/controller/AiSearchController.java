@@ -31,4 +31,13 @@ public class AiSearchController implements AiSearchControllerDocs {
         AiSearchResponseDTO.BriefingInitResult result = aiSearchService.requestSmartBriefing(request);
         return ApiResponse.onSuccess(result);
     }
+
+    @Override
+    @GetMapping("/briefing/status/{taskId}")
+    public ApiResponse<AiSearchResponseDTO.BriefingStatusResult> getSmartBriefingStatus(
+            @PathVariable("taskId") String taskId
+    ) {
+        AiSearchResponseDTO.BriefingStatusResult result = aiSearchService.getSmartBriefingStatus(taskId);
+        return ApiResponse.onSuccess(result);
+    }
 }
