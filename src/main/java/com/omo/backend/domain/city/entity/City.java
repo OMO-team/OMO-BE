@@ -39,6 +39,9 @@ public class City extends BaseEntity {
     @Column(name = "monthly_cost")
     private Integer monthlyCost;
 
+    @Column(name = "initial_settlement_cost")
+    private Integer initialSettlementCost;
+
     @Column(name = "safety_score", precision = 2, scale = 1)
     private BigDecimal safetyScore;
 

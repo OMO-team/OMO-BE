@@ -42,8 +42,8 @@ public class InquiryAttachment extends BaseEntity {
     @Column(name = "stored_name", length = 255, nullable = false)
     private String storedName;
 
-    @Column(name = "file_url", length = 500, nullable = false)
-    private String fileUrl;
+    @Column(name = "object_key", length = 500, nullable = false)
+    private String objectKey;
 
     @Column(name = "content_type", length = 100, nullable = false)
     private String contentType;
@@ -55,7 +55,7 @@ public class InquiryAttachment extends BaseEntity {
             Inquiry inquiry,
             String originalName,
             String storedName,
-            String fileUrl,
+            String objectKey,
             String contentType,
             Long fileSize
     ) {
@@ -63,7 +63,7 @@ public class InquiryAttachment extends BaseEntity {
                 .inquiry(inquiry)
                 .originalName(originalName)
                 .storedName(storedName)
-                .fileUrl(fileUrl)
+                .objectKey(objectKey)
                 .contentType(contentType)
                 .fileSize(fileSize)
                 .build();

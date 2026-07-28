@@ -34,13 +34,22 @@ public class AiSearchLog extends BaseEntity {
     @Column(name = "ai_response", columnDefinition = "TEXT")
     private String aiResponse;
 
-    public static AiSearchLog createSearchLog(AiSearchSession session, String searchQuery, Boolean isRefine) {
+    @Column(name = "task_id", length = 50, nullable = false, unique = true)
+    private String taskId;
+
+    public static AiSearchLog createSearchLog(AiSearchSession session, String searchQuery, Boolean isRefine, String taskId) {
         return AiSearchLog.builder()
                 .aiSearchSession(session)
                 .searchQuery(searchQuery)
                 .isRefine(Boolean.TRUE.equals(isRefine))
                 .isEmptyResult(false)
+                .taskId(taskId)
                 .build();
+    }
+
+    public void updateAiResponse(String aiResponse, boolean isEmptyResult) {
+        this.aiResponse = aiResponse;
+        this.isEmptyResult = isEmptyResult;
     }
 
 }

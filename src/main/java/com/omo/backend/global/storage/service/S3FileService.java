@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
@@ -60,6 +61,21 @@ public class S3FileService {
                             .build(),
                     RequestBody.fromBytes(content)
             );
+        } catch (SdkException exception) {
+            throw new StorageException(StorageErrorCode.S3_OPERATION_FAILED);
+        }
+    }
+
+    public void move(String bucket, String sourceObjectKey, String destinationObjectKey) {
+        try {
+            // S3에는 rename 기능이 없어 영구 경로로 복사한 뒤 임시 객체를 삭제
+            s3Client.copyObject(CopyObjectRequest.builder()
+                    .sourceBucket(bucket)
+                    .sourceKey(sourceObjectKey)
+                    .destinationBucket(bucket)
+                    .destinationKey(destinationObjectKey)
+                    .build());
+            delete(bucket, sourceObjectKey);
         } catch (SdkException exception) {
             throw new StorageException(StorageErrorCode.S3_OPERATION_FAILED);
         }

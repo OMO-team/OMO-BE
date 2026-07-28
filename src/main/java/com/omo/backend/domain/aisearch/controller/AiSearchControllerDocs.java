@@ -7,6 +7,7 @@ import com.omo.backend.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "AI Search", description = "AI 검색 API")
@@ -19,5 +20,10 @@ public interface AiSearchControllerDocs {
     ApiResponse<AiSearchResponseDTO.BriefingInitResult> requestSmartBriefing(
             @Valid @RequestBody AiSearchRequestDTO.BriefingRequest request
     );
+
+    @Operation(summary = "AI 스마트 브리핑 분석 결과 조회 API", description = "taskId의 작업 상태(PROCESSING/COMPLETED/FAILED) 및 최종 브리핑 결과를 조회합니다.")
+    ApiResponse<AiSearchResponseDTO.BriefingStatusResult> getSmartBriefingStatus(
+            @PathVariable("taskId") String taskId);
+
 
 }

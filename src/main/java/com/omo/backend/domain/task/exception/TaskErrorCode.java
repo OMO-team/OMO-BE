@@ -9,6 +9,11 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum TaskErrorCode implements BaseErrorCode {
 
+    TASK_DUE_DATE_AFTER_DEPARTURE(
+            HttpStatus.BAD_REQUEST,
+            "TASK400_1",
+            "태스크 권장 완료일은 출국일 이후일 수 없습니다."
+    ),
     TASK_LOCKED(
             HttpStatus.CONFLICT,
             "TASK409_1",
@@ -23,6 +28,11 @@ public enum TaskErrorCode implements BaseErrorCode {
             HttpStatus.CONFLICT,
             "TASK409_3",
             "이미 완료된 태스크입니다."
+    ),
+    TASK_SCHEDULE_NOT_AVAILABLE(
+            HttpStatus.CONFLICT,
+            "TASK409_4",
+            "로드맵 출국일 설정 후 태스크 일정을 변경할 수 있습니다."
     ),
     TASK_NOT_FOUND(
             HttpStatus.NOT_FOUND,
