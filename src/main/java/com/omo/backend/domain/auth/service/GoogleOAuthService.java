@@ -32,7 +32,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Duration;
@@ -59,6 +59,7 @@ public class GoogleOAuthService {
     private final GoogleProfileImageService googleProfileImageService;
     private final AuthCommandService authCommandService;
     private final StringRedisTemplate redisTemplate;
+    private final RestClient googleRestClient;
 
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String clientId;
@@ -215,7 +216,7 @@ public class GoogleOAuthService {
         request.add("grant_type", "authorization_code");
 
         try {
-            OAuthResponseDTO.GoogleTokenDTO response = RestClient.create()
+            OAuthResponseDTO.GoogleTokenDTO response = googleRestClient
                     .post()
                     .uri(GOOGLE_TOKEN_URI)
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -227,7 +228,7 @@ public class GoogleOAuthService {
                 throw new AuthException(AuthErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
             }
             return response.accessToken();
-        } catch (RestClientResponseException e) {
+        } catch (RestClientException exception) {
             throw new AuthException(AuthErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
         }
     }
@@ -235,7 +236,7 @@ public class GoogleOAuthService {
     // Google 액세스 토큰을 사용해 사용자의 고유 ID, 이메일, 이름 등을 조회
     private OAuthResponseDTO.GoogleUserInfoDTO requestGoogleUserInfo(String accessToken) {
         try {
-            OAuthResponseDTO.GoogleUserInfoDTO response = RestClient.create()
+            OAuthResponseDTO.GoogleUserInfoDTO response = googleRestClient
                     .get()
                     .uri(GOOGLE_USER_INFO_URI)
                     .headers(headers -> headers.setBearerAuth(accessToken))
@@ -246,7 +247,7 @@ public class GoogleOAuthService {
                 throw new AuthException(AuthErrorCode.GOOGLE_USER_INFO_REQUEST_FAILED);
             }
             return response;
-        } catch (RestClientResponseException e) {
+        } catch (RestClientException exception) {
             throw new AuthException(AuthErrorCode.GOOGLE_USER_INFO_REQUEST_FAILED);
         }
     }
