@@ -75,6 +75,9 @@ public class GoogleOAuthService {
     @Value("${oauth.google-link-redirect-uri}")
     private String googleLinkRedirectUri;
 
+    @Value("${oauth.frontend-link-redirect-uri}")
+    private String frontendLinkRedirectUri;
+
     // 필수 약관을 검증하고 회원가입용 state를 Redis에 저장한 뒤 Google 인증 URL 생성
     @Transactional(readOnly = true)
     public OAuthResponseDTO.GoogleAuthorizationUrlDTO createSignupAuthorizationUrl(OAuthRequestDTO.GoogleSignupStartDTO request) {
@@ -131,7 +134,7 @@ public class GoogleOAuthService {
         OAuthStateDTO.GoogleOAuthStateDTO oauthState = consumeOAuthState(state);
 
         // 인가 코드를 Google 액세스 토큰으로 교환한 뒤 사용자 정보를 조회
-        String googleAccessToken = requestGoogleAccessToken(code);
+        String googleAccessToken = requestGoogleAccessToken(code, redirectUri);
         OAuthResponseDTO.GoogleUserInfoDTO userInfo = requestGoogleUserInfo(googleAccessToken);
         validateGoogleUserInfo(userInfo);
 
@@ -145,6 +148,38 @@ public class GoogleOAuthService {
         String ticket = createLoginTicket(member);
         return UriComponentsBuilder.fromUriString(frontendRedirectUri)
                 .queryParam("ticket", ticket)
+                .build()
+                .encode()
+                .toUriString();
+    }
+
+    // Google 계정 연결 콜백을 검증하고 로그인 회원에게 소셜 계정 연결
+    @Transactional
+    public String handleLinkCallback(String code, String state, String authorizationError) {
+        // Google 인증 성공 여부와 요청 시 발급한 state를 검증
+        validateAuthorizationResponse(code, state, authorizationError);
+        OAuthStateDTO.GoogleOAuthStateDTO oauthState = consumeOAuthState(state);
+
+        if (oauthState.purpose() != OAuthPurpose.LINK || oauthState.memberId() == null) {
+            throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
+        }
+
+        String googleAccessToken = requestGoogleAccessToken(code, googleLinkRedirectUri);
+        OAuthResponseDTO.GoogleUserInfoDTO userInfo = requestGoogleUserInfo(googleAccessToken);
+        validateGoogleUserInfo(userInfo);
+
+        Member member = getActiveMember(oauthState.memberId());
+        if (socialAccountRepository.existsByMemberIdAndProvider(member.getId(), MemberProvider.GOOGLE)) {
+            throw new AuthException(AuthErrorCode.SOCIAL_ACCOUNT_ALREADY_LINKED);
+        }
+        if (socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).isPresent()) {
+            throw new AuthException(AuthErrorCode.SOCIAL_ACCOUNT_LINKED_TO_ANOTHER_MEMBER);
+        }
+
+        socialAccountRepository.save(OAuthConverter.toGoogleSocialAccount(member, userInfo));
+
+        return UriComponentsBuilder.fromUriString(frontendLinkRedirectUri)
+                .queryParam("linked", true)
                 .build()
                 .encode()
                 .toUriString();
@@ -171,12 +206,12 @@ public class GoogleOAuthService {
     }
 
     // Google 콜백에서 받은 인가 코드를 Google 액세스 토큰으로 교환
-    private String requestGoogleAccessToken(String code) {
+    private String requestGoogleAccessToken(String code, String callbackUri) {
         MultiValueMap<String, String> request = new LinkedMultiValueMap<>();
         request.add("code", code);
         request.add("client_id", clientId);
         request.add("client_secret", clientSecret);
-        request.add("redirect_uri", redirectUri);
+        request.add("redirect_uri", callbackUri);
         request.add("grant_type", "authorization_code");
 
         try {

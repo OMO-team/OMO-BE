@@ -58,6 +58,7 @@ jwt:
 oauth:
   frontend-redirect-uri: ${OAUTH_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/callback}
   google-link-redirect-uri: ${GOOGLE_LINK_REDIRECT_URI:http://localhost:8080/auth/v1/oauth/google/link/callback}
+  frontend-link-redirect-uri: ${OAUTH_FRONTEND_LINK_REDIRECT_URI:http://localhost:3000/settings/account}
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}

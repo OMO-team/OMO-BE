@@ -72,6 +72,19 @@ public interface AuthControllerDocs {
     );
 
     @Operation(
+            summary = "Google 계정 연결 콜백",
+            description = "Google 계정 연결 요청을 검증하고 소셜 계정을 저장한 뒤 프론트 설정 화면으로 리다이렉트합니다."
+    )
+    ResponseEntity<Void> doGoogleLinkCallback(
+            @Parameter(description = "Google 인가 코드")
+            @RequestParam(required = false) String code,
+            @Parameter(description = "OAuth 계정 연결 요청 위조 방지 상태값")
+            @RequestParam(required = false) String state,
+            @Parameter(description = "Google 인증 실패 코드")
+            @RequestParam(required = false) String error
+    );
+
+    @Operation(
             summary = "Google 로그인 티켓 교환",
             description = "일회용 로그인 티켓을 검증하고 OMO 액세스 토큰과 리프레시 토큰을 발급합니다."
     )

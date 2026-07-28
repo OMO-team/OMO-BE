@@ -114,6 +114,20 @@ public class AuthController implements AuthControllerDocs {
                 .build();
     }
 
+    @GetMapping("/oauth/google/link/callback")
+    public ResponseEntity<Void> doGoogleLinkCallback(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String error
+    ) {
+        String frontendRedirectUrl =
+                googleOAuthService.handleLinkCallback(code, state, error);
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(frontendRedirectUrl))
+                .build();
+    }
+
     @PostMapping("/oauth/google/exchange")
     public ApiResponse<AuthResponseDTO.LoginResultDTO> exchangeGoogleLoginTicket(
             @Valid @RequestBody OAuthRequestDTO.GoogleLoginExchangeDTO request
