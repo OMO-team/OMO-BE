@@ -48,7 +48,9 @@ public class GoogleOAuthService {
     private static final String GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token";
     private static final String GOOGLE_USER_INFO_URI = "https://openidconnect.googleapis.com/v1/userinfo";
     private static final String OAUTH_STATE_KEY_PREFIX = "OAUTH:GOOGLE:STATE:";
+    private static final String LOGIN_TICKET_KEY_PREFIX = "OAUTH:GOOGLE:LOGIN:";
     private static final Duration OAUTH_STATE_EXPIRATION = Duration.ofMinutes(5);
+    private static final Duration LOGIN_TICKET_EXPIRATION = Duration.ofMinutes(3);
 
     private final SocialAccountRepository socialAccountRepository;
     private final MemberRepository memberRepository;
@@ -66,6 +68,9 @@ public class GoogleOAuthService {
 
     @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     private String redirectUri;
+
+    @Value("${oauth.frontend-redirect-uri}")
+    private String frontendRedirectUri;
 
     // 필수 약관을 검증하고 회원가입용 state를 Redis에 저장한 뒤 Google 인증 URL 생성
     @Transactional(readOnly = true)
@@ -102,7 +107,7 @@ public class GoogleOAuthService {
 
     // Google 콜백의 요청 목적에 따라 신규 회원가입 또는 기존 회원 로그인 처리
     @Transactional
-    public AuthResponseDTO.LoginResultDTO handleCallback(String code, String state, String authorizationError) {
+    public String handleCallback(String code, String state, String authorizationError) {
         // Google 인증 성공 여부와 요청 시 발급한 state를 검증
         validateAuthorizationResponse(code, state, authorizationError);
         OAuthStateDTO.GoogleOAuthStateDTO oauthState = consumeOAuthState(state);
@@ -118,7 +123,31 @@ public class GoogleOAuthService {
         };
         validateActiveMember(member);
 
-        // 기존 일반 로그인과 동일한 OMO 액세스 토큰 및 리프레시 토큰 발급
+        String ticket = createLoginTicket(member);
+        return UriComponentsBuilder.fromUriString(frontendRedirectUri)
+                .queryParam("ticket", ticket)
+                .build()
+                .encode()
+                .toUriString();
+    }
+
+    // 일회용 로그인 티켓을 소비하고 기존 JWT 발급 로직을 호출
+    @Transactional(readOnly = true)
+    public AuthResponseDTO.LoginResultDTO exchangeLoginTicket(OAuthRequestDTO.GoogleLoginExchangeDTO request) {
+        String memberIdValue = redisTemplate.opsForValue().getAndDelete(loginTicketKey(request.ticket()));
+        if (!StringUtils.hasText(memberIdValue)) {
+            throw new AuthException(AuthErrorCode.OAUTH_TICKET_INVALID);
+        }
+
+        Member member;
+        try {
+            member = memberRepository.findById(Long.valueOf(memberIdValue))
+                    .orElseThrow(() -> new AuthException(AuthErrorCode.OAUTH_TICKET_INVALID));
+        } catch (NumberFormatException exception) {
+            throw new AuthException(AuthErrorCode.OAUTH_TICKET_INVALID);
+        }
+
+        validateActiveMember(member);
         return authCommandService.issueLoginTokens(member);
     }
 
@@ -193,10 +222,18 @@ public class GoogleOAuthService {
         return member;
     }
 
-    // Google sub과 연결된 기존 OMO 회원을 조회하고, 없으면 회원가입 필요 예외 발생
+    // Google sub와 연결된 회원을 조회하고, 동일 이메일 회원이 있으면 계정 연동 안내
     private Member getGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo) {
-        return socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).map(SocialAccount::getMember)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.OAUTH_SIGNUP_REQUIRED));
+        SocialAccount socialAccount = socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).orElse(null);
+
+        if (socialAccount != null) {
+            return socialAccount.getMember();
+        }
+
+        if (memberRepository.existsByEmail(userInfo.email())) {
+            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_LINK_REQUIRED);
+        }
+        throw new AuthException(AuthErrorCode.OAUTH_SIGNUP_REQUIRED);
     }
 
     // OAuth 요청 목적과 약관 정보를 JSON으로 변환해 state와 함께 Redis에 저장
@@ -206,6 +243,13 @@ public class GoogleOAuthService {
         } catch (JsonProcessingException exception) {
             throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
         }
+    }
+
+    // 회원 ID를 3분 동안 Redis에 저장하고 프론트에 전달할 일회용 티켓 생성
+    private String createLoginTicket(Member member) {
+        String ticket = UUID.randomUUID().toString();
+        redisTemplate.opsForValue().set(loginTicketKey(ticket), member.getId().toString(), LOGIN_TICKET_EXPIRATION);
+        return ticket;
     }
 
     // Redis의 state를 조회와 동시에 삭제하여 만료·위조·재사용 요청을 차단
@@ -248,5 +292,9 @@ public class GoogleOAuthService {
 
     private String stateKey(String state) {
         return OAUTH_STATE_KEY_PREFIX + state;
+    }
+
+    private String loginTicketKey(String ticket) {
+        return LOGIN_TICKET_KEY_PREFIX + ticket;
     }
 }

@@ -39,6 +39,9 @@ jwt:
   access-token-expiration: 1h
   refresh-token-expiration: 7d
 
+oauth:
+  frontend-redirect-uri: http://localhost:3000/oauth/callback
+
 cors:
   allowed-origins: http://localhost:3000
 

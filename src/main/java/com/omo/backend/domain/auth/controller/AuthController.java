@@ -14,6 +14,8 @@ import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -98,12 +102,23 @@ public class AuthController implements AuthControllerDocs {
     }
 
     @GetMapping("/oauth/google/callback")
-    public ApiResponse<AuthResponseDTO.LoginResultDTO> doGoogleCallback(
+    public ResponseEntity<Void> doGoogleCallback(
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String state,
             @RequestParam(required = false) String error
     ) {
-        AuthResponseDTO.LoginResultDTO result = googleOAuthService.handleCallback(code, state, error);
+        String frontendRedirectUrl = googleOAuthService.handleCallback(code, state, error);
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(frontendRedirectUrl))
+                .build();
+    }
+
+    @PostMapping("/oauth/google/exchange")
+    public ApiResponse<AuthResponseDTO.LoginResultDTO> exchangeGoogleLoginTicket(
+            @Valid @RequestBody OAuthRequestDTO.GoogleLoginExchangeDTO request
+    ) {
+        AuthResponseDTO.LoginResultDTO result = googleOAuthService.exchangeLoginTicket(request);
         return ApiResponse.onSuccess(result);
     }
 
