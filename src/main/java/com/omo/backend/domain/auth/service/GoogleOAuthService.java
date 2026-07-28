@@ -1,8 +1,12 @@
 package com.omo.backend.domain.auth.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omo.backend.domain.auth.converter.OAuthConverter;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
 import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
+import com.omo.backend.domain.auth.dto.OAuthStateDTO;
+import com.omo.backend.domain.auth.enums.OAuthPurpose;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.member.converter.MemberConverter;
@@ -29,12 +33,14 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class GoogleOAuthService {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String GOOGLE_AUTHORIZATION_URI = "https://accounts.google.com/o/oauth2/v2/auth";
     private static final String GOOGLE_TOKEN_URI = "https://oauth2.googleapis.com/token";
     private static final String GOOGLE_USER_INFO_URI = "https://openidconnect.googleapis.com/v1/userinfo";
@@ -60,7 +66,8 @@ public class GoogleOAuthService {
     // OAuth 요청 위조 방지를 위한 state를 Redis에 저장하고 Google 인증 URL을 생성
     public String createAuthorizationUrl() {
         String state = UUID.randomUUID().toString();
-        redisTemplate.opsForValue().set(stateKey(state), "login", OAUTH_STATE_EXPIRATION);
+        OAuthStateDTO.GoogleOAuthStateDTO oauthState = new OAuthStateDTO.GoogleOAuthStateDTO(OAuthPurpose.LOGIN, List.of());
+        saveOAuthState(state, oauthState);
 
         return UriComponentsBuilder.fromUriString(GOOGLE_AUTHORIZATION_URI)
                 .queryParam("client_id", clientId)
@@ -78,7 +85,10 @@ public class GoogleOAuthService {
     public AuthResponseDTO.LoginResultDTO login(String code, String state, String authorizationError) {
         // Google 인증 성공 여부와 요청 시 발급한 state를 검증
         validateAuthorizationResponse(code, state, authorizationError);
-        validateAndConsumeState(state);
+        OAuthStateDTO.GoogleOAuthStateDTO oauthState = consumeOAuthState(state);
+        if (oauthState.purpose() != OAuthPurpose.LOGIN) {
+            throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
+        }
 
         // 인가 코드를 Google 액세스 토큰으로 교환한 뒤 사용자 정보를 조회
         String googleAccessToken = requestGoogleAccessToken(code);
@@ -166,20 +176,35 @@ public class GoogleOAuthService {
         return member;
     }
 
+    // OAuth 요청 목적과 약관 정보를 JSON으로 변환해 state와 함께 Redis에 저장
+    private void saveOAuthState(String state, OAuthStateDTO.GoogleOAuthStateDTO oauthState) {
+        try {
+            redisTemplate.opsForValue().set(stateKey(state), OBJECT_MAPPER.writeValueAsString(oauthState), OAUTH_STATE_EXPIRATION);
+        } catch (JsonProcessingException exception) {
+            throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
+        }
+    }
+
+    // Redis의 state를 조회와 동시에 삭제하여 만료·위조·재사용 요청을 차단
+    private OAuthStateDTO.GoogleOAuthStateDTO consumeOAuthState(String state) {
+        String savedState = redisTemplate.opsForValue().getAndDelete(stateKey(state));
+        if (!StringUtils.hasText(savedState)) {
+            throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
+        }
+
+        try {
+            return OBJECT_MAPPER.readValue(savedState, OAuthStateDTO.GoogleOAuthStateDTO.class);
+        } catch (JsonProcessingException exception) {
+            throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
+        }
+    }
+
     // 사용자가 Google 인증을 취소했거나 필수 콜백 값이 없는지 확인
     private void validateAuthorizationResponse(String code, String state, String authorizationError) {
         if (StringUtils.hasText(authorizationError) || !StringUtils.hasText(code)) {
             throw new AuthException(AuthErrorCode.OAUTH_AUTHORIZATION_FAILED);
         }
         if (!StringUtils.hasText(state)) {
-            throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
-        }
-    }
-
-    // Redis의 state를 조회와 동시에 삭제하여 만료·위조·재사용 요청을 차단
-    private void validateAndConsumeState(String state) {
-        String savedState = redisTemplate.opsForValue().getAndDelete(stateKey(state));
-        if (!StringUtils.hasText(savedState)) {
             throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
         }
     }
