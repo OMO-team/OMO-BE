@@ -9,7 +9,6 @@ import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,16 +45,6 @@ public class RoadmapController implements RoadmapControllerDocs {
                 request
         );
         return ApiResponse.created(result);
-    }
-
-    @Override
-    @GetMapping
-    public ApiResponse<List<RoadmapResponseDTO.ListItemDTO>> getRoadmaps(
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) {
-        return ApiResponse.onSuccess(
-                roadmapQueryService.getRoadmaps(userDetails.getMemberId())
-        );
     }
 
     @Override
