@@ -70,6 +70,14 @@ public class MemberController implements MemberControllerDocs {
         return ApiResponse.onSuccess(result);
     }
 
+    @DeleteMapping("/me/social-accounts/google")
+    public ApiResponse<Void> unlinkGoogleAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        memberCommandService.unlinkGoogleAccount(userDetails.getMemberId());
+        return ApiResponse.onSuccess(null);
+    }
+
     @PatchMapping("/me/profile")
     public ApiResponse<MemberResponseDTO.UpdateProfileResultDTO> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,

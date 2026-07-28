@@ -1,16 +1,21 @@
 package com.omo.backend.domain.member.service;
 
+import com.omo.backend.domain.auth.exception.AuthErrorCode;
+import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.auth.service.EmailVerificationService;
 import com.omo.backend.domain.member.converter.MemberConverter;
 import com.omo.backend.domain.member.dto.MemberRequestDTO;
 import com.omo.backend.domain.member.dto.MemberResponseDTO;
 import com.omo.backend.domain.member.entity.Member;
 import com.omo.backend.domain.member.entity.MemberSettings;
+import com.omo.backend.domain.member.entity.SocialAccount;
+import com.omo.backend.domain.member.enums.MemberProvider;
 import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
 import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
 import com.omo.backend.domain.member.repository.MemberSettingsRepository;
+import com.omo.backend.domain.member.repository.SocialAccountRepository;
 import com.omo.backend.domain.terms.entity.Terms;
 import com.omo.backend.global.storage.FileValidationPolicy;
 import com.omo.backend.global.storage.S3Properties;
@@ -21,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -31,6 +37,7 @@ public class MemberCommandService {
 
     private final MemberRepository memberRepository;
     private final MemberSettingsRepository memberSettingsRepository;
+    private final SocialAccountRepository socialAccountRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationService emailVerificationService;
     private final TermsAgreementService termsAgreementService;
@@ -135,6 +142,22 @@ public class MemberCommandService {
         validatePasswordConfirm(request.newPassword(), request.newPasswordConfirm());
 
         member.changePassword(passwordEncoder.encode(request.newPassword()));
+    }
+
+    // 다른 로그인 수단이 남아 있는 경우에만 Google 계정 연결 해제
+    public void unlinkGoogleAccount(Long memberId) {
+        Member member = getActiveMember(memberId);
+        SocialAccount googleAccount = socialAccountRepository.findByMemberIdAndProvider(memberId, MemberProvider.GOOGLE)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.SOCIAL_ACCOUNT_NOT_LINKED));
+
+        boolean hasLocalLogin = StringUtils.hasText(member.getPassword());
+        boolean hasAnotherSocialLogin = socialAccountRepository.countByMemberId(memberId) > 1;
+
+        if (!hasLocalLogin && !hasAnotherSocialLogin) {
+            throw new AuthException(AuthErrorCode.LAST_LOGIN_METHOD_UNLINK_NOT_ALLOWED);
+        }
+
+        socialAccountRepository.delete(googleAccount);
     }
 
     private void validatePasswordConfirm(String password, String passwordConfirm) {

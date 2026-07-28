@@ -48,6 +48,12 @@ public interface MemberControllerDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails
     );
 
+    @Operation(summary = "Google 계정 연결 해제", description = "다른 로그인 수단이 남아 있는 경우 로그인한 회원의 Google 계정 연결을 해제합니다.")
+    ApiResponse<Void> unlinkGoogleAccount(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
     @Operation(summary = "프로필 수정", description = "로그인한 회원의 이름을 수정합니다.")
     ApiResponse<MemberResponseDTO.UpdateProfileResultDTO> updateProfile(
             @Parameter(hidden = true)
