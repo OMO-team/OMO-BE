@@ -51,6 +51,14 @@ public class MemberController implements MemberControllerDocs {
         return ApiResponse.onSuccess(result);
     }
 
+    @GetMapping("/me/social-accounts")
+    public ApiResponse<MemberResponseDTO.SocialAccountStatusDTO> getSocialAccountStatus(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        MemberResponseDTO.SocialAccountStatusDTO result = memberQueryService.getSocialAccountStatus(userDetails.getMemberId());
+        return ApiResponse.onSuccess(result);
+    }
+
     @PatchMapping("/me/profile")
     public ApiResponse<MemberResponseDTO.UpdateProfileResultDTO> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,

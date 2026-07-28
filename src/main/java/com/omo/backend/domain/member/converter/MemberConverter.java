@@ -48,6 +48,13 @@ public class MemberConverter {
                 .build();
     }
 
+    // 연결 여부 -> 소셜 계정 상태 조회 DTO
+    public static MemberResponseDTO.SocialAccountStatusDTO toSocialAccountStatusDTO(boolean googleLinked) {
+        return MemberResponseDTO.SocialAccountStatusDTO.builder()
+                .googleLinked(googleLinked)
+                .build();
+    }
+
     // entity -> 프로필 수정 DTO
     public static MemberResponseDTO.UpdateProfileResultDTO toUpdateProfileResultDTO(Member member) {
         return MemberResponseDTO.UpdateProfileResultDTO.builder()

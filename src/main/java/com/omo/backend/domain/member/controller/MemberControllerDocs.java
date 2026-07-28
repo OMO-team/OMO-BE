@@ -35,6 +35,12 @@ public interface MemberControllerDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails
     );
 
+    @Operation(summary = "소셜 계정 연결 여부 조회", description = "로그인한 회원의 Google 계정 연결 여부를 조회합니다.")
+    ApiResponse<MemberResponseDTO.SocialAccountStatusDTO> getSocialAccountStatus(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
     @Operation(summary = "프로필 수정", description = "로그인한 회원의 이름을 수정합니다.")
     ApiResponse<MemberResponseDTO.UpdateProfileResultDTO> updateProfile(
             @Parameter(hidden = true)
