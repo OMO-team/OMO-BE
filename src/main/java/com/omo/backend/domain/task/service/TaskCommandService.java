@@ -2,6 +2,8 @@ package com.omo.backend.domain.task.service;
 
 import com.omo.backend.domain.document.entity.TaskDocument;
 import com.omo.backend.domain.document.repository.TaskDocumentRepository;
+import com.omo.backend.domain.roadmap.entity.Roadmap;
+import com.omo.backend.domain.roadmap.repository.RoadmapRepository;
 import com.omo.backend.domain.roadmap.service.RoadmapScheduleCalculator;
 import com.omo.backend.domain.task.converter.TaskConverter;
 import com.omo.backend.domain.task.dto.TaskRequestDTO;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TaskCommandService {
 
+    private final RoadmapRepository roadmapRepository;
     private final TaskRepository taskRepository;
     private final TaskDependencyRepository taskDependencyRepository;
     private final TaskDocumentRepository taskDocumentRepository;
@@ -57,11 +60,16 @@ public class TaskCommandService {
             Long memberId,
             TaskRequestDTO.UpdateScheduleDTO request
     ) {
+        Roadmap roadmap = roadmapRepository.findOwnedByTaskIdForUpdate(taskId, memberId)
+                .orElseThrow(() -> new TaskException(TaskErrorCode.TASK_NOT_FOUND));
         Task task = taskRepository
                 .findWithRoadmapAndTaskTemplateByIdAndRoadmap_Member_Id(taskId, memberId)
                 .orElseThrow(() -> new TaskException(TaskErrorCode.TASK_NOT_FOUND));
-        if (task.getRoadmap().getDepartureDate() == null) {
+        if (roadmap.getDepartureDate() == null) {
             throw new TaskException(TaskErrorCode.TASK_SCHEDULE_NOT_AVAILABLE);
+        }
+        if (request.dueDate().isAfter(roadmap.getDepartureDate())) {
+            throw new TaskException(TaskErrorCode.TASK_DUE_DATE_AFTER_DEPARTURE);
         }
 
         task.updateDueDate(request.dueDate());

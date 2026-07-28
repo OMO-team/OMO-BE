@@ -100,7 +100,7 @@ public interface RoadmapControllerDocs {
 
     @Operation(
             summary = "로드맵 일정 설정 및 변경",
-            description = "출국일을 최초 설정하면 태스크 권장 완료일을 초기화합니다. 이후 출국일 변경은 태스크 일정에 영향을 주지 않습니다.",
+            description = "출국일을 설정하거나 변경하면 모든 태스크 권장 완료일을 새 출국일 기준으로 다시 계산합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(

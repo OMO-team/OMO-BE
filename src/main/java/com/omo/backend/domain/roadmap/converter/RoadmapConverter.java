@@ -1,5 +1,6 @@
 package com.omo.backend.domain.roadmap.converter;
 
+import com.omo.backend.domain.budget.entity.Budget;
 import com.omo.backend.domain.roadmap.dto.RoadmapResponseDTO;
 import com.omo.backend.domain.roadmap.entity.Roadmap;
 import com.omo.backend.domain.task.entity.Task;
@@ -106,7 +107,19 @@ public final class RoadmapConverter {
                 .nextScheduleDate(nextScheduleTask == null ? null : nextScheduleTask.getDueDate())
                 .nextScheduleDDay(nextScheduleDDay)
                 .isNextScheduleOverdue(isNextScheduleOverdue)
+                .budget(toBudgetDTO(roadmap.getBudget()))
                 .tasks(tasks)
+                .build();
+    }
+
+    private static RoadmapResponseDTO.BudgetDTO toBudgetDTO(Budget budget) {
+        if (budget == null) {
+            return null;
+        }
+        return RoadmapResponseDTO.BudgetDTO.builder()
+                .initialSettlementCost(budget.getInitialSettlementCost())
+                .monthlyCost(budget.getMonthlyCost())
+                .totalCost(budget.calculateTotalCost())
                 .build();
     }
 

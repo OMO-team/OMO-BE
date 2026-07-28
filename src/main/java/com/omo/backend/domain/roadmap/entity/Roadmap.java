@@ -75,4 +75,8 @@ public class Roadmap extends BaseEntity {
     public void updateDepartureDate(LocalDate departureDate) {
         this.departureDate = departureDate;
     }
+
+    public void updateStayMonths(Integer stayMonths) {
+        this.stayMonths = stayMonths;
+    }
 }
