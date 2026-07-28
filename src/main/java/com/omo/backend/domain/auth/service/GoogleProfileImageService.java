@@ -53,7 +53,7 @@ public class GoogleProfileImageService {
 
             s3FileService.upload(s3Properties.profileBucket(), objectKey, fileType.getContentType(), image);
             return objectKey;
-        } catch (RestClientException | StorageException exception) {
+        } catch (RestClientException | StorageException | IllegalArgumentException exception) {
             // 기본 프로필 이미지는 선택 정보이므로 실패해도 Google 회원가입은 계속 진행
             log.warn("Google 프로필 이미지 저장 실패: memberId={}", memberId, exception);
             return null;
