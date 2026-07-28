@@ -24,7 +24,9 @@ public class TermsAgreementService {
 
     // 전달받은 약관 ID가 모두 존재하고 필수 약관을 포함하는지 검증
     public List<Terms> validateAndGetAgreedTerms(List<Long> agreedTermsIds) {
-        List<Terms> agreedTerms = termsRepository.findAllById(agreedTermsIds);
+        validateDuplicateTermsIds(agreedTermsIds);
+
+        List<Terms> agreedTerms = termsRepository.findAllByIdInAndDeletedAtIsNull(agreedTermsIds);
         validateAgreedTerms(agreedTermsIds, agreedTerms);
         validateRequiredTermsAgreed(agreedTerms);
         return agreedTerms;
@@ -38,9 +40,14 @@ public class TermsAgreementService {
         memberTermsRepository.saveAll(memberTermsList);
     }
 
+    private void validateDuplicateTermsIds(List<Long> agreedTermsIds) {
+        if (new HashSet<>(agreedTermsIds).size() != agreedTermsIds.size()) {
+            throw new MemberException(MemberErrorCode.INVALID_AGREED_TERMS);
+        }
+    }
+
     private void validateAgreedTerms(List<Long> agreedTermsIds, List<Terms> agreedTerms) {
-        Set<Long> uniqueAgreedTermsIds = new HashSet<>(agreedTermsIds);
-        if (uniqueAgreedTermsIds.size() != agreedTerms.size()) {
+        if (agreedTermsIds.size() != agreedTerms.size()) {
             throw new MemberException(MemberErrorCode.INVALID_AGREED_TERMS);
         }
     }
