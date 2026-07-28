@@ -86,7 +86,7 @@ public class AiSearchService {
         // 이어묻기(isRefine = true)이고, sessionId가 제공된 경우 -> 기존 세션 조회
         if (Boolean.TRUE.equals(isRefine)) {
             return Optional.ofNullable(sessionId)
-                    .flatMap(aiSearchSessionRepository::findById)
+                    .flatMap(aiSearchSessionRepository::findByIdAndDeletedAtIsNull)
                     .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_SESSION_NOT_FOUND));
         }
 

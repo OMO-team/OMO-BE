@@ -1,6 +1,8 @@
 package com.omo.backend.domain.aisearch.repository;
 
 import com.omo.backend.domain.aisearch.entity.AiSearchSession;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -12,5 +14,4 @@ public interface AiSearchSessionRepository extends JpaRepository<AiSearchSession
     Optional<AiSearchSession> findByIdAndDeletedAtIsNull(Long id);
 
     // 지정 시간 이전 생성된 세션 조회 (스케줄러용)
-    List<AiSearchSession> findAllByCreatedAtBeforeAndDeletedAtIsNull(LocalDateTime threshold);
-}
+    Slice<AiSearchSession> findAllByCreatedAtBeforeAndDeletedAtIsNull(LocalDateTime threshold, Pageable pageable);}
