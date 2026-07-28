@@ -147,4 +147,16 @@ public class AiSearchService {
             throw new GeneralException(AiSearchErrorCode.AI_ANALYSIS_FAILED);
         }
     }
+
+    /**
+     * AI 검색 세션 단건 삭제 (Soft Delete)
+     */
+    @Transactional
+    public void deleteSession(Long sessionId) {
+        AiSearchSession session = aiSearchSessionRepository.findByIdAndDeletedAtIsNull(sessionId)
+                .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_SESSION_NOT_FOUND));
+
+        session.delete();
+    }
+
 }
