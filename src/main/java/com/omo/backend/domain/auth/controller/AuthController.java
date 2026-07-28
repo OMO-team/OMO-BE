@@ -2,6 +2,8 @@ package com.omo.backend.domain.auth.controller;
 
 import com.omo.backend.domain.auth.dto.AuthRequestDTO;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
+import com.omo.backend.domain.auth.dto.OAuthRequestDTO;
+import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.auth.service.AuthCommandService;
@@ -12,8 +14,6 @@ import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +23,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -85,22 +83,27 @@ public class AuthController implements AuthControllerDocs {
         return ApiResponse.onSuccess(result);
     }
 
+    @PostMapping("/oauth/google/signup")
+    public ApiResponse<OAuthResponseDTO.GoogleAuthorizationUrlDTO> doGoogleSignup(
+            @Valid @RequestBody OAuthRequestDTO.GoogleSignupStartDTO request
+    ) {
+        OAuthResponseDTO.GoogleAuthorizationUrlDTO result = googleOAuthService.createSignupAuthorizationUrl(request);
+        return ApiResponse.onSuccess(result);
+    }
+
     @GetMapping("/oauth/google/login")
-    public ResponseEntity<Void> doGoogleLogin() {
-        String authorizationUrl = googleOAuthService.createAuthorizationUrl();
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .location(URI.create(authorizationUrl))
-                .build();
+    public ApiResponse<OAuthResponseDTO.GoogleAuthorizationUrlDTO> doGoogleLogin() {
+        OAuthResponseDTO.GoogleAuthorizationUrlDTO result = googleOAuthService.createLoginAuthorizationUrl();
+        return ApiResponse.onSuccess(result);
     }
 
     @GetMapping("/oauth/google/callback")
-    public ApiResponse<AuthResponseDTO.LoginResultDTO> doGoogleLoginCallback(
+    public ApiResponse<AuthResponseDTO.LoginResultDTO> doGoogleCallback(
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String state,
             @RequestParam(required = false) String error
     ) {
-        AuthResponseDTO.LoginResultDTO result = googleOAuthService.login(code, state, error);
+        AuthResponseDTO.LoginResultDTO result = googleOAuthService.handleCallback(code, state, error);
         return ApiResponse.onSuccess(result);
     }
 

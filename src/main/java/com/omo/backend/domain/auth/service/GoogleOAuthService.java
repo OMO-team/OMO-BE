@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.omo.backend.domain.auth.converter.OAuthConverter;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
+import com.omo.backend.domain.auth.dto.OAuthRequestDTO;
 import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
 import com.omo.backend.domain.auth.dto.OAuthStateDTO;
 import com.omo.backend.domain.auth.enums.OAuthPurpose;
@@ -19,6 +20,8 @@ import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
 import com.omo.backend.domain.member.repository.MemberSettingsRepository;
 import com.omo.backend.domain.member.repository.SocialAccountRepository;
+import com.omo.backend.domain.member.service.TermsAgreementService;
+import com.omo.backend.domain.terms.entity.Terms;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -50,6 +53,7 @@ public class GoogleOAuthService {
     private final SocialAccountRepository socialAccountRepository;
     private final MemberRepository memberRepository;
     private final MemberSettingsRepository memberSettingsRepository;
+    private final TermsAgreementService termsAgreementService;
     private final GoogleProfileImageService googleProfileImageService;
     private final AuthCommandService authCommandService;
     private final StringRedisTemplate redisTemplate;
@@ -63,12 +67,28 @@ public class GoogleOAuthService {
     @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     private String redirectUri;
 
-    // OAuth 요청 위조 방지를 위한 state를 Redis에 저장하고 Google 인증 URL을 생성
-    public String createAuthorizationUrl() {
+    // 필수 약관을 검증하고 회원가입용 state를 Redis에 저장한 뒤 Google 인증 URL 생성
+    @Transactional(readOnly = true)
+    public OAuthResponseDTO.GoogleAuthorizationUrlDTO createSignupAuthorizationUrl(OAuthRequestDTO.GoogleSignupStartDTO request) {
+        termsAgreementService.validateAndGetAgreedTerms(request.agreedTermsIds());
+
+        String state = UUID.randomUUID().toString();
+        OAuthStateDTO.GoogleOAuthStateDTO oauthState = new OAuthStateDTO.GoogleOAuthStateDTO(OAuthPurpose.SIGNUP, List.copyOf(request.agreedTermsIds()));
+        saveOAuthState(state, oauthState);
+
+        return new OAuthResponseDTO.GoogleAuthorizationUrlDTO(createGoogleAuthorizationUrl(state));
+    }
+
+    // 로그인용 state를 Redis에 저장한 뒤 Google 인증 URL 생성
+    public OAuthResponseDTO.GoogleAuthorizationUrlDTO createLoginAuthorizationUrl() {
         String state = UUID.randomUUID().toString();
         OAuthStateDTO.GoogleOAuthStateDTO oauthState = new OAuthStateDTO.GoogleOAuthStateDTO(OAuthPurpose.LOGIN, List.of());
         saveOAuthState(state, oauthState);
 
+        return new OAuthResponseDTO.GoogleAuthorizationUrlDTO(createGoogleAuthorizationUrl(state));
+    }
+
+    private String createGoogleAuthorizationUrl(String state) {
         return UriComponentsBuilder.fromUriString(GOOGLE_AUTHORIZATION_URI)
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
@@ -80,23 +100,22 @@ public class GoogleOAuthService {
                 .toUriString();
     }
 
-    // Google 콜백을 검증하고 Google 사용자에 대응하는 OMO 로그인 토큰을 발급
+    // Google 콜백의 요청 목적에 따라 신규 회원가입 또는 기존 회원 로그인 처리
     @Transactional
-    public AuthResponseDTO.LoginResultDTO login(String code, String state, String authorizationError) {
+    public AuthResponseDTO.LoginResultDTO handleCallback(String code, String state, String authorizationError) {
         // Google 인증 성공 여부와 요청 시 발급한 state를 검증
         validateAuthorizationResponse(code, state, authorizationError);
         OAuthStateDTO.GoogleOAuthStateDTO oauthState = consumeOAuthState(state);
-        if (oauthState.purpose() != OAuthPurpose.LOGIN) {
-            throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
-        }
 
         // 인가 코드를 Google 액세스 토큰으로 교환한 뒤 사용자 정보를 조회
         String googleAccessToken = requestGoogleAccessToken(code);
         OAuthResponseDTO.GoogleUserInfoDTO userInfo = requestGoogleUserInfo(googleAccessToken);
         validateGoogleUserInfo(userInfo);
 
-        // 소셜 계정에 연결된 회원을 조회하거나 신규 Google 회원을 생성
-        Member member = findOrCreateMember(userInfo);
+        Member member = switch (oauthState.purpose()) {
+            case SIGNUP -> createGoogleMember(userInfo, oauthState.agreedTermsIds());
+            case LOGIN -> getGoogleMember(userInfo);
+        };
         validateActiveMember(member);
 
         // 기존 일반 로그인과 동일한 OMO 액세스 토큰 및 리프레시 토큰 발급
@@ -149,23 +168,21 @@ public class GoogleOAuthService {
         }
     }
 
-    // Google의 고유 사용자 ID(sub)로 연결된 소셜 계정을 조회
-    private Member findOrCreateMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo) {
-        return socialAccountRepository
-                .findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub())
-                .map(SocialAccount::getMember)
-                .orElseGet(() -> createGoogleMember(userInfo));
-    }
-
-    // 동일 이메일의 기존 회원은 자동 연동하지 않고 신규 Google 회원만 생성
-    private Member createGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo) {
+    // 약관을 재검증하고 신규 Google 회원과 가입 관련 데이터 생성
+    private Member createGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo, List<Long> agreedTermsIds) {
+        if (socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).isPresent()) {
+            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_ALREADY_EXISTS);
+        }
         if (memberRepository.existsByEmail(userInfo.email())) {
             throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_LINK_REQUIRED);
         }
 
-        // 회원, 기본 회원 설정, 소셜 계정 연동 정보를 하나의 트랜잭션으로 저장
+        List<Terms> agreedTerms = termsAgreementService.validateAndGetAgreedTerms(agreedTermsIds);
+
+        // 회원, 기본 설정, 약관 동의, 소셜 계정 연동 정보를 하나의 트랜잭션으로 저장
         Member member = memberRepository.save(OAuthConverter.toGoogleMember(userInfo));
         memberSettingsRepository.save(MemberConverter.toDefaultMemberSettings(member));
+        termsAgreementService.saveMemberTerms(member, agreedTerms);
         socialAccountRepository.save(OAuthConverter.toGoogleSocialAccount(member, userInfo));
 
         String profileImageKey = googleProfileImageService.upload(member.getId(), userInfo.picture());
@@ -174,6 +191,12 @@ public class GoogleOAuthService {
         }
 
         return member;
+    }
+
+    // Google sub과 연결된 기존 OMO 회원을 조회하고, 없으면 회원가입 필요 예외 발생
+    private Member getGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo) {
+        return socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).map(SocialAccount::getMember)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.OAUTH_SIGNUP_REQUIRED));
     }
 
     // OAuth 요청 목적과 약관 정보를 JSON으로 변환해 state와 함께 Redis에 저장
