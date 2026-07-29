@@ -36,6 +36,7 @@ public class ReportQueryService {
     private final CityReviewRepository cityReviewRepository;
     private final CityRepository cityRepository;
     private final MemberCompareItemRepository memberCompareItemRepository;
+    private final ReportAiSummaryGenerator reportAiSummaryGenerator;
 
     public List<ReportResponseDTO.CoreSummaryDTO> getCoreSummaries(Long cityId) {
         validateCityExists(cityId);
@@ -89,19 +90,19 @@ public class ReportQueryService {
         if (question == null || question.isBlank()) {
             throw new ReportException(ReportErrorCode.AI_REPORT_QUERY_EMPTY);
         }
-        validateCityExists(cityId);
+        City city = cityRepository.findById(cityId)
+                .orElseThrow(() -> new ReportException(ReportErrorCode.CITY_NOT_FOUND));
 
-        String summary = generateAiSummary(cityId, question);
+        List<CityCoreSummary> coreSummaries = cityCoreSummaryRepository.findByCityIdAndDeletedAtIsNull(cityId);
+        List<CityProsCons> prosCons =
+                cityProsConsRepository.findByCityIdAndDeletedAtIsNullOrderByDisplayOrderAsc(cityId);
+
+        String summary = reportAiSummaryGenerator.generate(city, coreSummaries, prosCons, question);
 
         List<CityRelatedResource> resources =
                 cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
 
         return new ReportResponseDTO.AiReportDTO(summary, ReportConverter.toResourceDTOList(resources));
-    }
-
-    private String generateAiSummary(Long cityId, String question) {
-        // TODO: 팀원 LLM 연동 코드 참고해서 실제 구현 예정
-        return "AI 답변 준비 중입니다. (임시 응답)";
     }
 
     private void validateCityExists(Long cityId) {

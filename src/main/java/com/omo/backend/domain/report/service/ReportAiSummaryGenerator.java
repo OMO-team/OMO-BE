@@ -1,0 +1,86 @@
+package com.omo.backend.domain.report.service;
+
+import com.omo.backend.domain.aisearch.service.AiClient;
+import com.omo.backend.domain.city.entity.City;
+import com.omo.backend.domain.report.dto.ReportResponseDTO;
+import com.omo.backend.domain.report.entity.CityCoreSummary;
+import com.omo.backend.domain.report.entity.CityProsCons;
+import com.omo.backend.domain.report.enums.ProsConsType;
+import com.omo.backend.domain.report.exception.ReportErrorCode;
+import com.omo.backend.domain.report.exception.ReportException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class ReportAiSummaryGenerator {
+
+    private final AiClient aiClient;
+
+    private static final Map<String, Object> AI_SUMMARY_SCHEMA = Map.of(
+            "type", "object",
+            "properties", Map.of(
+                    "summary", Map.of("type", "string")
+            ),
+            "required", List.of("summary")
+    );
+
+    public String generate(
+            City city,
+            List<CityCoreSummary> coreSummaries,
+            List<CityProsCons> prosCons,
+            String question
+    ) {
+        String prompt = buildPrompt(city, coreSummaries, prosCons, question);
+        try {
+            ReportResponseDTO.AiSummaryResult result = aiClient.callWithSchema(
+                    prompt, AI_SUMMARY_SCHEMA, ReportResponseDTO.AiSummaryResult.class
+            );
+            return result.summary();
+        } catch (Exception e) {
+            log.error("[AI 리포트 생성 오류] cityId: {}", city.getCityId(), e);
+            throw new ReportException(ReportErrorCode.AI_REPORT_GENERATION_FAILED);
+        }
+    }
+
+    private String buildPrompt(
+            City city,
+            List<CityCoreSummary> coreSummaries,
+            List<CityProsCons> prosCons,
+            String question
+    ) {
+        String coreSummaryText = coreSummaries.stream()
+                .map(s -> "[%s] %s: %s".formatted(s.getCategory(), s.getTitle(), s.getContent()))
+                .collect(Collectors.joining("\n"));
+
+        String prosConsText = prosCons.stream()
+                .map(p -> (p.getType() == ProsConsType.PROS ? "장점: " : "단점: ") + p.getContent())
+                .collect(Collectors.joining("\n"));
+
+        return """
+        너는 해외 이주/어학연수 정보 서비스의 도시별 Q&A 답변자다.
+        아래는 "%s" 도시에 대해 서비스가 직접 조사한 실제 데이터다.
+
+        절대 규칙:
+        - 반드시 아래 제공된 데이터에 근거해서만 답변하라.
+        - 제공된 데이터에 없는 내용(기후, 문화, 치안 수준 등)을 추측하거나 지어내지 마라.
+        - 질문에 대한 답을 데이터에서 찾을 수 없으면, 모른다고 솔직히 답하라.
+        - 자연스러운 한국어 문장으로 답하라.
+        - 반드시 summary 필드만 있는 JSON으로 출력한다. 설명, 코드블록, 마크다운 금지.
+
+        [핵심 정보]
+        %s
+
+        [장단점]
+        %s
+
+        사용자 질문: "%s"
+        """.formatted(city.getName(), coreSummaryText, prosConsText, question);
+    }
+}
