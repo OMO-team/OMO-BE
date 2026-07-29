@@ -17,7 +17,8 @@ public enum ReportErrorCode implements BaseErrorCode {
     COMPARE_CITY_IDS_INVALID(HttpStatus.BAD_REQUEST, "COMPARE400_2", "비교할 도시는 2개 이상 3개 이하여야 합니다."),
     COMPARE_CITY_IDS_DUPLICATED(HttpStatus.BAD_REQUEST, "COMPARE400_3", "중복된 도시가 있습니다."),
     COMPARE_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "COMPARE404_1", "비교함에서 해당 도시를 찾을 수 없습니다."),
-    COMPARE_ITEM_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMPARE409_1", "이미 비교함에 담긴 도시입니다.")
+    COMPARE_ITEM_ALREADY_EXISTS(HttpStatus.CONFLICT, "COMPARE409_1", "이미 비교함에 담긴 도시입니다."),
+    AI_REPORT_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AIREPORT500_1", "AI 답변 생성에 실패했습니다. 다시 시도해 주세요.")
     ;
 
     private final HttpStatus status;
