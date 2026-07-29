@@ -86,7 +86,7 @@ public class AiSearchService {
         // 이어묻기(isRefine = true)이고, sessionId가 제공된 경우 -> 기존 세션 조회
         if (Boolean.TRUE.equals(isRefine)) {
             return Optional.ofNullable(sessionId)
-                    .flatMap(aiSearchSessionRepository::findById)
+                    .flatMap(aiSearchSessionRepository::findByIdAndDeletedAtIsNull)
                     .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_SESSION_NOT_FOUND));
         }
 
@@ -147,4 +147,16 @@ public class AiSearchService {
             throw new GeneralException(AiSearchErrorCode.AI_ANALYSIS_FAILED);
         }
     }
+
+    /**
+     * AI 검색 세션 단건 삭제 (Soft Delete)
+     */
+    @Transactional
+    public void deleteSession(Long sessionId) {
+        AiSearchSession session = aiSearchSessionRepository.findByIdAndDeletedAtIsNull(sessionId)
+                .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_SESSION_NOT_FOUND));
+
+        session.delete();
+    }
+
 }

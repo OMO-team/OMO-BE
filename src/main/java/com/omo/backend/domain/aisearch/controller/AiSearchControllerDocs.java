@@ -25,5 +25,6 @@ public interface AiSearchControllerDocs {
     ApiResponse<AiSearchResponseDTO.BriefingStatusResult> getSmartBriefingStatus(
             @PathVariable("taskId") String taskId);
 
-
+    @Operation(summary = "AI 검색 세션 삭제 API", description = "특정 AI 검색 세션을 삭제(Soft Delete)합니다.")
+    ApiResponse<String> deleteSession(@PathVariable Long sessionId);
 }
