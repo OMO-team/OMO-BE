@@ -90,7 +90,7 @@ public class ReportQueryService {
         if (question == null || question.isBlank()) {
             throw new ReportException(ReportErrorCode.AI_REPORT_QUERY_EMPTY);
         }
-        City city = cityRepository.findById(cityId)
+        City city = cityRepository.findByCityIdAndDeletedAtIsNull(cityId)
                 .orElseThrow(() -> new ReportException(ReportErrorCode.CITY_NOT_FOUND));
 
         List<CityCoreSummary> coreSummaries = cityCoreSummaryRepository.findByCityIdAndDeletedAtIsNull(cityId);
@@ -113,7 +113,7 @@ public class ReportQueryService {
             return null;
         }
         try {
-            return ResourceTopic.valueOf(topic);
+            return ResourceTopic.valueOf(topic.trim().toUpperCase(java.util.Locale.ROOT));
         } catch (IllegalArgumentException e) {
             return null;
         }
