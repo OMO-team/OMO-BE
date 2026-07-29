@@ -97,12 +97,26 @@ public class ReportQueryService {
         List<CityProsCons> prosCons =
                 cityProsConsRepository.findByCityIdAndDeletedAtIsNullOrderByDisplayOrderAsc(cityId);
 
-        String summary = reportAiSummaryGenerator.generate(city, coreSummaries, prosCons, question);
+        ReportResponseDTO.AiSummaryResult aiResult =
+                reportAiSummaryGenerator.generate(city, coreSummaries, prosCons, question);
 
-        List<CityRelatedResource> resources =
-                cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
+        ResourceTopic matchedTopic = parseResourceTopic(aiResult.topic());
+        List<CityRelatedResource> resources = matchedTopic != null
+                ? cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, matchedTopic)
+                : cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
 
-        return new ReportResponseDTO.AiReportDTO(summary, ReportConverter.toResourceDTOList(resources));
+        return new ReportResponseDTO.AiReportDTO(aiResult.summary(), ReportConverter.toResourceDTOList(resources));
+    }
+
+    private ResourceTopic parseResourceTopic(String topic) {
+        if (topic == null || topic.isBlank()) {
+            return null;
+        }
+        try {
+            return ResourceTopic.valueOf(topic);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private void validateCityExists(Long cityId) {

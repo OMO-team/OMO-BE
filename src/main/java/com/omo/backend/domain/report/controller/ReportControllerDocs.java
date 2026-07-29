@@ -23,7 +23,7 @@ public interface ReportControllerDocs {
     );
 
     @Operation(summary = "도시별 AI 질문 답변",
-            description = "질문에 대한 AI 답변과 관련자료를 조회합니다. (LLM 연동 전 임시 응답)")
+            description = "도시에 대한 질문을 Gemini로 분석해 AI 답변과 관련자료를 조회합니다. 도시 데이터에 없는 내용은 답변하지 않습니다.")
     ApiResponse<ReportResponseDTO.AiReportDTO> getAiReport(
             @Parameter(description = "도시 ID") Long cityId,
             @RequestBody(description = "질문 내용") ReportRequestDTO.AiReportRequestDTO request

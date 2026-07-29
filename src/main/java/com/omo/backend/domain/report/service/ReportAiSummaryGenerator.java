@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,12 +27,16 @@ public class ReportAiSummaryGenerator {
     private static final Map<String, Object> AI_SUMMARY_SCHEMA = Map.of(
             "type", "object",
             "properties", Map.of(
-                    "summary", Map.of("type", "string")
+                    "summary", Map.of("type", "string"),
+                    "topic", Map.of(
+                            "type", List.of("string", "null"),
+                            "enum", Arrays.asList("VISA", "COST", "HOUSING", "SAFETY", null)
+                    )
             ),
             "required", List.of("summary")
     );
 
-    public String generate(
+    public ReportResponseDTO.AiSummaryResult generate(
             City city,
             List<CityCoreSummary> coreSummaries,
             List<CityProsCons> prosCons,
@@ -39,10 +44,9 @@ public class ReportAiSummaryGenerator {
     ) {
         String prompt = buildPrompt(city, coreSummaries, prosCons, question);
         try {
-            ReportResponseDTO.AiSummaryResult result = aiClient.callWithSchema(
+            return aiClient.callWithSchema(
                     prompt, AI_SUMMARY_SCHEMA, ReportResponseDTO.AiSummaryResult.class
             );
-            return result.summary();
         } catch (Exception e) {
             log.error("[AI 리포트 생성 오류] cityId: {}", city.getCityId(), e);
             throw new ReportException(ReportErrorCode.AI_REPORT_GENERATION_FAILED);
@@ -72,7 +76,9 @@ public class ReportAiSummaryGenerator {
         - 제공된 데이터에 없는 내용(기후, 문화, 치안 수준 등)을 추측하거나 지어내지 마라.
         - 질문에 대한 답을 데이터에서 찾을 수 없으면, 모른다고 솔직히 답하라.
         - 자연스러운 한국어 문장으로 답하라.
-        - 반드시 summary 필드만 있는 JSON으로 출력한다. 설명, 코드블록, 마크다운 금지.
+        - topic 필드에는 질문과 가장 관련 있는 주제 하나를 VISA/COST/HOUSING/SAFETY 중에서 골라라.
+          질문이 이 네 가지 중 어디에도 명확히 해당하지 않으면 topic은 null로 남겨라.
+        - 반드시 summary와 topic 필드만 있는 JSON으로 출력한다. 설명, 코드블록, 마크다운 금지.
 
         [핵심 정보]
         %s
