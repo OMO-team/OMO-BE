@@ -14,6 +14,7 @@ public class TaskResponseDTO {
     private TaskResponseDTO() {
     }
 
+    @Schema(name = "TaskCompleteResult")
     @Builder
     public record CompleteResultDTO(
             @Schema(description = "완료된 태스크 ID", example = "10")
@@ -30,6 +31,7 @@ public class TaskResponseDTO {
     ) {
     }
 
+    @Schema(name = "TaskDetailResult")
     @Builder
     public record DetailResultDTO(
             Long taskId,
@@ -50,6 +52,7 @@ public class TaskResponseDTO {
     ) {
     }
 
+    @Schema(name = "TaskUpdateScheduleResult")
     @Builder
     public record UpdateScheduleResultDTO(
             @Schema(description = "태스크 ID", example = "10")

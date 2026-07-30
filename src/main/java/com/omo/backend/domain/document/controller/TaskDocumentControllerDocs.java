@@ -6,8 +6,6 @@ import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -26,10 +24,7 @@ public interface TaskDocumentControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
-            description = "작업 서류 완료 체크 상태 변경 성공",
-            content = @Content(schema = @Schema(
-                    implementation = TaskDocumentResponseDTO.UpdateCheckResultDTO.class
-            ))
+            description = "작업 서류 완료 체크 상태 변경 성공"
     )
     ApiResponse<TaskDocumentResponseDTO.UpdateCheckResultDTO> updateCheckStatus(
             @Parameter(description = "작업 서류 ID", example = "1", required = true)

@@ -26,26 +26,38 @@ public interface BudgetControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
-            description = "로드맵 예산 설정 성공",
-            content = @Content(schema = @Schema(
-                    implementation = BudgetResponseDTO.UpsertResultDTO.class
-            ))
+            description = "로드맵 예산 설정 성공"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "로드맵 ID 또는 체류 기간이 유효하지 않음"
+            description = "로드맵 ID 또는 체류 기간이 유효하지 않음",
+            content = @Content(schema = @Schema(
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "401",
-            description = "인증 필요"
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵"
+            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "409",
-            description = "도시의 예산 정보가 설정되지 않음"
+            description = "도시의 예산 정보가 설정되지 않음",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<BudgetResponseDTO.UpsertResultDTO> upsertBudget(
             @Parameter(description = "로드맵 ID", example = "12", required = true)
