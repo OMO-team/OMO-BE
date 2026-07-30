@@ -28,7 +28,10 @@ public interface WishlistControllerDocs {
             responseCode = "400",
             description = "도시 ID 검증 실패 또는 타입 오류",
             content = @Content(schema = @Schema(
-                    implementation = ApiResponse.ErrorResponse.class
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
             ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -67,7 +70,10 @@ public interface WishlistControllerDocs {
             responseCode = "400",
             description = "도시 ID 검증 실패 또는 타입 오류",
             content = @Content(schema = @Schema(
-                    implementation = ApiResponse.ErrorResponse.class
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
             ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(

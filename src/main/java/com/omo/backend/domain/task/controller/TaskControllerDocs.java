@@ -57,7 +57,10 @@ public interface TaskControllerDocs {
             responseCode = "400",
             description = "태스크 권장 완료일이 출국일 이후임",
             content = @Content(schema = @Schema(
-                    implementation = ApiResponse.ErrorResponse.class
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
             ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(

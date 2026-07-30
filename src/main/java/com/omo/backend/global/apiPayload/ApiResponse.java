@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Getter
 @AllArgsConstructor
@@ -64,6 +65,25 @@ public class ApiResponse<T> {
 
             @Schema(description = "에러 메시지")
             String message,
+
+            @Schema(description = "응답 시각", example = "2026-07-30T23:00:00")
+            LocalDateTime timestamp
+    ) {
+    }
+
+    @Schema(name = "ApiValidationErrorResponse", description = "공통 API 검증 오류 응답")
+    public record ValidationErrorResponse(
+            @Schema(description = "요청 성공 여부", example = "false")
+            Boolean isSuccess,
+
+            @Schema(description = "검증 에러 코드", example = "VALID400_1")
+            String code,
+
+            @Schema(description = "에러 메시지", example = "검증에 실패했습니다.")
+            String message,
+
+            @Schema(description = "필드별 검증 오류")
+            Map<String, String> result,
 
             @Schema(description = "응답 시각", example = "2026-07-30T23:00:00")
             LocalDateTime timestamp

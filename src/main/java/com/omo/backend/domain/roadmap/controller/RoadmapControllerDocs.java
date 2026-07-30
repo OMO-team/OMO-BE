@@ -32,7 +32,10 @@ public interface RoadmapControllerDocs {
             responseCode = "400",
             description = "요청값 또는 도시와 목적 조합이 유효하지 않음",
             content = @Content(schema = @Schema(
-                    implementation = ApiResponse.ErrorResponse.class
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
             ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -105,7 +108,10 @@ public interface RoadmapControllerDocs {
             responseCode = "400",
             description = "출국일이 유효하지 않음",
             content = @Content(schema = @Schema(
-                    implementation = ApiResponse.ErrorResponse.class
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
             ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
