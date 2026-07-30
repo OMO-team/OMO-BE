@@ -68,7 +68,7 @@ public class SecurityConfig {
             "/api/v1/cities/{cityId}/resources",
             "/api/v1/cities/{cityId}/reviews",
             "/api/v1/ai-search/recommend-chips",
-            "/api/v1/ai-search/briefing/status/**"
+            "/api/v1/ai-search/briefing/status/{taskId}"
     };
 
     // 인증 없이 POST 요청을 허용하는 공개 API URL 배열
