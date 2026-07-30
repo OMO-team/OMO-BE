@@ -9,6 +9,8 @@ import java.util.List;
 @Repository
 public interface TermsRepository extends JpaRepository<Terms, Long> {
 
+    List<Terms> findAllByIdInAndDeletedAtIsNull(List<Long> ids);
+
     List<Terms> findAllByRequiredTrueAndDeletedAtIsNull();
 
     List<Terms> findAllByDeletedAtIsNullOrderByIdAsc();

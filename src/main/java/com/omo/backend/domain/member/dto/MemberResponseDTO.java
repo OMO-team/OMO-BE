@@ -27,6 +27,12 @@ public class MemberResponseDTO {
             MemberProvider provider
     ) {}
 
+    // 소셜 계정 연결 상태 조회 결과
+    @Builder
+    public record SocialAccountStatusDTO(
+            Boolean googleLinked
+    ) {}
+
     // 프로필 수정 결과
     @Builder
     public record UpdateProfileResultDTO(

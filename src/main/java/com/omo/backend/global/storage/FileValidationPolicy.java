@@ -20,6 +20,11 @@ public class FileValidationPolicy {
         FileType.from(objectKey, contentType);
     }
 
+    public FileType validateExternalImage(String contentType, long fileSize) {
+        validateFileSize(fileSize);
+        return FileType.fromContentType(contentType);
+    }
+
     private void validateFileSize(long fileSize) {
         if (fileSize <= 0 || fileSize > MAX_FILE_SIZE_BYTES) {
             throw new StorageException(StorageErrorCode.INVALID_FILE_SIZE);

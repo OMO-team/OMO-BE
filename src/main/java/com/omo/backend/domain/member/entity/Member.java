@@ -59,12 +59,27 @@ public class Member extends BaseEntity {
     @Builder.Default
     private List<MemberTerms> memberTermsList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<SocialAccount> socialAccountList = new ArrayList<>();
+
     public static Member createLocalMember(String email, String password, String name) {
         return Member.builder()
                 .email(email)
                 .password(password)
                 .name(name)
                 .provider(MemberProvider.LOCAL)
+                .emailVerified(true)
+                .status(MemberStatus.ACTIVE)
+                .build();
+    }
+
+    public static Member createGoogleMember(String email, String name, String profileImageKey) {
+        return Member.builder()
+                .email(email)
+                .name(name)
+                .profileImageKey(profileImageKey)
+                .provider(MemberProvider.GOOGLE)
                 .emailVerified(true)
                 .status(MemberStatus.ACTIVE)
                 .build();

@@ -2,6 +2,7 @@ package com.omo.backend.domain.member.controller;
 
 import com.omo.backend.domain.member.dto.MemberRequestDTO;
 import com.omo.backend.domain.member.dto.MemberResponseDTO;
+import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +32,24 @@ public interface MemberControllerDocs {
                     """
     )
     ApiResponse<MemberResponseDTO.MyInfoResultDTO> getMyInfo(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
+    @Operation(summary = "소셜 계정 연결 여부 조회", description = "로그인한 회원의 Google 계정 연결 여부를 조회합니다.")
+    ApiResponse<MemberResponseDTO.SocialAccountStatusDTO> getSocialAccountStatus(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
+    @Operation(summary = "Google 계정 연결 인증 URL 발급", description = "로그인한 회원의 Google 계정 연결을 위한 OAuth 인증 URL을 발급합니다.")
+    ApiResponse<OAuthResponseDTO.GoogleAuthorizationUrlDTO> createGoogleLinkAuthorizationUrl(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    );
+
+    @Operation(summary = "Google 계정 연결 해제", description = "다른 로그인 수단이 남아 있는 경우 로그인한 회원의 Google 계정 연결을 해제합니다.")
+    ApiResponse<Void> unlinkGoogleAccount(
             @Parameter(hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails
     );

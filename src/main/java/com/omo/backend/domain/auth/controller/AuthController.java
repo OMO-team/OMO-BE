@@ -2,22 +2,31 @@ package com.omo.backend.domain.auth.controller;
 
 import com.omo.backend.domain.auth.dto.AuthRequestDTO;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
+import com.omo.backend.domain.auth.dto.OAuthRequestDTO;
+import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.auth.service.AuthCommandService;
 import com.omo.backend.domain.auth.service.EmailVerificationService;
+import com.omo.backend.domain.auth.service.GoogleOAuthService;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,6 +37,7 @@ public class AuthController implements AuthControllerDocs {
 
     private final EmailVerificationService emailVerificationService;
     private final AuthCommandService authCommandService;
+    private final GoogleOAuthService googleOAuthService;
 
     @PostMapping("/email/send")
     public ApiResponse<AuthResponseDTO.EmailSendResultDTO> sendEmailVerificationCode(
@@ -74,6 +84,55 @@ public class AuthController implements AuthControllerDocs {
             @RequestBody @Valid AuthRequestDTO.LoginDTO request
     ) {
         AuthResponseDTO.LoginResultDTO result = authCommandService.login(request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @PostMapping("/oauth/google/signup")
+    public ApiResponse<OAuthResponseDTO.GoogleAuthorizationUrlDTO> doGoogleSignup(
+            @Valid @RequestBody OAuthRequestDTO.GoogleSignupStartDTO request
+    ) {
+        OAuthResponseDTO.GoogleAuthorizationUrlDTO result = googleOAuthService.createSignupAuthorizationUrl(request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @GetMapping("/oauth/google/login")
+    public ApiResponse<OAuthResponseDTO.GoogleAuthorizationUrlDTO> doGoogleLogin() {
+        OAuthResponseDTO.GoogleAuthorizationUrlDTO result = googleOAuthService.createLoginAuthorizationUrl();
+        return ApiResponse.onSuccess(result);
+    }
+
+    @GetMapping("/oauth/google/callback")
+    public ResponseEntity<Void> doGoogleCallback(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String error
+    ) {
+        String frontendRedirectUrl = googleOAuthService.handleCallback(code, state, error);
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(frontendRedirectUrl))
+                .build();
+    }
+
+    @GetMapping("/oauth/google/link/callback")
+    public ResponseEntity<Void> doGoogleLinkCallback(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String error
+    ) {
+        String frontendRedirectUrl =
+                googleOAuthService.handleLinkCallback(code, state, error);
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(frontendRedirectUrl))
+                .build();
+    }
+
+    @PostMapping("/oauth/google/exchange")
+    public ApiResponse<AuthResponseDTO.LoginResultDTO> exchangeGoogleLoginTicket(
+            @Valid @RequestBody OAuthRequestDTO.GoogleLoginExchangeDTO request
+    ) {
+        AuthResponseDTO.LoginResultDTO result = googleOAuthService.exchangeLoginTicket(request);
         return ApiResponse.onSuccess(result);
     }
 

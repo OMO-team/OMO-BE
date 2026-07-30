@@ -40,6 +40,7 @@ dependencies {
 
 	// security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
 	// jwt
 	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
@@ -57,6 +58,7 @@ dependencies {
 
 	// json
 	implementation 'org.springframework.boot:spring-boot-starter-json'
+
 	// AWS SDK
 	implementation platform('software.amazon.awssdk:bom:2.47.3')
 	implementation 'software.amazon.awssdk:s3'

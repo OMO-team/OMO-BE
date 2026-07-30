@@ -4,11 +4,13 @@ import com.omo.backend.domain.member.converter.MemberConverter;
 import com.omo.backend.domain.member.dto.MemberResponseDTO;
 import com.omo.backend.domain.member.entity.Member;
 import com.omo.backend.domain.member.entity.MemberSettings;
+import com.omo.backend.domain.member.enums.MemberProvider;
 import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
 import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
 import com.omo.backend.domain.member.repository.MemberSettingsRepository;
+import com.omo.backend.domain.member.repository.SocialAccountRepository;
 import com.omo.backend.global.storage.S3Properties;
 import com.omo.backend.global.storage.service.S3PresignedUrlService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class MemberQueryService {
 
     private final MemberRepository memberRepository;
     private final MemberSettingsRepository memberSettingsRepository;
+    private final SocialAccountRepository socialAccountRepository;
     private final S3PresignedUrlService s3PresignedUrlService;
     private final S3Properties s3Properties;
 
@@ -43,6 +46,12 @@ public class MemberQueryService {
     public MemberResponseDTO.SettingsResultDTO getMySettings(Long memberId) {
         MemberSettings memberSettings = getMemberSettings(memberId);
         return MemberConverter.toSettingsResultDTO(memberSettings);
+    }
+
+    public MemberResponseDTO.SocialAccountStatusDTO getSocialAccountStatus(Long memberId) {
+        getActiveMember(memberId);
+        boolean googleLinked = socialAccountRepository.existsByMemberIdAndProvider(memberId, MemberProvider.GOOGLE);
+        return MemberConverter.toSocialAccountStatusDTO(googleLinked);
     }
 
     public void validateActiveMember(Long memberId) {

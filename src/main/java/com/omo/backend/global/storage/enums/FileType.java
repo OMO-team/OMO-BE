@@ -32,6 +32,15 @@ public enum FileType {
                 .orElseThrow(() -> new StorageException(StorageErrorCode.UNSUPPORTED_FILE_TYPE));
     }
 
+    public static FileType fromContentType(String contentType) {
+        String normalizedContentType = normalizeContentType(contentType);
+
+        return Arrays.stream(values())
+                .filter(fileType -> fileType.contentType.equals(normalizedContentType))
+                .findFirst()
+                .orElseThrow(() -> new StorageException(StorageErrorCode.UNSUPPORTED_FILE_TYPE));
+    }
+
     private static String extractExtension(String fileName) {
         if (fileName == null) {
             throw new StorageException(StorageErrorCode.UNSUPPORTED_FILE_TYPE);
