@@ -67,6 +67,13 @@ services:
       JWT_ACCESS_TOKEN_EXPIRATION: 1h
       JWT_REFRESH_TOKEN_EXPIRATION: 7d
 
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:http://localhost:8080/auth/v1/oauth/google/callback}
+      GOOGLE_LINK_REDIRECT_URI: ${GOOGLE_LINK_REDIRECT_URI:http://localhost:8080/auth/v1/oauth/google/link/callback}
+      OAUTH_FRONTEND_REDIRECT_URI: ${OAUTH_FRONTEND_REDIRECT_URI:http://localhost:5173/oauth/callback}
+      OAUTH_FRONTEND_LINK_REDIRECT_URI: ${OAUTH_FRONTEND_LINK_REDIRECT_URI:http://localhost:5173/settings/account}
+
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
 
       AWS_REGION: ${AWS_REGION:-ap-northeast-2}
