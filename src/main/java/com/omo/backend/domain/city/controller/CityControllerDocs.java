@@ -16,7 +16,7 @@ public interface CityControllerDocs {
             description = "키워드 검색 + 필터 조건(월 생활비, 점수, 난이도 등)을 적용하여 도시 목록을 조회합니다. 모든 쿼리 파라미터는 선택 사항 입니다."
     )
     @Parameters({
-            @Parameter(name = "keyword", description = "검색 키워드 (도시명, 국가명, 설명)", required = false, example = "베를린"),
+            @Parameter(name = "keyword", description = "검색 키워드 (도시명, 국가명, 설명, 최대 50자)", required = false, example = "베를린"),
             @Parameter(name = "purposeType", description = "목적 (WORKING_HOLIDAY / EXCHANGE_STUDENT / INTERNSHIP)"),
             @Parameter(name = "countryCode", description = "국가 코드 (예: AU, JP)"),
             @Parameter(name = "maxMonthlyCost", description = "최대 월 생활비 (만원 단위, 예: 200)"),
