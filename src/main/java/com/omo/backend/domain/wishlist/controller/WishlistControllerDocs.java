@@ -43,7 +43,7 @@ public interface WishlistControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "도시를 찾을 수 없거나 삭제된 도시",
+            description = "회원을 찾을 수 없거나 도시가 존재하지 않거나 삭제됨",
             content = @Content(schema = @Schema(
                     implementation = ApiResponse.ErrorResponse.class
             ))

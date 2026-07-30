@@ -6,6 +6,8 @@ import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,6 +27,30 @@ public interface TaskDocumentControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
             description = "작업 서류 완료 체크 상태 변경 성공"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "작업 서류 ID나 완료 여부 검증 실패 또는 타입 오류",
+            content = @Content(schema = @Schema(
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "작업 서류를 찾을 수 없거나 다른 회원의 작업 서류",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<TaskDocumentResponseDTO.UpdateCheckResultDTO> updateCheckStatus(
             @Parameter(description = "작업 서류 ID", example = "1", required = true)
