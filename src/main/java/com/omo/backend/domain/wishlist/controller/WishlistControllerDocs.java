@@ -4,6 +4,8 @@ import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
@@ -24,15 +26,24 @@ public interface WishlistControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "도시 ID 검증 실패 또는 타입 오류"
+            description = "도시 ID 검증 실패 또는 타입 오류",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "401",
-            description = "인증 필요"
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "도시를 찾을 수 없거나 삭제된 도시"
+            description = "도시를 찾을 수 없거나 삭제된 도시",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<Void> addWishlist(
             @Parameter(description = "추가할 도시 ID", example = "1", required = true)
@@ -54,11 +65,17 @@ public interface WishlistControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "도시 ID 검증 실패 또는 타입 오류"
+            description = "도시 ID 검증 실패 또는 타입 오류",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "401",
-            description = "인증 필요"
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<Void> removeWishlist(
             @Parameter(description = "삭제할 도시 ID", example = "1", required = true)

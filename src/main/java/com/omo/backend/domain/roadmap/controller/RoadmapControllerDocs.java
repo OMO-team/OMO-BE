@@ -26,26 +26,35 @@ public interface RoadmapControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "201",
-            description = "로드맵 생성 성공",
-            content = @Content(schema = @Schema(
-                    implementation = RoadmapResponseDTO.CreateResultDTO.class
-            ))
+            description = "로드맵 생성 성공"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "요청값 또는 도시와 목적 조합이 유효하지 않음"
+            description = "요청값 또는 도시와 목적 조합이 유효하지 않음",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "401",
-            description = "인증 필요"
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "회원, 도시, 목적 또는 로드맵 템플릿을 찾을 수 없음"
+            description = "회원, 도시, 목적 또는 로드맵 템플릿을 찾을 수 없음",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "409",
-            description = "도시와 목적에 대응하는 템플릿이 여러 개여서 하나로 결정할 수 없음"
+            description = "도시와 목적에 대응하는 템플릿이 여러 개여서 하나로 결정할 수 없음",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<RoadmapResponseDTO.CreateResultDTO> createRoadmap(
             @Parameter(hidden = true)
@@ -65,14 +74,14 @@ public interface RoadmapControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
-            description = "로드맵 상세 조회 성공",
-            content = @Content(schema = @Schema(
-                    implementation = RoadmapResponseDTO.DetailResultDTO.class
-            ))
+            description = "로드맵 상세 조회 성공"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵"
+            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<RoadmapResponseDTO.DetailResultDTO> getRoadmap(
             @Parameter(description = "로드맵 ID", example = "1", required = true)
@@ -90,18 +99,21 @@ public interface RoadmapControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
-            description = "로드맵 일정 변경 성공",
-            content = @Content(schema = @Schema(
-                    implementation = RoadmapResponseDTO.UpdateScheduleResultDTO.class
-            ))
+            description = "로드맵 일정 변경 성공"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "출국일이 유효하지 않음"
+            description = "출국일이 유효하지 않음",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵"
+            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<RoadmapResponseDTO.UpdateScheduleResultDTO> updateSchedule(
             @Parameter(description = "로드맵 ID", example = "1", required = true)
@@ -129,7 +141,10 @@ public interface RoadmapControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵"
+            description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<Void> deleteRoadmap(
             @Parameter(description = "로드맵 ID", example = "1", required = true)
