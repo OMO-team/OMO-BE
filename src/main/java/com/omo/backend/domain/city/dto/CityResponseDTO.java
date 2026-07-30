@@ -67,10 +67,10 @@ public class CityResponseDTO {
     public record CityInfo(
             Long cityId,
             String name,
-            Long countryId,
-            String countryName,
+            CountryDTO country,
             String imageUrl,
             BigDecimal rating,
+            // TODO : 즐겨찾기 저장 추가
             String description,
             Integer monthlyCost,
             BigDecimal safetyScore,
@@ -80,9 +80,17 @@ public class CityResponseDTO {
             BigDecimal infraScore
     ) {}
 
-    // 도시 목록 조회 결과
+    // 필터 목록 결과
+    @Builder
     public record CityListResult(
             int totalCount,
             List<CityInfo> cities
     ) {}
+
+    //국가 정보
+    @Builder
+    public record CountryDTO(
+            Long countryId,
+            String name
+    ){}
 }
