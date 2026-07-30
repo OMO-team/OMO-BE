@@ -1,6 +1,7 @@
 package com.omo.backend.domain.document.entity;
 
 import com.omo.backend.common.BaseEntity;
+import com.omo.backend.domain.task.entity.Task;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -35,9 +36,9 @@ public class TaskDocument extends BaseEntity {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    // TODO: Roadmap 도메인의 Task 엔티티 구현 후 @ManyToOne 연관관계로 변경
-    @Column(name = "task_id", nullable = false)
-    private Long taskId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id", nullable = false)
+    private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "document_template_id", nullable = false)
@@ -50,14 +51,18 @@ public class TaskDocument extends BaseEntity {
     private LocalDateTime checkedAt;
 
     public static TaskDocument createTaskDocument(
-            Long taskId,
+            Task task,
             DocumentTemplate documentTemplate
     ) {
         return TaskDocument.builder()
-                .taskId(taskId)
+                .task(task)
                 .documentTemplate(documentTemplate)
                 .checked(false)
                 .build();
+    }
+
+    public Long getTaskId() {
+        return task.getId();
     }
 
     public void updateChecked(Boolean checked) {

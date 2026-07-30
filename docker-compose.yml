@@ -68,7 +68,15 @@ services:
       JWT_REFRESH_TOKEN_EXPIRATION: 7d
 
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+
+      AWS_REGION: ${AWS_REGION:-ap-northeast-2}
+      PROFILE_BUCKET: ${PROFILE_BUCKET}
+      INQUIRY_BUCKET: ${INQUIRY_BUCKET}
+      S3_PRESIGNED_URL_EXPIRATION: ${S3_PRESIGNED_URL_EXPIRATION:-5m}
+
       TZ: Asia/Seoul
+
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
     depends_on:
       mysql:
         condition: service_healthy

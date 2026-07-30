@@ -31,4 +31,19 @@ public class AiSearchController implements AiSearchControllerDocs {
         AiSearchResponseDTO.BriefingInitResult result = aiSearchService.requestSmartBriefing(request);
         return ApiResponse.onSuccess(result);
     }
+
+    @Override
+    @GetMapping("/briefing/status/{taskId}")
+    public ApiResponse<AiSearchResponseDTO.BriefingStatusResult> getSmartBriefingStatus(
+            @PathVariable("taskId") String taskId
+    ) {
+        AiSearchResponseDTO.BriefingStatusResult result = aiSearchService.getSmartBriefingStatus(taskId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @DeleteMapping("/sessions/{sessionId}")
+    public ApiResponse<String> deleteSession(@PathVariable Long sessionId) {
+        aiSearchService.deleteSession(sessionId);
+        return ApiResponse.onSuccess("세션이 성공적으로 삭제되었습니다.");
+    }
 }

@@ -37,6 +37,8 @@ jobs:
         run: chmod +x gradlew
 
       - name: Test and build
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: ./gradlew clean test bootJar --no-daemon
 
       - name: Configure AWS credentials
@@ -64,16 +66,19 @@ jobs:
       - name: Deploy to EC2
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           PARAMETERS=$(jq -n \
             --arg image_tag "$IMAGE_TAG" \
             --arg region "$AWS_REGION" \
             --arg registry "$ECR_REGISTRY" \
+            --arg gemini_api_key "$GEMINI_API_KEY" \
             '{
               commands: [
                 "set -eu",
                 "cd /home/ssm-user/omo",
                 ("sed -i \"s/^IMAGE_TAG=.*/IMAGE_TAG=" + $image_tag + "/\" .env"),
+                ("grep -q \"^GEMINI_API_KEY=\" .env && sed -i \"s|^GEMINI_API_KEY=.*|GEMINI_API_KEY=" + $gemini_api_key + "|\" .env || echo \"GEMINI_API_KEY=" + $gemini_api_key + "\" >> .env"),
                 ("grep -q \"^IMAGE_TAG=" + $image_tag + "$\" .env"),
                 ("aws ecr get-login-password --region " + $region + " | docker login --username AWS --password-stdin " + $registry),
                 "docker compose pull backend",

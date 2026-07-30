@@ -73,6 +73,17 @@ public class ReportResponseDTO {
             List<ResourceDTO> resources
     ) {}
 
+    public record CityReviewDTO(
+            @Schema(description = "작성자 이름", example = "김민수")
+            String authorName,
+
+            @Schema(description = "평점", example = "5")
+            Integer rating,
+
+            @Schema(description = "후기 내용", example = "정말 좋았어요")
+            String content
+    ) {}
+
     public record CityHeaderDTO(
             @Schema(description = "도시 ID", example = "12")
             Long cityId,

@@ -15,6 +15,11 @@ import com.omo.backend.domain.member.repository.MemberSettingsRepository;
 import com.omo.backend.domain.terms.entity.Terms;
 import com.omo.backend.domain.member.repository.MemberTermsRepository;
 import com.omo.backend.domain.terms.repository.TermsRepository;
+import com.omo.backend.global.storage.FileValidationPolicy;
+import com.omo.backend.global.storage.S3Properties;
+import com.omo.backend.global.storage.exception.StorageErrorCode;
+import com.omo.backend.global.storage.exception.StorageException;
+import com.omo.backend.global.storage.service.S3FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +40,9 @@ public class MemberCommandService {
     private final TermsRepository termsRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerificationService emailVerificationService;
+    private final S3FileService s3FileService;
+    private final FileValidationPolicy fileValidationPolicy;
+    private final S3Properties s3Properties;
 
     public MemberResponseDTO.JoinResultDTO join(MemberRequestDTO.JoinDTO request) {
         // 이미 등록된 이메일인지 확인
@@ -70,9 +78,44 @@ public class MemberCommandService {
 
     public MemberResponseDTO.UpdateProfileResultDTO updateProfile(Long memberId, MemberRequestDTO.UpdateProfileDTO request) {
         Member member = getActiveMember(memberId);
-        member.updateProfile(request.name(), request.profileImageUrl());
+        member.updateProfile(request.name());
 
         return MemberConverter.toUpdateProfileResultDTO(member);
+    }
+
+    public MemberResponseDTO.ProfileImageUpdateResultDTO updateProfileImage(Long memberId, MemberRequestDTO.ProfileImageUpdateDTO request) {
+        // 활성 회원인지 확인하고, 다른 회원의 프로필 경로를 등록하지 못하도록 object key를 검증
+        Member member = getActiveMember(memberId);
+        validateProfileImageKey(memberId, request.objectKey());
+
+        // S3에 업로드된 객체의 실제 메타데이터를 조회해 크기와 MIME 타입을 다시 검증
+        S3FileService.ObjectMetadata metadata = s3FileService.getObjectMetadata(s3Properties.profileBucket(), request.objectKey());
+        fileValidationPolicy.validateStoredObject(request.objectKey(), metadata.contentType(), metadata.contentLength());
+
+        // DB에는 만료되는 Presigned URL이 아닌 영구 식별자인 object key를 저장
+        String previousObjectKey = member.getProfileImageKey();
+        member.updateProfileImage(request.objectKey());
+
+        // 이미지 교체인 경우 더 이상 참조하지 않는 기존 S3 객체를 삭제
+        if (previousObjectKey != null && !previousObjectKey.equals(request.objectKey())) {
+            s3FileService.delete(s3Properties.profileBucket(), previousObjectKey);
+        }
+
+        return MemberConverter.toProfileImageUpdateResultDTO(member);
+    }
+
+    public void deleteProfileImage(Long memberId) {
+        Member member = getActiveMember(memberId);
+        String objectKey = member.getProfileImageKey();
+
+        // 이미 프로필 이미지가 없는 경우에도 삭제 요청을 성공 처리
+        if (objectKey == null) {
+            return;
+        }
+
+        // DB에서 프로필 이미지 연결을 제거하고 기존 S3 객체를 삭제
+        member.deleteProfileImage();
+        s3FileService.delete(s3Properties.profileBucket(), objectKey);
     }
 
     public void withdrawMember(Long memberId) {
@@ -87,8 +130,7 @@ public class MemberCommandService {
         memberSettings.updateSettings(
                 request.pushNotification(),
                 request.emailNotification(),
-                request.autoSave(),
-                request.twoFactorEnabled()
+                request.autoSave()
         );
 
         return MemberConverter.toSettingsResultDTO(memberSettings);
@@ -152,6 +194,13 @@ public class MemberCommandService {
         }
 
         return member;
+    }
+
+    private void validateProfileImageKey(Long memberId, String objectKey) {
+        String memberProfilePrefix = "profiles/%d/".formatted(memberId);
+        if (!objectKey.startsWith(memberProfilePrefix)) {
+            throw new StorageException(StorageErrorCode.INVALID_OBJECT_KEY);
+        }
     }
 
     private MemberSettings getMemberSettings(Long memberId) {

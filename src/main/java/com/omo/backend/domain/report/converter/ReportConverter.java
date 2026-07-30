@@ -5,6 +5,7 @@ import com.omo.backend.domain.report.dto.ReportResponseDTO;
 import com.omo.backend.domain.report.entity.CityCoreSummary;
 import com.omo.backend.domain.report.entity.CityProsCons;
 import com.omo.backend.domain.report.entity.CityRelatedResource;
+import com.omo.backend.domain.report.entity.CityReview;
 import com.omo.backend.domain.report.entity.MemberCompareItem;
 import com.omo.backend.domain.report.enums.ProsConsType;
 import com.omo.backend.domain.report.enums.StatType;
@@ -57,13 +58,29 @@ public class ReportConverter {
                 .toList();
     }
 
+    public static ReportResponseDTO.CityReviewDTO toCityReviewDTO(CityReview review) {
+        return new ReportResponseDTO.CityReviewDTO(
+                review.getAuthorName(),
+                review.getRating(),
+                review.getContent()
+        );
+    }
+
+    public static List<ReportResponseDTO.CityReviewDTO> toCityReviewDTOList(List<CityReview> reviews) {
+        return reviews.stream()
+                .map(ReportConverter::toCityReviewDTO)
+                .toList();
+    }
+
     public static List<ReportResponseDTO.StatDTO> toStatDTOList(City city) {
         return List.of(
                 new ReportResponseDTO.StatDTO(StatType.SAFETY, toDouble(city.getSafetyScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.COST, toDouble(city.getMonthlyCost()), null, "원"),
+                new ReportResponseDTO.StatDTO(StatType.COST, toDouble(city.getMonthlyCost()), null, "만원"),
                 new ReportResponseDTO.StatDTO(StatType.HOUSING, toDouble(city.getHousingScore()), 5.0, "점"),
                 new ReportResponseDTO.StatDTO(StatType.VISA, toDouble(city.getVisaScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.INFRA, toDouble(city.getInfraScore()), 5.0, "점")
+                new ReportResponseDTO.StatDTO(StatType.INFRA, toDouble(city.getInfraScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.INTERNET, toDouble(city.getInternetScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.PREFERENCE, toDouble(city.getPreferenceScore()), 5.0, "점")
         );
     }
 
@@ -88,10 +105,13 @@ public class ReportConverter {
 
         List<ReportResponseDTO.StatGroupDTO> statGroups = List.of(
                 toStatGroupDTO(StatType.SAFETY, 5.0, "점", cities, City::getSafetyScore),
-                toStatGroupDTO(StatType.COST, null, "원", cities, City::getMonthlyCost),
+                toStatGroupDTO(StatType.COST, null, "만원", cities, City::getMonthlyCost),
                 toStatGroupDTO(StatType.HOUSING, 5.0, "점", cities, City::getHousingScore),
                 toStatGroupDTO(StatType.VISA, 5.0, "점", cities, City::getVisaScore),
-                toStatGroupDTO(StatType.INFRA, 5.0, "점", cities, City::getInfraScore)
+                toStatGroupDTO(StatType.INFRA, 5.0, "점", cities, City::getInfraScore),
+                toStatGroupDTO(StatType.INTERNET, 5.0, "점", cities, City::getInternetScore),
+                toStatGroupDTO(StatType.PREFERENCE, 5.0, "점", cities, City::getPreferenceScore)
+
         );
 
         return new ReportResponseDTO.CompareResultDTO(cityHeaders, statGroups);

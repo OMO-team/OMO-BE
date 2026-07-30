@@ -30,20 +30,28 @@ public class ReportController implements ReportControllerDocs {
         return ApiResponse.onSuccess(reportQueryService.getProsCons(cityId));
     }
 
-    @GetMapping("/{cityId}/resources")
-    public ApiResponse<List<ReportResponseDTO.ResourceDTO>> getResources(
-            @PathVariable Long cityId,
-            @RequestParam(required = false) String topic
-    ) {
-        return ApiResponse.onSuccess(reportQueryService.getResources(cityId, topic));
-    }
-
     @PostMapping("/{cityId}/ai-report")
     public ApiResponse<ReportResponseDTO.AiReportDTO> getAiReport(
             @PathVariable Long cityId,
             @RequestBody ReportRequestDTO.AiReportRequestDTO request
     ) {
         return ApiResponse.onSuccess(reportQueryService.getAiReport(cityId, request.question()));
+    }
+
+    @GetMapping("/{cityId}/resources")
+    public ApiResponse<List<ReportResponseDTO.ResourceDTO>> getResources(
+            @PathVariable Long cityId,
+            @RequestParam(required = false) String topic,
+            @RequestParam(required = false) String resourceType
+    ) {
+        return ApiResponse.onSuccess(reportQueryService.getResources(cityId, topic, resourceType));
+    }
+
+    @GetMapping("/{cityId}/reviews")
+    public ApiResponse<List<ReportResponseDTO.CityReviewDTO>> getCityReviews(
+            @PathVariable Long cityId
+    ) {
+        return ApiResponse.onSuccess(reportQueryService.getCityReviews(cityId));
     }
 
     @Override

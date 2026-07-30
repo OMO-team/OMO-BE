@@ -8,8 +8,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum PurposeErrorCode implements BaseErrorCode {
-    INVALID_PURPOSE_TYPE(HttpStatus.BAD_REQUEST, "PURPOSE400_1", "유효하지 않은 목적입니다.");
-;
+    INVALID_PURPOSE_TYPE(HttpStatus.BAD_REQUEST, "PURPOSE400_1", "유효하지 않은 목적입니다."),
+    PURPOSE_NOT_FOUND(HttpStatus.NOT_FOUND, "PURPOSE404_1", "존재하지 않는 목적입니다.");
 
     private final HttpStatus status;
     private final String code;
