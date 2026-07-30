@@ -29,6 +29,23 @@ public interface TaskControllerDocs {
             description = "태스크 상세 조회 성공"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "태스크 ID 검증 실패 또는 타입 오류",
+            content = @Content(schema = @Schema(
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
             description = "태스크를 찾을 수 없거나 다른 회원의 태스크",
             content = @Content(schema = @Schema(
@@ -55,12 +72,19 @@ public interface TaskControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "태스크 권장 완료일이 출국일 이후임",
+            description = "태스크 ID나 권장 완료일 검증 실패 또는 권장 완료일이 출국일 이후임",
             content = @Content(schema = @Schema(
                     oneOf = {
                             ApiResponse.ErrorResponse.class,
                             ApiResponse.ValidationErrorResponse.class
                     }
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
             ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -100,6 +124,23 @@ public interface TaskControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
             description = "태스크 완료 성공"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "태스크 ID 검증 실패 또는 타입 오류",
+            content = @Content(schema = @Schema(
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "409",
