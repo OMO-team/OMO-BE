@@ -59,6 +59,13 @@ public interface RoadmapControllerDocs {
                     implementation = ApiResponse.ErrorResponse.class
             ))
     )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "422",
+            description = "로드맵 템플릿 또는 생성 데이터의 무결성 오류",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
+    )
     ApiResponse<RoadmapResponseDTO.CreateResultDTO> createRoadmap(
             @Parameter(hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -78,6 +85,23 @@ public interface RoadmapControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
             description = "로드맵 상세 조회 성공"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "로드맵 ID 검증 실패 또는 타입 오류",
+            content = @Content(schema = @Schema(
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
@@ -106,12 +130,19 @@ public interface RoadmapControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "출국일이 유효하지 않음",
+            description = "로드맵 ID나 출국일 검증 실패 또는 출국일이 유효하지 않음",
             content = @Content(schema = @Schema(
                     oneOf = {
                             ApiResponse.ErrorResponse.class,
                             ApiResponse.ValidationErrorResponse.class
                     }
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
             ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -144,6 +175,23 @@ public interface RoadmapControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
             description = "로드맵 삭제 성공"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400",
+            description = "로드맵 ID 검증 실패 또는 타입 오류",
+            content = @Content(schema = @Schema(
+                    oneOf = {
+                            ApiResponse.ErrorResponse.class,
+                            ApiResponse.ValidationErrorResponse.class
+                    }
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "인증 필요",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
