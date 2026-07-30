@@ -20,16 +20,20 @@ public class CityQueryService {
 
     private final CityRepository cityRepository;
 
-    // 필터 조건으로 도시 목록 조회
-    public CityResponseDTO.CityListResult getCities(CityRequestDTO.CityFilterRequest request) {
-        Specification<City> spec = Specification.where(CitySpecification.isNotDeleted())
-                .and(CitySpecification.hasKeyword(request.keyword()))
+    public CityResponseDTO.CityListResult getCities(CityRequestDTO.CityFilterRequest request){
+
+        String keyword = (request.keyword() != null) ? request.keyword().trim() : null;
+
+        Specification<City> spec = Specification
+                .where(CitySpecification.isNotDeleted())
+                .and(CitySpecification.hasKeyword(keyword))
                 .and(CitySpecification.hasPurpose(request.purposeType()))
                 .and(CitySpecification.hasMaxCost(request.maxMonthlyCost()))
                 .and(CitySpecification.hasMinSafety(request.minSafetyScore()))
                 .and(CitySpecification.hasHousingDifficulty(request.housingDifficulty()))
                 .and(CitySpecification.hasVisaDifficulty(request.visaDifficulty()))
-                .and(CitySpecification.hasCountry(request.countryCode()));
+                .and(CitySpecification.hasCountry(request.countryCode()))
+                .and(CitySpecification.hasStayDuration(request.stayDuration()));
 
         List<City> cities = cityRepository.findAll(spec);
         return CityConverter.toCityListResult(cities);

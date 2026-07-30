@@ -13,7 +13,8 @@ public enum AiSearchErrorCode implements BaseErrorCode {
     AI_SESSION_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI400_2", "해당 AI 검색 세션을 찾을 수 없습니다."),
     AI_TAG_TYPE_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI400_3", "존재하지 않거나 이미 삭제된 태그 타입입니다."),
     AI_TASK_ID_INVALID(HttpStatus.BAD_REQUEST, "AI400_4", "유효하지 않거나 만료된 작업 ID(taskId)입니다."),
-    AI_SESSION_UNAUTHORIZED(HttpStatus.FORBIDDEN, "AI403_1", "해당 세션의 소유자가 아닙니다.");
+    AI_SESSION_UNAUTHORIZED(HttpStatus.FORBIDDEN, "AI403_1", "해당 세션의 소유자가 아닙니다."),
+    AI_ANALYSIS_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI500_1", "AI 스마트 브리핑 분석에 실패했습니다. 다시 시도해 주세요.");
 
     private final HttpStatus status;
     private final String code;

@@ -6,6 +6,5 @@ public enum InquiryType {
     WISHLIST_COMPARISON,           // 위시리스트·비교 기능
     ACCOUNT,                       // 계정·로그인·회원정보
     BUG_REPORT,                    // 오류 신고(버그)
-    SERVICE_SUGGESTION,            // 서비스 제안
-    ETC                            // 기타 문의
+    SERVICE_SUGGESTION_ETC         // 서비스 제안·기타 문의
 }

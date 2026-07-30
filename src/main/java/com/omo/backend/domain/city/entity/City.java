@@ -1,6 +1,8 @@
 package com.omo.backend.domain.city.entity;
 
 import com.omo.backend.common.BaseEntity;
+import com.omo.backend.domain.city.enums.CityDifficulty;
+import com.omo.backend.domain.city.enums.CityStayDuration;
 import com.omo.backend.domain.country.entity.Country;
 import jakarta.persistence.*;
 import lombok.*;
@@ -39,6 +41,9 @@ public class City extends BaseEntity {
     @Column(name = "monthly_cost")
     private Integer monthlyCost;
 
+    @Column(name = "initial_settlement_cost")
+    private Integer initialSettlementCost;
+
     @Column(name = "safety_score", precision = 2, scale = 1)
     private BigDecimal safetyScore;
 
@@ -60,6 +65,10 @@ public class City extends BaseEntity {
 // language_score >= 4.0을 영어권 도시 기준으로 사용
     @Column(name = "language_score", precision = 2, scale = 1)
     private BigDecimal languageScore;
+
+    @Column(name = "stay_duration", nullable = true)
+    @Enumerated(EnumType.STRING)
+    private CityStayDuration stayDuration;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

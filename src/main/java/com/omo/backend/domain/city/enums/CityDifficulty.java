@@ -6,19 +6,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
 @Getter
 @AllArgsConstructor
-public enum CityEnum {
+public enum CityDifficulty {
         EASY(new BigDecimal("4.0")),
         NORMAL(new BigDecimal("3.0")),
         HARD(new BigDecimal("2.0"));
 
         private final BigDecimal minScore;
 
-        public static CityEnum from(String value){
+        public static CityDifficulty from(String value){
                 try{
-                        return valueOf(value.toUpperCase());
+                        return valueOf(value.toUpperCase(Locale.ROOT));
                 }catch (IllegalArgumentException e){
                         throw new CityException(CityErrorCode.INVALID_DIFFICULTY);
                 }

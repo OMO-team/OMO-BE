@@ -74,6 +74,7 @@ public class SecurityConfig {
     // 인증 없이 POST 요청을 허용하는 공개 API URL 배열
     private static final String[] PUBLIC_POST_API_URLS = {
             "/api/v1/inquiries",
+            "/api/v1/inquiries/attachments/upload-urls",
             "/api/v1/ai-search/briefing",
             "/api/v1/cities/*/ai-report"
     };
