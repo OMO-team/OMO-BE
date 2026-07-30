@@ -52,7 +52,8 @@ public class SecurityConfig {
             "/auth/v1/password/reset",
             "/auth/v1/login/local",
             "/auth/v1/reissue",
-            "/api/v1/terms"
+            "/api/v1/terms",
+            "/api/v1/cities"
     };
 
     @Bean
