@@ -26,14 +26,14 @@ public interface TaskControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
-            description = "태스크 상세 조회 성공",
-            content = @Content(schema = @Schema(
-                    implementation = TaskResponseDTO.DetailResultDTO.class
-            ))
+            description = "태스크 상세 조회 성공"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "태스크를 찾을 수 없거나 다른 회원의 태스크"
+            description = "태스크를 찾을 수 없거나 다른 회원의 태스크",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<TaskResponseDTO.DetailResultDTO> getTask(
             @Parameter(description = "태스크 ID", example = "10", required = true)
@@ -51,22 +51,28 @@ public interface TaskControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
-            description = "태스크 일정 변경 성공",
-            content = @Content(schema = @Schema(
-                    implementation = TaskResponseDTO.UpdateScheduleResultDTO.class
-            ))
+            description = "태스크 일정 변경 성공"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "태스크 권장 완료일이 출국일 이후임"
+            description = "태스크 권장 완료일이 출국일 이후임",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "409",
-            description = "로드맵 출국일이 설정되지 않음"
+            description = "로드맵 출국일이 설정되지 않음",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "태스크를 찾을 수 없거나 다른 회원의 태스크"
+            description = "태스크를 찾을 수 없거나 다른 회원의 태스크",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<TaskResponseDTO.UpdateScheduleResultDTO> updateTaskSchedule(
             @Parameter(description = "태스크 ID", example = "10", required = true)
@@ -90,18 +96,21 @@ public interface TaskControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
-            description = "태스크 완료 성공",
-            content = @Content(schema = @Schema(
-                    implementation = TaskResponseDTO.CompleteResultDTO.class
-            ))
+            description = "태스크 완료 성공"
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "409",
-            description = "잠긴 태스크, 서류가 있는 태스크 또는 이미 완료된 태스크"
+            description = "잠긴 태스크, 서류가 있는 태스크 또는 이미 완료된 태스크",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
-            description = "태스크를 찾을 수 없음"
+            description = "태스크를 찾을 수 없음",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
     )
     ApiResponse<TaskResponseDTO.CompleteResultDTO> completeTask(
             @Parameter(description = "태스크 ID", example = "10", required = true)
