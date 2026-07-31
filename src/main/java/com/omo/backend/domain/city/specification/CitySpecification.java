@@ -14,7 +14,7 @@ public class CitySpecification {
 
     // 목적 필터
     public static Specification<City> hasPurpose(String purpose){
-        if (purpose == null || purpose.isBlank()) return null;
+        if (purpose == null || purpose.isBlank()) return (root, query, cb) -> null;
         PurposeEnum purposeEnum = PurposeEnum.from(purpose);
         return (root, query, cb) -> {
             return cb.equal(
@@ -28,7 +28,7 @@ public class CitySpecification {
 
     // 키워드 검색 (도시명, 국가명, 설명)
     public static Specification<City> hasKeyword(String keyword){
-        if (keyword == null || keyword.isBlank()) return null;
+        if (keyword == null || keyword.isBlank()) return (root, query, cb) -> null;
         // SQL LIKE 특수문자 이스케이프 (순서 중요: \ 먼저)
         String escaped = keyword
                 .replace("\\", "\\\\")
@@ -44,14 +44,14 @@ public class CitySpecification {
 
     //국가 코드 필터
     public static Specification<City> hasCountry(String countryCode){
-        if (countryCode == null || countryCode.isBlank()) return null;
+        if (countryCode == null || countryCode.isBlank()) return (root, query, cb) -> null;
         return (root, query, cb) ->
                 cb.equal(root.get("country").get("code"), countryCode);
     }
 
     // 최대 생활비
     public static Specification<City> hasMaxCost(Integer maxCost){
-        if (maxCost == null) return null;
+        if (maxCost == null) return (root, query, cb) -> null;
         return (root, query, cb) -> {
             return cb.lessThanOrEqualTo(root.get("monthlyCost"), maxCost);
         };
@@ -59,7 +59,7 @@ public class CitySpecification {
 
     //최소 치안 점수
     public static Specification<City> hasMinSafety(BigDecimal minSafety){
-        if (minSafety == null) return null;
+        if (minSafety == null) return (root, query, cb) -> null;
         return (root, query, cb) -> {
             return cb.greaterThanOrEqualTo(root.get("safetyScore"), minSafety);
         };
@@ -68,7 +68,7 @@ public class CitySpecification {
 
     //숙소 난이도 -> 선택한 난이도값 이상의 도시들 반환
     public static Specification<City> hasHousingDifficulty(String difficulty){
-        if (difficulty == null || difficulty.isBlank()) return null;
+        if (difficulty == null || difficulty.isBlank()) return (root, query, cb) -> null;
         BigDecimal threshold = CityDifficulty.from(difficulty).getMinScore();
         return ((root, query, cb) ->
                 cb.greaterThanOrEqualTo(root.get("housingScore"), threshold));
@@ -76,14 +76,14 @@ public class CitySpecification {
 
     //비자 난이도 -> 선택한 난이도값 이상의 도시들 반환
     public static Specification<City> hasVisaDifficulty(String difficulty){
-        if (difficulty == null || difficulty.isBlank()) return null;
+        if (difficulty == null || difficulty.isBlank()) return (root, query, cb) -> null;
         BigDecimal threshold = CityDifficulty.from(difficulty).getMinScore();
         return (root, query, cb) ->
                 cb.greaterThanOrEqualTo(root.get("visaScore"), threshold);
     }
 
     public static Specification<City> hasStayDuration(String stayDuration){
-        if (stayDuration == null || stayDuration.isBlank()) return null;
+        if (stayDuration == null || stayDuration.isBlank()) return (root, query, cb) -> null;
         CityStayDuration duration = CityStayDuration.from(stayDuration);
         return (root, query, cb) ->
                 cb.equal(root.get("stayDuration"), duration);
@@ -91,7 +91,7 @@ public class CitySpecification {
 
     // 대륙 필터
     public static Specification<City> hasContinent(String continent) {
-        if (continent == null || continent.isBlank()) return null;
+        if (continent == null || continent.isBlank()) return (root, query, cb) -> null;
         return (root, query, cb) ->
                 cb.equal(root.join("country", JoinType.LEFT).get("continent"), continent);
     }

@@ -12,7 +12,8 @@ public class CountryResponseDTO {
             String name,
             String code,
             String imageUrl,
-            String continent
+            String continent,
+            Long recommendedCityCount
     ){}
 
     @Builder

@@ -78,9 +78,8 @@ public class ReportConverter {
                 new ReportResponseDTO.StatDTO(StatType.COST, toDouble(city.getMonthlyCost()), null, "만원"),
                 new ReportResponseDTO.StatDTO(StatType.HOUSING, toDouble(city.getHousingScore()), 5.0, "점"),
                 new ReportResponseDTO.StatDTO(StatType.VISA, toDouble(city.getVisaScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.INFRA, toDouble(city.getInfraScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.INTERNET, toDouble(city.getInternetScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.PREFERENCE, toDouble(city.getPreferenceScore()), 5.0, "점")
+                new ReportResponseDTO.StatDTO(StatType.INFRA, toDouble(city.getInternetScore()), 5.0, "점"),
+                new ReportResponseDTO.StatDTO(StatType.INTERNET, toDouble(city.getInternetScore()), 5.0, "점")
         );
     }
 
@@ -108,10 +107,8 @@ public class ReportConverter {
                 toStatGroupDTO(StatType.COST, null, "만원", cities, City::getMonthlyCost),
                 toStatGroupDTO(StatType.HOUSING, 5.0, "점", cities, City::getHousingScore),
                 toStatGroupDTO(StatType.VISA, 5.0, "점", cities, City::getVisaScore),
-                toStatGroupDTO(StatType.INFRA, 5.0, "점", cities, City::getInfraScore),
-                toStatGroupDTO(StatType.INTERNET, 5.0, "점", cities, City::getInternetScore),
-                toStatGroupDTO(StatType.PREFERENCE, 5.0, "점", cities, City::getPreferenceScore)
-
+                toStatGroupDTO(StatType.INFRA, 5.0, "점", cities, City::getInternetScore),
+                toStatGroupDTO(StatType.INTERNET, 5.0, "점", cities, City::getInternetScore)
         );
 
         return new ReportResponseDTO.CompareResultDTO(cityHeaders, statGroups);

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface CityControllerDocs {
 
     @Operation(
-            summary = "도시 목록 조회",
+            summary = "도시 검색 및 필터 적용",
             description = "키워드 검색 + 필터 조건(월 생활비, 점수, 난이도 등)을 적용하여 도시 목록을 조회합니다. 모든 쿼리 파라미터는 선택 사항 입니다."
     )
     @Parameters({

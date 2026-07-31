@@ -2,6 +2,7 @@ package com.omo.backend.domain.country.service;
 
 import com.omo.backend.domain.country.converter.CountryConverter;
 import com.omo.backend.domain.country.dto.CountryResponseDTO;
+import com.omo.backend.domain.country.entity.Country;
 import com.omo.backend.domain.country.repository.CountryRepository;
 import com.omo.backend.domain.purpose.enums.PurposeEnum;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,9 @@ public class CountryQueryService {
 
     public CountryResponseDTO.CountryListResult getCountries(PurposeEnum purposeType){
         List<CountryResponseDTO.CountryInfo> countries = countryRepository
-                .findCountriesByPurposeType(purposeType)
+                .findCountriesWithCityCountByPurposeType(purposeType)
                 .stream()
-                .map(CountryConverter::toCountryInfo)
+                .map(row -> CountryConverter.toCountryInfo((Country) row[0], (Long) row[1]))
                 .toList();
         return CountryConverter.toCountryListResult(purposeType, countries);
     }

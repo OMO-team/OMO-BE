@@ -30,7 +30,7 @@ public interface CityRepository extends JpaRepository<City, Long>, JpaSpecificat
             "(:englishOnly IS NULL OR :englishOnly = false OR c.languageScore >= 4.0) AND " +
             "(:easyVisa IS NULL OR :easyVisa = false OR c.visaScore >= 4.0) AND " +
             "(:goodHousing IS NULL OR :goodHousing = false OR c.housingScore >= 4.0) AND " +
-            "(:goodInfra IS NULL OR :goodInfra = false OR c.infraScore >= 4.0) AND " +
+            "(:goodInfra IS NULL OR :goodInfra = false OR c.internetScore >= 4.0) AND " +
             "(:country IS NULL OR LOWER(c.country.name) = LOWER(:country))")
     List<City> findCandidatesByConditions(
             @Param("maxBudget") Integer maxBudget,
