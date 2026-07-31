@@ -33,7 +33,8 @@ public class CityQueryService {
                 .and(CitySpecification.hasHousingDifficulty(request.housingDifficulty()))
                 .and(CitySpecification.hasVisaDifficulty(request.visaDifficulty()))
                 .and(CitySpecification.hasCountry(request.countryCode()))
-                .and(CitySpecification.hasStayDuration(request.stayDuration()));
+                .and(CitySpecification.hasStayDuration(request.stayDuration()))
+                .and(CitySpecification.hasContinent(request.continent()));
 
         List<City> cities = cityRepository.findAll(spec);
         return CityConverter.toCityListResult(cities);

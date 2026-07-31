@@ -89,6 +89,13 @@ public class CitySpecification {
                 cb.equal(root.get("stayDuration"), duration);
     }
 
+    // 대륙 필터
+    public static Specification<City> hasContinent(String continent) {
+        if (continent == null || continent.isBlank()) return null;
+        return (root, query, cb) ->
+                cb.equal(root.join("country", JoinType.LEFT).get("continent"), continent);
+    }
+
     public static Specification<City> isNotDeleted() {
         return (root, query, cb) -> {
             query.distinct(true);

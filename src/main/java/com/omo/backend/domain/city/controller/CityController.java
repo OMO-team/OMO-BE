@@ -28,7 +28,8 @@ public class CityController implements CityControllerDocs {
             @RequestParam(required = false) String minSafetyScore,
             @RequestParam(required = false) String housingDifficulty,
             @RequestParam(required = false) String visaDifficulty,
-            @RequestParam(required = false) String stayDuration
+            @RequestParam(required = false) String stayDuration,
+            @RequestParam(required = false) String continent
     ) {
         if (keyword != null && keyword.length() > 50) {
             throw new GeneralException(CityErrorCode.INVALID_KEYWORD_LENGTH);
@@ -47,7 +48,7 @@ public class CityController implements CityControllerDocs {
 
         CityRequestDTO.CityFilterRequest request = new CityRequestDTO.CityFilterRequest(
                 keyword, purposeType, countryCode, parsedMaxCost,
-                parsedMinSafety, housingDifficulty, visaDifficulty, stayDuration
+                parsedMinSafety, housingDifficulty, visaDifficulty, stayDuration, continent
         );
         return ApiResponse.onSuccess(cityQueryService.getCities(request));
     }
