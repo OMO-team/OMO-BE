@@ -16,7 +16,7 @@ public class CityConverter {
                         .countryId(city.getCountry().getCountryId())
                         .name(city.getCountry().getName())
                         .build())
-                .continent(city.getContinent())
+                .continent(city.getCountry().getContinent())
                 .imageUrl(city.getImageUrl())
                 .rating(city.getRating())
                 .description(city.getDescription())

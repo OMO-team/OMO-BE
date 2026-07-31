@@ -27,5 +27,7 @@ public class Country extends BaseEntity {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
+    @Column(name = "continent", length = 100)
+    private String continent;
 
 }

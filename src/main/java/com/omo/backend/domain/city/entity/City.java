@@ -70,9 +70,6 @@ public class City extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CityStayDuration stayDuration;
 
-    @Column(name = "continent", length = 100)
-    private String continent;
-
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
