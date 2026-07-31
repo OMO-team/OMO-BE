@@ -77,8 +77,7 @@ public class CityResponseDTO {
             BigDecimal safetyScore,
             BigDecimal housingScore,
             BigDecimal visaScore,
-            BigDecimal languageScore,
-            BigDecimal infraScore
+            BigDecimal languageScore
     ) {}
 
     // 필터 목록 결과

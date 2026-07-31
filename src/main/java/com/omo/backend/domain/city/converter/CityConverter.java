@@ -25,7 +25,6 @@ public class CityConverter {
                 .housingScore(city.getHousingScore())
                 .visaScore(city.getVisaScore())
                 .languageScore(city.getLanguageScore())
-                .infraScore(city.getInfraScore())
                 .build();
     }
 
