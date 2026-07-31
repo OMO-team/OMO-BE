@@ -44,7 +44,7 @@ public class SecurityConfig {
             "/webjars/**",
     };
 
-    // 인증 없이 접근할 수 있는 공개 API URL 배열
+    // HTTP 메서드와 관계없이 인증 없이 접근할 수 있는 공개 API URL 배열
     private static final String[] PUBLIC_API_URLS = {
             "/actuator/health",
             "/api/v1/members/signup",
@@ -55,6 +55,29 @@ public class SecurityConfig {
             "/auth/v1/oauth/google/**",
             "/auth/v1/reissue",
             "/api/v1/terms"
+    };
+
+    // 인증 없이 GET 요청을 허용하는 공개 API URL 배열
+    private static final String[] PUBLIC_GET_API_URLS = {
+            "/api/v1/purposes",
+            "/api/v1/countries",
+            "/api/v1/cities",
+            "/api/v1/cities/compare",
+            "/api/v1/cities/{cityId}/core-summaries",
+            "/api/v1/cities/{cityId}/stats",
+            "/api/v1/cities/{cityId}/pros-cons",
+            "/api/v1/cities/{cityId}/resources",
+            "/api/v1/cities/{cityId}/reviews",
+            "/api/v1/ai-search/recommend-chips",
+            "/api/v1/ai-search/briefing/status/{taskId}"
+    };
+
+    // 인증 없이 POST 요청을 허용하는 공개 API URL 배열
+    private static final String[] PUBLIC_POST_API_URLS = {
+            "/api/v1/inquiries",
+            "/api/v1/inquiries/attachments/upload-urls",
+            "/api/v1/ai-search/briefing",
+            "/api/v1/cities/*/ai-report"
     };
 
     @Bean
@@ -69,8 +92,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(SWAGGER_URLS).permitAll()
                         .requestMatchers(PUBLIC_API_URLS).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/inquiries").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/inquiries/attachments/upload-urls").permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_API_URLS).permitAll()
+                        .requestMatchers(HttpMethod.POST, PUBLIC_POST_API_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
