@@ -13,6 +13,7 @@ public class CityResponseDTO {
             Long cityId,
             String name,
             CountryDTO country,
+            String continent,
             String imageUrl,
             BigDecimal rating,
             // TODO : 즐겨찾기 저장 추가

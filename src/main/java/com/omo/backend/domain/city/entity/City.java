@@ -53,13 +53,15 @@ public class City extends BaseEntity {
     @Column(name = "infra_score", precision = 2, scale = 1)
     private BigDecimal infraScore;
 
-// language_score >= 4.0을 영어권 도시 기준으로 사용
     @Column(name = "language_score", precision = 2, scale = 1)
     private BigDecimal languageScore;
 
     @Column(name = "stay_duration", nullable = true)
     @Enumerated(EnumType.STRING)
     private CityStayDuration stayDuration;
+
+    @Column(name = "continent", length = 100)
+    private String continent;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
