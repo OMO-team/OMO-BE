@@ -15,6 +15,7 @@ public class CountryConverter {
                 .name(country.getName())
                 .code(country.getCode())
                 .imageUrl(country.getImageUrl())
+                .continent(country.getContinent())
                 .build();
     }
 

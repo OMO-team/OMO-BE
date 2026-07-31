@@ -6,7 +6,9 @@ import com.omo.backend.domain.city.exception.CityErrorCode;
 import com.omo.backend.domain.city.service.CityQueryService;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.apiPayload.exception.GeneralException;
+import com.omo.backend.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -21,6 +23,7 @@ public class CityController implements CityControllerDocs {
 
     @GetMapping
     public ApiResponse<CityResponseDTO.CityListResult> getCities(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String purposeType,
             @RequestParam(required = false) String countryCode,
@@ -50,6 +53,7 @@ public class CityController implements CityControllerDocs {
                 keyword, purposeType, countryCode, parsedMaxCost,
                 parsedMinSafety, housingDifficulty, visaDifficulty, stayDuration, continent
         );
-        return ApiResponse.onSuccess(cityQueryService.getCities(request));
+        Long memberId = (userDetails != null) ? userDetails.getMemberId() : null;
+        return ApiResponse.onSuccess(cityQueryService.getCities(request, memberId));
     }
 }

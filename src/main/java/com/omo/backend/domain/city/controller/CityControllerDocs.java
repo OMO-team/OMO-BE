@@ -2,10 +2,12 @@ package com.omo.backend.domain.city.controller;
 
 import com.omo.backend.domain.city.dto.CityResponseDTO;
 import com.omo.backend.global.apiPayload.ApiResponse;
+import com.omo.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "City", description = "도시 API")
@@ -23,10 +25,13 @@ public interface CityControllerDocs {
             @Parameter(name = "minSafetyScore", description = "최소 치안 점수 (예: 4.0)"),
             @Parameter(name = "housingDifficulty", description = "숙소 난이도 (EASY / NORMAL / HARD)"),
             @Parameter(name = "visaDifficulty", description = "비자 난이도 (EASY / NORMAL / HARD)"),
-            @Parameter(name = "stayDuration", description = "체류 기간(SHORT / MEDIUM / LONG / VERY_LONG)")
+            @Parameter(name = "stayDuration", description = "체류 기간(SHORT / MEDIUM / LONG / VERY_LONG)"),
+            @Parameter(name = "continent", description = "대륙 (Asia / Europe / North America / South America / Oceania / Africa)")
 
     })
     ApiResponse<CityResponseDTO.CityListResult> getCities(
+            @Parameter(hidden = true)
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String purposeType,
             @RequestParam(required = false) String countryCode,
@@ -34,6 +39,7 @@ public interface CityControllerDocs {
             @RequestParam(required = false) String minSafetyScore,
             @RequestParam(required = false) String housingDifficulty,
             @RequestParam(required = false) String visaDifficulty,
-            @RequestParam(required = false) String stayDuration
+            @RequestParam(required = false) String stayDuration,
+            @RequestParam(required = false) String continent
     );
 }

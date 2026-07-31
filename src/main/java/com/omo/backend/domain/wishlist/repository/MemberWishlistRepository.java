@@ -26,6 +26,14 @@ public interface MemberWishlistRepository extends JpaRepository<MemberWishlist, 
             @Param("memberId") Long memberId
     );
 
+    @Query("""
+            select memberWishlist.city.cityId
+            from MemberWishlist memberWishlist
+            where memberWishlist.member.id = :memberId
+              and memberWishlist.city.deletedAt is null
+            """)
+    List<Long> findWishlistedCityIdsByMemberId(@Param("memberId") Long memberId);
+
     @Modifying
     @Query("""
             delete from MemberWishlist memberWishlist
