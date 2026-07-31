@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -51,6 +52,7 @@ public class SecurityConfig {
             "/auth/v1/password/reset/**",
             "/auth/v1/password/reset",
             "/auth/v1/login/local",
+            "/auth/v1/oauth/google/**",
             "/auth/v1/reissue",
             "/api/v1/terms"
     };
@@ -67,6 +69,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(SWAGGER_URLS).permitAll()
                         .requestMatchers(PUBLIC_API_URLS).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/inquiries").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/inquiries/attachments/upload-urls").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)

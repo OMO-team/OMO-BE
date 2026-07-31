@@ -2,10 +2,12 @@ package com.omo.backend.domain.member.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -49,11 +51,32 @@ public class MemberRequestDTO {
             @Schema(description = "회원 이름", example = "홍길동")
             @NotBlank(message = "이름은 필수 입력값입니다.")
             @Size(max = 20, message = "이름은 20자 이하로 입력해 주세요.")
-            String name,
+            String name
+    ) {}
 
-            @Schema(description = "프로필 이미지 URL", example = "https://example.com/profile.png")
-            @Size(max = 500, message = "프로필 이미지 URL은 500자 이하로 입력해 주세요.")
-            String profileImageUrl
+    // 프로필 이미지 업로드 URL 발급
+    public record ProfileImageUploadUrlDTO(
+            @Schema(description = "업로드할 파일명", example = "profile.jpg")
+            @NotBlank(message = "파일명은 필수 입력값입니다.")
+            String fileName,
+
+            @Schema(description = "파일 MIME 타입", example = "image/jpeg")
+            @NotBlank(message = "파일 MIME 타입은 필수 입력값입니다.")
+            String contentType,
+
+            @Schema(description = "파일 크기(byte)", example = "1048576")
+            @NotNull(message = "파일 크기는 필수 입력값입니다.")
+            @Positive(message = "파일 크기는 0보다 커야 합니다.")
+            @Max(value = 5L * 1024 * 1024, message = "파일 크기는 5MB 이하여야 합니다.")
+            Long fileSize
+    ) {}
+
+    // 프로필 이미지 등록
+    public record ProfileImageUpdateDTO(
+            @Schema(description = "업로드 URL 발급 API에서 반환된 S3 object key", example = "profiles/1/550e8400-e29b-41d4-a716-446655440000.jpg")
+            @NotBlank(message = "프로필 이미지 object key는 필수 입력값입니다.")
+            @Size(max = 500, message = "프로필 이미지 object key는 500자 이하여야 합니다.")
+            String objectKey
     ) {}
 
     // 내 설정 수정
@@ -65,10 +88,7 @@ public class MemberRequestDTO {
             Boolean emailNotification,
 
             @Schema(description = "자동 저장 여부", example = "true")
-            Boolean autoSave,
-
-            @Schema(description = "2단계 인증 활성화 여부", example = "false")
-            Boolean twoFactorEnabled
+            Boolean autoSave
     ) {}
 
     // 비밀번호 변경

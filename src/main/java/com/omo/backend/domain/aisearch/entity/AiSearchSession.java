@@ -4,6 +4,7 @@ import com.omo.backend.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,11 @@ public class AiSearchSession extends BaseEntity {
     private String accumulatedConditions;
 
     @OneToMany(mappedBy = "aiSearchSession", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<AiSearchLog> searchLogs = new ArrayList<>();
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     // 누적 조건 업데이트 메서드
     public void updateAccumulatedConditions(String newConditions) {
@@ -39,5 +44,10 @@ public class AiSearchSession extends BaseEntity {
         return AiSearchSession.builder()
                 .accumulatedConditions("{}")
                 .build();
+    }
+
+    // 세션 삭제 메서드
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

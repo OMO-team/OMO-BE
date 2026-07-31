@@ -37,13 +37,38 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${GOOGLE_REDIRECT_URI:http://localhost:8080/auth/v1/oauth/google/callback}
+            authorization-grant-type: authorization_code
+            scope:
+              - email
+              - profile
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
-  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:1h}
-  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:7d}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}
+
+oauth:
+  frontend-redirect-uri: ${OAUTH_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/callback}
+  google-link-redirect-uri: ${GOOGLE_LINK_REDIRECT_URI:http://localhost:8080/auth/v1/oauth/google/link/callback}
+  frontend-link-redirect-uri: ${OAUTH_FRONTEND_LINK_REDIRECT_URI:http://localhost:3000/settings/account}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,https://omo-fe.vercel.app}
+
+aws:
+  s3:
+    region: ${AWS_REGION:ap-northeast-2}
+    profile-bucket: ${PROFILE_BUCKET}
+    inquiry-bucket: ${INQUIRY_BUCKET}
+    presigned-url-expiration: ${S3_PRESIGNED_URL_EXPIRATION:5m}
 
 management:
   endpoints:
@@ -54,3 +79,8 @@ management:
     health:
       probes:
         enabled: true
+
+gemini:
+  api:
+    key: ${GEMINI_API_KEY:jwt-test-key}
+    model: gemini-3.1-flash-lite

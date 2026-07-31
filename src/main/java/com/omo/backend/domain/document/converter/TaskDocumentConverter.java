@@ -24,22 +24,6 @@ public class TaskDocumentConverter {
                 .build();
     }
 
-    public static TaskDocumentResponseDTO.DocumentListResultDTO toDocumentListResultDTO(
-            Long taskId,
-            List<TaskDocument> taskDocuments
-    ) {
-        List<TaskDocumentResponseDTO.DocumentItemDTO> documents = taskDocuments.stream()
-                .map(TaskDocumentConverter::toDocumentItemDTO)
-                .toList();
-
-        return TaskDocumentResponseDTO.DocumentListResultDTO.builder()
-                .taskId(taskId)
-                .completedCount(countCompleted(taskDocuments))
-                .totalCount(countTotal(taskDocuments))
-                .documents(documents)
-                .build();
-    }
-
     public static TaskDocumentResponseDTO.UpdateCheckResultDTO toUpdateCheckResultDTO(
             TaskDocument updatedTaskDocument,
             List<TaskDocument> taskDocuments
@@ -52,13 +36,13 @@ public class TaskDocumentConverter {
                 .build();
     }
 
-    private static Long countCompleted(List<TaskDocument> taskDocuments) {
+    public static Long countCompleted(List<TaskDocument> taskDocuments) {
         return taskDocuments.stream()
                 .filter(taskDocument -> Boolean.TRUE.equals(taskDocument.getChecked()))
                 .count();
     }
 
-    private static Long countTotal(List<TaskDocument> taskDocuments) {
+    public static Long countTotal(List<TaskDocument> taskDocuments) {
         return (long) taskDocuments.size();
     }
 }

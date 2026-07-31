@@ -1,7 +1,6 @@
 package com.omo.backend.domain.document.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
 import lombok.Builder;
 
 public class TaskDocumentResponseDTO {
@@ -25,22 +24,6 @@ public class TaskDocumentResponseDTO {
 
             @Schema(description = "서류 완료 체크 여부", example = "false")
             Boolean checked
-    ) {
-    }
-
-    @Builder
-    public record DocumentListResultDTO(
-            @Schema(description = "태스크 ID", example = "10")
-            Long taskId,
-
-            @Schema(description = "완료된 서류 개수", example = "2")
-            Long completedCount,
-
-            @Schema(description = "전체 서류 개수", example = "5")
-            Long totalCount,
-
-            @Schema(description = "필요 서류 목록")
-            List<DocumentItemDTO> documents
     ) {
     }
 

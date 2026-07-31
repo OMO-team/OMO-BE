@@ -48,6 +48,10 @@ public class AuthCommandService {
         }
 
         // 이메일과 비밀번호가 일치할 경우 토큰 생성
+        return issueLoginTokens(member);
+    }
+
+    public AuthResponseDTO.LoginResultDTO issueLoginTokens(Member member) {
         String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getId(), member.getEmail());
 

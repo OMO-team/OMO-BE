@@ -21,10 +21,39 @@ spring:
     username: test
     password: test
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-google-client-id
+            client-secret: test-google-client-secret
+            redirect-uri: http://localhost:8080/auth/v1/oauth/google/callback
+            authorization-grant-type: authorization_code
+            scope:
+              - email
+              - profile
+
 jwt:
   secret-key: YWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYQ==
   access-token-expiration: 1h
   refresh-token-expiration: 7d
 
+oauth:
+  frontend-redirect-uri: http://localhost:3000/oauth/callback
+  google-link-redirect-uri: http://localhost:8080/auth/v1/oauth/google/link/callback
+  frontend-link-redirect-uri: http://localhost:3000/settings/account
+
 cors:
   allowed-origins: http://localhost:3000
+
+gemini:
+  api:
+    key: test-key
+    model: gemini-3.1-flash-lite
+aws:
+  s3:
+    region: ap-northeast-2
+    profile-bucket: test-profile-bucket
+    inquiry-bucket: test-inquiry-bucket
+    presigned-url-expiration: 5m
