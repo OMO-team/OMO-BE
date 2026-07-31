@@ -39,9 +39,6 @@ public class CityResponseDTO {
             @Schema(description = "주거 점수", example = "3.5")
             BigDecimal housingScore,
 
-            @Schema(description = "인프라 점수", example = "4.2")
-            BigDecimal infraScore,
-
             @Schema(description = "언어 점수 (4.0 이상이면 영어권)", example = "4.5")
             BigDecimal languageScore
     ) {
@@ -56,7 +53,6 @@ public class CityResponseDTO {
                     .safetyScore(city.getSafetyScore())
                     .visaScore(city.getVisaScore())
                     .housingScore(city.getHousingScore())
-                    .infraScore(city.getInfraScore())
                     .languageScore(city.getLanguageScore())
                     .build();
         }
@@ -68,16 +64,22 @@ public class CityResponseDTO {
             Long cityId,
             String name,
             CountryDTO country,
+            String continent,
             String imageUrl,
             BigDecimal rating,
-            // TODO : 즐겨찾기 저장 추가
             String description,
             Integer monthlyCost,
             BigDecimal safetyScore,
             BigDecimal housingScore,
             BigDecimal visaScore,
             BigDecimal languageScore,
-            BigDecimal infraScore
+            @Schema(description = "인터넷/인프라 점수", example = "4.7")
+            BigDecimal internetScore,
+            @Schema(description = "권장 체류 기간", example = "SHORT",
+                    allowableValues = {"SHORT", "MEDIUM", "LONG", "VERY_LONG"})
+            String stayDuration,
+            @Schema(description = "로그인한 사용자의 위시리스트 여부 (비로그인 시 false)", example = "true")
+            boolean isWishlisted
     ) {}
 
     // 필터 목록 결과

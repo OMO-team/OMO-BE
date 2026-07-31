@@ -9,12 +9,14 @@ import java.util.List;
 public class CountryConverter {
 
     // Country -> 국가 정보 DTO
-    public static CountryResponseDTO.CountryInfo toCountryInfo(Country country){
+    public static CountryResponseDTO.CountryInfo toCountryInfo(Country country, Long recommendedCityCount){
         return CountryResponseDTO.CountryInfo.builder()
                 .countryId(country.getCountryId())
                 .name(country.getName())
                 .code(country.getCode())
                 .imageUrl(country.getImageUrl())
+                .continent(country.getContinent())
+                .recommendedCityCount(recommendedCityCount)
                 .build();
     }
 

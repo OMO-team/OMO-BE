@@ -168,11 +168,11 @@ public class AiSearchProcessor {
     private String buildSelectPrompt(String searchQuery, AiSearchResponseDTO.ParsedConditions parsed, List<City> candidates) {
         String candidateJson = candidates.stream()
                 .map(c -> """
-        {"cityId": %d, "cityName": "%s", "countryName": "%s", "safetyScore": %s, "monthlyCost": %d, "visaScore": %s, "housingScore": %s, "infraScore": %s, "languageScore": %s}\
+        {"cityId": %d, "cityName": "%s", "countryName": "%s", "safetyScore": %s, "monthlyCost": %d, "visaScore": %s, "housingScore": %s, "internetScore": %s, "languageScore": %s}\
         """.formatted(
                         c.getCityId(), c.getName(), c.getCountry().getName(),
                         c.getSafetyScore(), c.getMonthlyCost(), c.getVisaScore(),
-                        c.getHousingScore(), c.getInfraScore(), c.getLanguageScore()
+                        c.getHousingScore(), c.getInternetScore(), c.getLanguageScore()
                 ))
                 .collect(Collectors.joining(",\n"));
 

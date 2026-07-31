@@ -11,14 +11,16 @@ import java.util.List;
 @Repository
 public interface CountryRepository extends JpaRepository<Country, Long> {
 
-    // 선택한 목적에 해당하는 도시가 있는 국가만 반환
+    // 선택한 목적에 해당하는 국가 + 추천 도시 수 반환
     @Query("""
-            select distinct city.country
+            select city.country, count(distinct city)
             from City city
             join city.cityPurposes cp
             join cp.purpose p
             where p.type = :purposeType
+              and city.deletedAt is null
+            group by city.country
             order by city.country.name asc
 """)
-    List<Country> findCountriesByPurposeType(@Param("purposeType")PurposeEnum purposeType);
+    List<Object[]> findCountriesWithCityCountByPurposeType(@Param("purposeType") PurposeEnum purposeType);
 }
