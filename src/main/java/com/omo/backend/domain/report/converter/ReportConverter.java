@@ -44,7 +44,7 @@ public class ReportConverter {
 
     public static ReportResponseDTO.ResourceDTO toResourceDTO(CityRelatedResource resource) {
         return new ReportResponseDTO.ResourceDTO(
-                resource.getTopic().name(),
+                resource.getTopic() == null ? null : resource.getTopic().name(),
                 resource.getResourceType().name(),
                 resource.getTitle(),
                 resource.getSource(),

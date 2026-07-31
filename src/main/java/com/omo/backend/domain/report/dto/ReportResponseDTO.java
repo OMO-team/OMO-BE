@@ -73,6 +73,14 @@ public class ReportResponseDTO {
             List<ResourceDTO> resources
     ) {}
 
+    public record AiSummaryResult(
+            @Schema(description = "Gemini가 생성한 AI 요약 답변", example = "시드니의 평균 생활비는...")
+            String summary,
+
+            @Schema(description = "질문과 가장 관련 있는 자료 주제 (VISA/COST/HOUSING/SAFETY, 해당 없으면 null)", example = "HOUSING")
+            String topic
+    ) {}
+
     public record CityReviewDTO(
             @Schema(description = "작성자 이름", example = "김민수")
             String authorName,
