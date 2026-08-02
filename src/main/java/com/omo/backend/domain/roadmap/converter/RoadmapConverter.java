@@ -5,7 +5,6 @@ import com.omo.backend.domain.roadmap.dto.RoadmapResponseDTO;
 import com.omo.backend.domain.roadmap.entity.Roadmap;
 import com.omo.backend.domain.task.entity.Task;
 import com.omo.backend.domain.task.enums.TaskStatus;
-import java.time.LocalDate;
 import java.util.List;
 
 public final class RoadmapConverter {
