@@ -41,6 +41,7 @@ public class RoadmapResponseDTO {
             Long cityId,
             String cityName,
             String cityImageUrl,
+            CountryDTO country,
             Long purposeId,
             String purposeName,
             LocalDate departureDate,
@@ -54,6 +55,16 @@ public class RoadmapResponseDTO {
             LocalDate nextScheduleDate,
             Long nextScheduleDDay,
             Boolean isNextScheduleOverdue
+    ) {
+    }
+
+    @Builder
+    public record CountryDTO(
+            @Schema(description = "국가 ID", example = "1")
+            Long countryId,
+
+            @Schema(description = "국가 이름", example = "일본")
+            String name
     ) {
     }
 
