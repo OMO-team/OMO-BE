@@ -101,6 +101,10 @@ public class CityResponseDTO {
             Long cityId,
             String name,
             CountryDTO country,
+            @Schema(description = "도시의 목적 ID", example = "3")
+            Long purposeId,
+            @Schema(description = "도시의 목적 이름", example = "해외 인턴십")
+            String purposeName,
             String continent,
             String imageUrl,
             BigDecimal rating,
@@ -116,11 +120,7 @@ public class CityResponseDTO {
                     allowableValues = {"SHORT", "MEDIUM", "LONG", "VERY_LONG"})
             String stayDuration,
             @Schema(description = "로그인한 사용자의 위시리스트 여부", example = "true")
-            boolean isWishlisted,
-            @Schema(description = "도시의 목적 ID", example = "3")
-            Long purposeId,
-            @Schema(description = "도시의 목적 이름", example = "해외 인턴십")
-            String purposeName
+            boolean isWishlisted
     ) {}
 
     @Builder

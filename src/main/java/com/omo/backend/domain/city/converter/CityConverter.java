@@ -69,6 +69,8 @@ public class CityConverter {
                 .cityId(cityInfo.cityId())
                 .name(cityInfo.name())
                 .country(cityInfo.country())
+                .purposeId(purpose.getPurposeId())
+                .purposeName(purpose.getName())
                 .continent(cityInfo.continent())
                 .imageUrl(cityInfo.imageUrl())
                 .rating(cityInfo.rating())
@@ -81,8 +83,6 @@ public class CityConverter {
                 .internetScore(cityInfo.internetScore())
                 .stayDuration(cityInfo.stayDuration())
                 .isWishlisted(cityInfo.isWishlisted())
-                .purposeId(purpose.getPurposeId())
-                .purposeName(purpose.getName())
                 .build();
     }
 }
