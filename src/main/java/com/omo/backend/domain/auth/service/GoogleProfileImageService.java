@@ -59,4 +59,18 @@ public class GoogleProfileImageService {
             return null;
         }
     }
+
+    // 프로필 이미지 Object Key DB 반영 실패 시 업로드된 S3 객체 보상 삭제
+    public void delete(String objectKey) {
+        if (!StringUtils.hasText(objectKey)) {
+            return;
+        }
+
+        try {
+            s3FileService.delete(s3Properties.profileBucket(), objectKey);
+        } catch (StorageException exception) {
+            // 선택 이미지 정리 실패가 Google 회원가입 결과에 영향을 주지 않도록 경고만 기록
+            log.warn("Google 프로필 이미지 보상 삭제 실패: objectKey={}", objectKey, exception);
+        }
+    }
 }

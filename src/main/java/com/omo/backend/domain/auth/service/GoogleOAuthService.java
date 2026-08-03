@@ -2,7 +2,6 @@ package com.omo.backend.domain.auth.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omo.backend.domain.auth.converter.OAuthConverter;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
 import com.omo.backend.domain.auth.dto.OAuthRequestDTO;
 import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
@@ -10,19 +9,16 @@ import com.omo.backend.domain.auth.dto.OAuthStateDTO;
 import com.omo.backend.domain.auth.enums.OAuthPurpose;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
-import com.omo.backend.domain.member.converter.MemberConverter;
 import com.omo.backend.domain.member.entity.Member;
-import com.omo.backend.domain.member.entity.SocialAccount;
 import com.omo.backend.domain.member.enums.MemberProvider;
 import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
 import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
-import com.omo.backend.domain.member.repository.MemberSettingsRepository;
 import com.omo.backend.domain.member.repository.SocialAccountRepository;
 import com.omo.backend.domain.member.service.TermsAgreementService;
-import com.omo.backend.domain.terms.entity.Terms;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
@@ -40,6 +36,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class GoogleOAuthService {
 
@@ -54,9 +51,9 @@ public class GoogleOAuthService {
 
     private final SocialAccountRepository socialAccountRepository;
     private final MemberRepository memberRepository;
-    private final MemberSettingsRepository memberSettingsRepository;
     private final TermsAgreementService termsAgreementService;
     private final GoogleProfileImageService googleProfileImageService;
+    private final GoogleOAuthPersistenceService googleOAuthPersistenceService;
     private final AuthCommandService authCommandService;
     private final StringRedisTemplate redisTemplate;
     private final RestClient googleRestClient;
@@ -128,7 +125,6 @@ public class GoogleOAuthService {
     }
 
     // Google 콜백의 요청 목적에 따라 신규 회원가입 또는 기존 회원 로그인 처리
-    @Transactional
     public String handleCallback(String code, String state, String authorizationError) {
         // Google 인증 성공 여부와 요청 시 발급한 state를 검증
         validateAuthorizationResponse(code, state, authorizationError);
@@ -141,7 +137,7 @@ public class GoogleOAuthService {
 
         Member member = switch (oauthState.purpose()) {
             case SIGNUP -> createGoogleMember(userInfo, oauthState.agreedTermsIds());
-            case LOGIN -> getGoogleMember(userInfo);
+            case LOGIN -> googleOAuthPersistenceService.getGoogleMember(userInfo);
             case LINK -> throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
         };
         validateActiveMember(member);
@@ -155,7 +151,6 @@ public class GoogleOAuthService {
     }
 
     // Google 계정 연결 콜백을 검증하고 로그인 회원에게 소셜 계정 연결
-    @Transactional
     public String handleLinkCallback(String code, String state, String authorizationError) {
         // Google 인증 성공 여부와 요청 시 발급한 state를 검증
         validateAuthorizationResponse(code, state, authorizationError);
@@ -169,15 +164,7 @@ public class GoogleOAuthService {
         OAuthResponseDTO.GoogleUserInfoDTO userInfo = requestGoogleUserInfo(googleAccessToken);
         validateGoogleUserInfo(userInfo);
 
-        Member member = getActiveMember(oauthState.memberId());
-        if (socialAccountRepository.existsByMemberIdAndProvider(member.getId(), MemberProvider.GOOGLE)) {
-            throw new AuthException(AuthErrorCode.SOCIAL_ACCOUNT_ALREADY_LINKED);
-        }
-        if (socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).isPresent()) {
-            throw new AuthException(AuthErrorCode.SOCIAL_ACCOUNT_LINKED_TO_ANOTHER_MEMBER);
-        }
-
-        socialAccountRepository.save(OAuthConverter.toGoogleSocialAccount(member, userInfo));
+        googleOAuthPersistenceService.linkGoogleAccount(oauthState.memberId(), userInfo);
 
         return UriComponentsBuilder.fromUriString(frontendLinkRedirectUri)
                 .queryParam("linked", true)
@@ -254,41 +241,20 @@ public class GoogleOAuthService {
 
     // 약관을 재검증하고 신규 Google 회원과 가입 관련 데이터 생성
     private Member createGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo, List<Long> agreedTermsIds) {
-        if (socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).isPresent()) {
-            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_ALREADY_EXISTS);
-        }
-        if (memberRepository.existsByEmail(userInfo.email())) {
-            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_LINK_REQUIRED);
-        }
-
-        List<Terms> agreedTerms = termsAgreementService.validateAndGetAgreedTerms(agreedTermsIds);
-
-        // 회원, 기본 설정, 약관 동의, 소셜 계정 연동 정보를 하나의 트랜잭션으로 저장
-        Member member = memberRepository.save(OAuthConverter.toGoogleMember(userInfo));
-        memberSettingsRepository.save(MemberConverter.toDefaultMemberSettings(member));
-        termsAgreementService.saveMemberTerms(member, agreedTerms);
-        socialAccountRepository.save(OAuthConverter.toGoogleSocialAccount(member, userInfo));
+        Member member = googleOAuthPersistenceService.createGoogleMember(userInfo, agreedTermsIds);
 
         String profileImageKey = googleProfileImageService.upload(member.getId(), userInfo.picture());
         if (profileImageKey != null) {
-            member.updateProfileImage(profileImageKey);
+            try {
+                googleOAuthPersistenceService.updateProfileImage(member.getId(), profileImageKey);
+            } catch (RuntimeException exception) {
+                // 프로필 이미지는 선택 정보이므로 DB 반영 실패 시 S3 객체를 정리하고 회원가입은 계속 진행
+                googleProfileImageService.delete(profileImageKey);
+                log.warn("Google 프로필 이미지 DB 반영 실패: memberId={}, objectKey={}", member.getId(), profileImageKey, exception);
+            }
         }
 
         return member;
-    }
-
-    // Google sub와 연결된 회원을 조회하고, 동일 이메일 회원이 있으면 계정 연동 안내
-    private Member getGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo) {
-        SocialAccount socialAccount = socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).orElse(null);
-
-        if (socialAccount != null) {
-            return socialAccount.getMember();
-        }
-
-        if (memberRepository.existsByEmail(userInfo.email())) {
-            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_LINK_REQUIRED);
-        }
-        throw new AuthException(AuthErrorCode.OAUTH_SIGNUP_REQUIRED);
     }
 
     private Member getActiveMember(Long memberId) {
