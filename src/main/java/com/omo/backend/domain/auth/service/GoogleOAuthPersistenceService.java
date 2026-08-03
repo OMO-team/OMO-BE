@@ -31,6 +31,7 @@ public class GoogleOAuthPersistenceService {
     private final MemberSettingsRepository memberSettingsRepository;
     private final SocialAccountRepository socialAccountRepository;
     private final TermsAgreementService termsAgreementService;
+    private final GoogleOAuthConflictResolver googleOAuthConflictResolver;
 
     // 신규 Google 회원과 기본 설정, 약관 동의, 소셜 계정을 하나의 트랜잭션으로 저장
     @Transactional
@@ -52,8 +53,8 @@ public class GoogleOAuthPersistenceService {
             socialAccountRepository.saveAndFlush(OAuthConverter.toGoogleSocialAccount(member, userInfo));
             return member;
         } catch (DataIntegrityViolationException exception) {
-            // 동시 회원가입 중 DB 유니크 제약을 먼저 선점한 요청이 있으면 기존 회원 안내
-            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_ALREADY_EXISTS);
+            AuthErrorCode errorCode = googleOAuthConflictResolver.resolveSignupConflict(userInfo).orElseThrow(() -> exception);
+            throw new AuthException(errorCode);
         }
     }
 
