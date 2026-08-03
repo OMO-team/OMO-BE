@@ -18,8 +18,7 @@ public interface MemberWishlistRepository extends JpaRepository<MemberWishlist, 
             from MemberWishlist memberWishlist
             join fetch memberWishlist.city city
             join fetch city.country
-            join fetch city.cityPurposes cityPurpose
-            join fetch cityPurpose.purpose
+            join fetch memberWishlist.purpose
             where memberWishlist.member.id = :memberId
               and city.deletedAt is null
             order by memberWishlist.createdAt desc, memberWishlist.id desc
