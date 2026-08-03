@@ -33,7 +33,7 @@ public class MyHomeController implements MyHomeControllerDocs {
 
     @Override
     @GetMapping("/wishlist")
-    public ApiResponse<CityResponseDTO.CityListResult> getWishlist(
+    public ApiResponse<CityResponseDTO.WishlistCityListResult> getWishlist(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         return ApiResponse.onSuccess(

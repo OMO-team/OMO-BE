@@ -2,6 +2,7 @@ package com.omo.backend.domain.wishlist.entity;
 
 import com.omo.backend.domain.city.entity.City;
 import com.omo.backend.domain.member.entity.Member;
+import com.omo.backend.domain.purpose.entity.Purpose;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -58,20 +59,26 @@ public class MemberWishlist {
     @JoinColumn(name = "city_id", nullable = false)
     private City city;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purpose_id", nullable = false)
+    private Purpose purpose;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private MemberWishlist(Member member, City city) {
+    private MemberWishlist(Member member, City city, Purpose purpose) {
         this.member = member;
         this.city = city;
+        this.purpose = purpose;
     }
 
-    public static MemberWishlist create(Member member, City city) {
+    public static MemberWishlist create(Member member, City city, Purpose purpose) {
         return MemberWishlist.builder()
                 .member(member)
                 .city(city)
+                .purpose(purpose)
                 .build();
     }
 }

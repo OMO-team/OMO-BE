@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -26,9 +27,11 @@ public class WishlistController implements WishlistControllerDocs {
     public ApiResponse<Void> addWishlist(
             @Positive(message = "도시 ID는 양수여야 합니다.")
             @PathVariable Long cityId,
+            @Positive(message = "목적 ID는 양수여야 합니다.")
+            @RequestParam Long purposeId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        wishlistCommandService.addWishlist(userDetails.getMemberId(), cityId);
+        wishlistCommandService.addWishlist(userDetails.getMemberId(), cityId, purposeId);
         return ApiResponse.onSuccess(null);
     }
 

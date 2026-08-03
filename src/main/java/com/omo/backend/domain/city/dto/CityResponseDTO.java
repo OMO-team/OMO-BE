@@ -95,4 +95,37 @@ public class CityResponseDTO {
             Long countryId,
             String name
     ){}
+
+    @Builder
+    public record WishlistCityInfo(
+            Long cityId,
+            String name,
+            CountryDTO country,
+            @Schema(description = "도시의 목적 ID", example = "3")
+            Long purposeId,
+            @Schema(description = "도시의 목적 이름", example = "해외 인턴십")
+            String purposeName,
+            String continent,
+            String imageUrl,
+            BigDecimal rating,
+            String description,
+            Integer monthlyCost,
+            BigDecimal safetyScore,
+            BigDecimal housingScore,
+            BigDecimal visaScore,
+            BigDecimal languageScore,
+            @Schema(description = "인터넷/인프라 점수", example = "4.7")
+            BigDecimal internetScore,
+            @Schema(description = "권장 체류 기간", example = "SHORT",
+                    allowableValues = {"SHORT", "MEDIUM", "LONG", "VERY_LONG"})
+            String stayDuration,
+            @Schema(description = "로그인한 사용자의 위시리스트 여부", example = "true")
+            boolean isWishlisted
+    ) {}
+
+    @Builder
+    public record WishlistCityListResult(
+            int totalCount,
+            List<WishlistCityInfo> cities
+    ) {}
 }
