@@ -2,7 +2,6 @@ package com.omo.backend.domain.auth.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.omo.backend.domain.auth.converter.OAuthConverter;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
 import com.omo.backend.domain.auth.dto.OAuthRequestDTO;
 import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
@@ -10,17 +9,14 @@ import com.omo.backend.domain.auth.dto.OAuthStateDTO;
 import com.omo.backend.domain.auth.enums.OAuthPurpose;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
-import com.omo.backend.domain.member.converter.MemberConverter;
 import com.omo.backend.domain.member.entity.Member;
 import com.omo.backend.domain.member.enums.MemberProvider;
 import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
 import com.omo.backend.domain.member.exception.MemberException;
 import com.omo.backend.domain.member.repository.MemberRepository;
-import com.omo.backend.domain.member.repository.MemberSettingsRepository;
 import com.omo.backend.domain.member.repository.SocialAccountRepository;
 import com.omo.backend.domain.member.service.TermsAgreementService;
-import com.omo.backend.domain.terms.entity.Terms;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -53,7 +49,6 @@ public class GoogleOAuthService {
 
     private final SocialAccountRepository socialAccountRepository;
     private final MemberRepository memberRepository;
-    private final MemberSettingsRepository memberSettingsRepository;
     private final TermsAgreementService termsAgreementService;
     private final GoogleProfileImageService googleProfileImageService;
     private final GoogleOAuthPersistenceService googleOAuthPersistenceService;
@@ -128,7 +123,6 @@ public class GoogleOAuthService {
     }
 
     // Google 콜백의 요청 목적에 따라 신규 회원가입 또는 기존 회원 로그인 처리
-    @Transactional
     public String handleCallback(String code, String state, String authorizationError) {
         // Google 인증 성공 여부와 요청 시 발급한 state를 검증
         validateAuthorizationResponse(code, state, authorizationError);
@@ -245,24 +239,11 @@ public class GoogleOAuthService {
 
     // 약관을 재검증하고 신규 Google 회원과 가입 관련 데이터 생성
     private Member createGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo, List<Long> agreedTermsIds) {
-        if (socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).isPresent()) {
-            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_ALREADY_EXISTS);
-        }
-        if (memberRepository.existsByEmail(userInfo.email())) {
-            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_LINK_REQUIRED);
-        }
-
-        List<Terms> agreedTerms = termsAgreementService.validateAndGetAgreedTerms(agreedTermsIds);
-
-        // 회원, 기본 설정, 약관 동의, 소셜 계정 연동 정보를 하나의 트랜잭션으로 저장
-        Member member = memberRepository.save(OAuthConverter.toGoogleMember(userInfo));
-        memberSettingsRepository.save(MemberConverter.toDefaultMemberSettings(member));
-        termsAgreementService.saveMemberTerms(member, agreedTerms);
-        socialAccountRepository.save(OAuthConverter.toGoogleSocialAccount(member, userInfo));
+        Member member = googleOAuthPersistenceService.createGoogleMember(userInfo, agreedTermsIds);
 
         String profileImageKey = googleProfileImageService.upload(member.getId(), userInfo.picture());
         if (profileImageKey != null) {
-            member.updateProfileImage(profileImageKey);
+            googleOAuthPersistenceService.updateProfileImage(member.getId(), profileImageKey);
         }
 
         return member;
