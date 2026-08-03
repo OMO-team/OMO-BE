@@ -18,6 +18,7 @@ import com.omo.backend.domain.member.repository.MemberRepository;
 import com.omo.backend.domain.member.repository.SocialAccountRepository;
 import com.omo.backend.domain.member.service.TermsAgreementService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class GoogleOAuthService {
 
@@ -243,7 +245,13 @@ public class GoogleOAuthService {
 
         String profileImageKey = googleProfileImageService.upload(member.getId(), userInfo.picture());
         if (profileImageKey != null) {
-            googleOAuthPersistenceService.updateProfileImage(member.getId(), profileImageKey);
+            try {
+                googleOAuthPersistenceService.updateProfileImage(member.getId(), profileImageKey);
+            } catch (RuntimeException exception) {
+                // 프로필 이미지는 선택 정보이므로 DB 반영 실패 시 S3 객체를 정리하고 회원가입은 계속 진행
+                googleProfileImageService.delete(profileImageKey);
+                log.warn("Google 프로필 이미지 DB 반영 실패: memberId={}, objectKey={}", member.getId(), profileImageKey, exception);
+            }
         }
 
         return member;
