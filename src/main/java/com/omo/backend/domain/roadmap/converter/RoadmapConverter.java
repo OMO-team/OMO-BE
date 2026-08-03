@@ -5,7 +5,6 @@ import com.omo.backend.domain.roadmap.dto.RoadmapResponseDTO;
 import com.omo.backend.domain.roadmap.entity.Roadmap;
 import com.omo.backend.domain.task.entity.Task;
 import com.omo.backend.domain.task.enums.TaskStatus;
-import java.time.LocalDate;
 import java.util.List;
 
 public final class RoadmapConverter {
@@ -44,6 +43,10 @@ public final class RoadmapConverter {
                 .cityId(roadmap.getRoadmapTemplate().getCity().getCityId())
                 .cityName(roadmap.getRoadmapTemplate().getCity().getName())
                 .cityImageUrl(roadmap.getRoadmapTemplate().getCity().getImageUrl())
+                .country(RoadmapResponseDTO.CountryDTO.builder()
+                        .countryId(roadmap.getRoadmapTemplate().getCity().getCountry().getCountryId())
+                        .name(roadmap.getRoadmapTemplate().getCity().getCountry().getName())
+                        .build())
                 .purposeId(roadmap.getRoadmapTemplate().getPurpose().getPurposeId())
                 .purposeName(roadmap.getRoadmapTemplate().getPurpose().getName())
                 .departureDate(roadmap.getDepartureDate())
