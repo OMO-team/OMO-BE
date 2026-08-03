@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 public class CitySpecification {
@@ -42,11 +43,17 @@ public class CitySpecification {
         );
     }
 
-    //국가 코드 필터
-    public static Specification<City> hasCountry(String countryCode){
-        if (countryCode == null || countryCode.isBlank()) return (root, query, cb) -> null;
+    //국가 코드 필터 (복수 선택)
+    public static Specification<City> hasCountry(List<String> countryCodes){
+        if (countryCodes == null || countryCodes.isEmpty()) return (root, query, cb) -> null;
+        List<String> filtered = countryCodes.stream()
+                .filter(code -> code != null && !code.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
+        if (filtered.isEmpty()) return (root, query, cb) -> null;
         return (root, query, cb) ->
-                cb.equal(root.get("country").get("code"), countryCode);
+                root.get("country").get("code").in(filtered);
     }
 
     // 최대 생활비
