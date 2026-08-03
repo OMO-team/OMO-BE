@@ -10,6 +10,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Tag(name = "City", description = "도시 API")
 public interface CityControllerDocs {
 
@@ -20,7 +22,7 @@ public interface CityControllerDocs {
     @Parameters({
             @Parameter(name = "keyword", description = "검색 키워드 (도시명, 국가명, 설명, 최대 50자)", required = false, example = "베를린"),
             @Parameter(name = "purposeType", description = "목적 (WORKING_HOLIDAY / EXCHANGE_STUDENT / INTERNSHIP)"),
-            @Parameter(name = "countryCode", description = "국가 코드 (예: AU, JP)"),
+            @Parameter(name = "countryCodes", description = "국가 코드 목록, 복수 선택 가능 (예: AU, JP) — ?countryCodes=AU&countryCodes=JP"),
             @Parameter(name = "maxMonthlyCost", description = "최대 월 생활비 (만원 단위, 예: 200)"),
             @Parameter(name = "minSafetyScore", description = "최소 치안 점수 (예: 4.0)"),
             @Parameter(name = "housingDifficulty", description = "숙소 난이도 (EASY / NORMAL / HARD)"),
@@ -34,7 +36,7 @@ public interface CityControllerDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String purposeType,
-            @RequestParam(required = false) String countryCode,
+            @RequestParam(required = false) List<String> countryCodes,
             @RequestParam(required = false) String maxMonthlyCost,
             @RequestParam(required = false) String minSafetyScore,
             @RequestParam(required = false) String housingDifficulty,

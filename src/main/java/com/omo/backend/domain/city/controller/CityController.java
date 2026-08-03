@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 @RestController
@@ -26,7 +27,7 @@ public class CityController implements CityControllerDocs {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String purposeType,
-            @RequestParam(required = false) String countryCode,
+            @RequestParam(required = false) List<String> countryCodes,
             @RequestParam(required = false) String maxMonthlyCost,
             @RequestParam(required = false) String minSafetyScore,
             @RequestParam(required = false) String housingDifficulty,
@@ -50,7 +51,7 @@ public class CityController implements CityControllerDocs {
         }
 
         CityRequestDTO.CityFilterRequest request = new CityRequestDTO.CityFilterRequest(
-                keyword, purposeType, countryCode, parsedMaxCost,
+                keyword, purposeType, countryCodes, parsedMaxCost,
                 parsedMinSafety, housingDifficulty, visaDifficulty, stayDuration, continent
         );
         Long memberId = (userDetails != null) ? userDetails.getMemberId() : null;
