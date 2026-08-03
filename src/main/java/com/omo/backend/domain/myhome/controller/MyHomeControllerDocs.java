@@ -53,7 +53,7 @@ public interface MyHomeControllerDocs {
                     implementation = ApiResponse.ErrorResponse.class
             ))
     )
-    ApiResponse<CityResponseDTO.CityListResult> getWishlist(
+    ApiResponse<CityResponseDTO.WishlistCityListResult> getWishlist(
             @Parameter(hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails
     );

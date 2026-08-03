@@ -16,13 +16,13 @@ public class WishlistQueryService {
 
     private final MemberWishlistRepository memberWishlistRepository;
 
-    public CityResponseDTO.CityListResult getWishlist(Long memberId) {
+    public CityResponseDTO.WishlistCityListResult getWishlist(Long memberId) {
         List<City> cities = memberWishlistRepository
                 .findAllActiveByMemberIdOrderByCreatedAtDescIdDesc(memberId)
                 .stream()
                 .map(memberWishlist -> memberWishlist.getCity())
                 .toList();
 
-        return CityConverter.toCityListResult(cities);
+        return CityConverter.toWishlistCityListResult(cities);
     }
 }

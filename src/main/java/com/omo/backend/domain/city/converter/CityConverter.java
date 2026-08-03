@@ -2,6 +2,7 @@ package com.omo.backend.domain.city.converter;
 
 import com.omo.backend.domain.city.dto.CityResponseDTO;
 import com.omo.backend.domain.city.entity.City;
+import com.omo.backend.domain.purpose.entity.Purpose;
 
 import java.util.List;
 import java.util.Set;
@@ -46,6 +47,42 @@ public class CityConverter {
         return CityResponseDTO.CityListResult.builder()
                 .totalCount(cityInfoList.size())
                 .cities(cityInfoList)
+                .build();
+    }
+
+    public static CityResponseDTO.WishlistCityListResult toWishlistCityListResult(List<City> cities) {
+        List<CityResponseDTO.WishlistCityInfo> cityInfoList = cities.stream()
+                .map(CityConverter::toWishlistCityInfo)
+                .toList();
+
+        return CityResponseDTO.WishlistCityListResult.builder()
+                .totalCount(cityInfoList.size())
+                .cities(cityInfoList)
+                .build();
+    }
+
+    private static CityResponseDTO.WishlistCityInfo toWishlistCityInfo(City city) {
+        CityResponseDTO.CityInfo cityInfo = toCityInfo(city, false);
+        Purpose purpose = city.getCityPurposes().getFirst().getPurpose();
+
+        return CityResponseDTO.WishlistCityInfo.builder()
+                .cityId(cityInfo.cityId())
+                .name(cityInfo.name())
+                .country(cityInfo.country())
+                .continent(cityInfo.continent())
+                .imageUrl(cityInfo.imageUrl())
+                .rating(cityInfo.rating())
+                .description(cityInfo.description())
+                .monthlyCost(cityInfo.monthlyCost())
+                .safetyScore(cityInfo.safetyScore())
+                .housingScore(cityInfo.housingScore())
+                .visaScore(cityInfo.visaScore())
+                .languageScore(cityInfo.languageScore())
+                .internetScore(cityInfo.internetScore())
+                .stayDuration(cityInfo.stayDuration())
+                .isWishlisted(cityInfo.isWishlisted())
+                .purposeId(purpose.getPurposeId())
+                .purposeName(purpose.getName())
                 .build();
     }
 }
