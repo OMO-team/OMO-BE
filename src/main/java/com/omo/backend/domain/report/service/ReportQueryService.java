@@ -101,13 +101,16 @@ public class ReportQueryService {
                 reportAiSummaryGenerator.generate(city, coreSummaries, prosCons, question);
 
         List<CityRelatedResource> resources;
-        if (Boolean.FALSE.equals(aiResult.answerable())) {
+        if (!Boolean.TRUE.equals(aiResult.answerable())) {
             resources = List.of();
         } else {
             ResourceTopic matchedTopic = parseResourceTopic(aiResult.topic());
             resources = matchedTopic != null
                     ? cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, matchedTopic)
-                    : cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId).stream().limit(2).toList();
+                    : cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId).stream()
+                            .sorted(java.util.Comparator.comparing(CityRelatedResource::getCreatedAt).reversed())
+                            .limit(2)
+                            .toList();
         }
 
         return new ReportResponseDTO.AiReportDTO(aiResult.summary(), ReportConverter.toResourceDTOList(resources));
