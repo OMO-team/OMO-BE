@@ -12,7 +12,6 @@ import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.member.converter.MemberConverter;
 import com.omo.backend.domain.member.entity.Member;
-import com.omo.backend.domain.member.entity.SocialAccount;
 import com.omo.backend.domain.member.enums.MemberProvider;
 import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
@@ -142,7 +141,7 @@ public class GoogleOAuthService {
 
         Member member = switch (oauthState.purpose()) {
             case SIGNUP -> createGoogleMember(userInfo, oauthState.agreedTermsIds());
-            case LOGIN -> getGoogleMember(userInfo);
+            case LOGIN -> googleOAuthPersistenceService.getGoogleMember(userInfo);
             case LINK -> throw new AuthException(AuthErrorCode.OAUTH_STATE_INVALID);
         };
         validateActiveMember(member);
@@ -267,20 +266,6 @@ public class GoogleOAuthService {
         }
 
         return member;
-    }
-
-    // Google sub와 연결된 회원을 조회하고, 동일 이메일 회원이 있으면 계정 연동 안내
-    private Member getGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo) {
-        SocialAccount socialAccount = socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).orElse(null);
-
-        if (socialAccount != null) {
-            return socialAccount.getMember();
-        }
-
-        if (memberRepository.existsByEmail(userInfo.email())) {
-            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_LINK_REQUIRED);
-        }
-        throw new AuthException(AuthErrorCode.OAUTH_SIGNUP_REQUIRED);
     }
 
     private Member getActiveMember(Long memberId) {

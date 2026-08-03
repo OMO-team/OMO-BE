@@ -5,6 +5,7 @@ import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
 import com.omo.backend.domain.auth.exception.AuthErrorCode;
 import com.omo.backend.domain.auth.exception.AuthException;
 import com.omo.backend.domain.member.entity.Member;
+import com.omo.backend.domain.member.entity.SocialAccount;
 import com.omo.backend.domain.member.enums.MemberProvider;
 import com.omo.backend.domain.member.enums.MemberStatus;
 import com.omo.backend.domain.member.exception.MemberErrorCode;
@@ -21,6 +22,23 @@ public class GoogleOAuthPersistenceService {
 
     private final MemberRepository memberRepository;
     private final SocialAccountRepository socialAccountRepository;
+
+    // Google 계정과 연결된 활성 회원을 조회하고 미가입·미연동 상태를 구분
+    @Transactional(readOnly = true)
+    public Member getGoogleMember(OAuthResponseDTO.GoogleUserInfoDTO userInfo) {
+        SocialAccount socialAccount = socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).orElse(null);
+
+        if (socialAccount != null) {
+            Member member = socialAccount.getMember();
+            validateActiveMember(member);
+            return member;
+        }
+
+        if (memberRepository.existsByEmail(userInfo.email())) {
+            throw new AuthException(AuthErrorCode.OAUTH_ACCOUNT_LINK_REQUIRED);
+        }
+        throw new AuthException(AuthErrorCode.OAUTH_SIGNUP_REQUIRED);
+    }
 
     // 로그인 회원과 Google 계정의 중복 연결을 검증하고 소셜 계정 저장
     @Transactional
@@ -42,9 +60,13 @@ public class GoogleOAuthPersistenceService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
+        validateActiveMember(member);
+        return member;
+    }
+
+    private void validateActiveMember(Member member) {
         if (member.getStatus() != MemberStatus.ACTIVE) {
             throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
         }
-        return member;
     }
 }
