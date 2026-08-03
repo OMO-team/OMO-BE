@@ -57,6 +57,7 @@ public class GoogleOAuthService {
     private final MemberSettingsRepository memberSettingsRepository;
     private final TermsAgreementService termsAgreementService;
     private final GoogleProfileImageService googleProfileImageService;
+    private final GoogleOAuthPersistenceService googleOAuthPersistenceService;
     private final AuthCommandService authCommandService;
     private final StringRedisTemplate redisTemplate;
     private final RestClient googleRestClient;
@@ -155,7 +156,6 @@ public class GoogleOAuthService {
     }
 
     // Google 계정 연결 콜백을 검증하고 로그인 회원에게 소셜 계정 연결
-    @Transactional
     public String handleLinkCallback(String code, String state, String authorizationError) {
         // Google 인증 성공 여부와 요청 시 발급한 state를 검증
         validateAuthorizationResponse(code, state, authorizationError);
@@ -169,15 +169,7 @@ public class GoogleOAuthService {
         OAuthResponseDTO.GoogleUserInfoDTO userInfo = requestGoogleUserInfo(googleAccessToken);
         validateGoogleUserInfo(userInfo);
 
-        Member member = getActiveMember(oauthState.memberId());
-        if (socialAccountRepository.existsByMemberIdAndProvider(member.getId(), MemberProvider.GOOGLE)) {
-            throw new AuthException(AuthErrorCode.SOCIAL_ACCOUNT_ALREADY_LINKED);
-        }
-        if (socialAccountRepository.findByProviderAndProviderUserId(MemberProvider.GOOGLE, userInfo.sub()).isPresent()) {
-            throw new AuthException(AuthErrorCode.SOCIAL_ACCOUNT_LINKED_TO_ANOTHER_MEMBER);
-        }
-
-        socialAccountRepository.save(OAuthConverter.toGoogleSocialAccount(member, userInfo));
+        googleOAuthPersistenceService.linkGoogleAccount(oauthState.memberId(), userInfo);
 
         return UriComponentsBuilder.fromUriString(frontendLinkRedirectUri)
                 .queryParam("linked", true)
