@@ -37,9 +37,10 @@ public class ReportAiSummaryGenerator {
                     "topic", Map.of(
                             "type", List.of("string", "null"),
                             "enum", topicEnumWithNull()
-                    )
+                    ),
+                    "answerable", Map.of("type", "boolean")
             ),
-            "required", List.of("summary")
+            "required", List.of("summary", "answerable")
     );
 
     private static List<String> topicEnumWithNull() {
@@ -92,8 +93,10 @@ public class ReportAiSummaryGenerator {
         - 질문에 대한 답을 데이터에서 찾을 수 없으면, 모른다고 솔직히 답하라.
         - 자연스러운 한국어 문장으로 답하라.
         - topic 필드에는 질문과 가장 관련 있는 주제 하나를 %s 중에서 골라라.
-          질문이 이 중 어디에도 명확히 해당하지 않으면 topic은 null로 남겨라.
-        - 반드시 summary와 topic 필드만 있는 JSON으로 출력한다. 설명, 코드블록, 마크다운 금지.
+          질문이 이 중 어디에도 명확히 해당하지 않으면 topic은 null로 남겨라. topic이 null인 것과 answerable이 false인 것은 서로 다른 의미다 — topic은 "특정 세부 주제가 없다"는 뜻일 뿐, 그 자체로 답변 불가를 의미하지 않는다.
+        - answerable 필드는 질문이 "%s" 도시에 관한 것이고 제공된 데이터로 답했으면(요약해서 답하는 일반적인 질문 포함) true로 채워라.
+          answerable은 오직 질문이 다른 도시/주제에 관한 것이라 제공된 데이터와 아예 무관해서 진짜로 답할 수 없을 때만 false로 채워라.
+        - 반드시 summary, topic, answerable 필드만 있는 JSON으로 출력한다. 설명, 코드블록, 마크다운 금지.
 
         [핵심 정보]
         %s
@@ -104,6 +107,6 @@ public class ReportAiSummaryGenerator {
         <user_question>
         %s
         </user_question>
-        """.formatted(city.getName(), topicOptions, coreSummaryText, prosConsText, question);
+        """.formatted(city.getName(), topicOptions, city.getName(), coreSummaryText, prosConsText, question);
     }
 }
