@@ -48,6 +48,8 @@ public class CitySpecification {
         if (countryCodes == null || countryCodes.isEmpty()) return (root, query, cb) -> null;
         List<String> filtered = countryCodes.stream()
                 .filter(code -> code != null && !code.isBlank())
+                .map(String::trim)
+                .distinct()
                 .toList();
         if (filtered.isEmpty()) return (root, query, cb) -> null;
         return (root, query, cb) ->
