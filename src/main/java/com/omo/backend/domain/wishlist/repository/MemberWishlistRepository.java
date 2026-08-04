@@ -11,7 +11,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MemberWishlistRepository extends JpaRepository<MemberWishlist, Long> {
 
-    boolean existsByMember_IdAndCity_CityId(Long memberId, Long cityId);
+    boolean existsByMember_IdAndCity_CityIdAndPurpose_PurposeId(
+            Long memberId,
+            Long cityId,
+            Long purposeId
+    );
 
     @Query("""
             select memberWishlist
@@ -40,9 +44,11 @@ public interface MemberWishlistRepository extends JpaRepository<MemberWishlist, 
             delete from MemberWishlist memberWishlist
             where memberWishlist.member.id = :memberId
               and memberWishlist.city.cityId = :cityId
+              and memberWishlist.purpose.purposeId = :purposeId
             """)
-    int deleteByMemberIdAndCityId(
+    int deleteByMemberIdAndCityIdAndPurposeId(
             @Param("memberId") Long memberId,
-            @Param("cityId") Long cityId
+            @Param("cityId") Long cityId,
+            @Param("purposeId") Long purposeId
     );
 }

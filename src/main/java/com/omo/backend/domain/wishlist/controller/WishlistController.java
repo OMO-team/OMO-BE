@@ -40,9 +40,11 @@ public class WishlistController implements WishlistControllerDocs {
     public ApiResponse<Void> removeWishlist(
             @Positive(message = "도시 ID는 양수여야 합니다.")
             @PathVariable Long cityId,
+            @Positive(message = "목적 ID는 양수여야 합니다.")
+            @RequestParam Long purposeId,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        wishlistCommandService.removeWishlist(userDetails.getMemberId(), cityId);
+        wishlistCommandService.removeWishlist(userDetails.getMemberId(), cityId, purposeId);
         return ApiResponse.onSuccess(null);
     }
 }

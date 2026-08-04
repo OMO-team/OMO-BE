@@ -42,15 +42,19 @@ public class WishlistCommandService {
 
         validateCityPurpose(cityId, purposeId);
 
-        if (memberWishlistRepository.existsByMember_IdAndCity_CityId(memberId, cityId)) {
+        if (memberWishlistRepository.existsByMember_IdAndCity_CityIdAndPurpose_PurposeId(
+                memberId,
+                cityId,
+                purposeId
+        )) {
             return;
         }
 
         memberWishlistRepository.save(MemberWishlist.create(member, city, purpose));
     }
 
-    public void removeWishlist(Long memberId, Long cityId) {
-        memberWishlistRepository.deleteByMemberIdAndCityId(memberId, cityId);
+    public void removeWishlist(Long memberId, Long cityId, Long purposeId) {
+        memberWishlistRepository.deleteByMemberIdAndCityIdAndPurposeId(memberId, cityId, purposeId);
     }
 
     private void validateCityPurpose(Long cityId, Long purposeId) {

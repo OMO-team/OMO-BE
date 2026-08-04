@@ -30,8 +30,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(
         name = "member_wishlist",
         uniqueConstraints = @UniqueConstraint(
-                name = "uk_member_wishlist_member_city",
-                columnNames = {"member_id", "city_id"}
+                name = "uk_member_wishlist_member_city_purpose",
+                columnNames = {"member_id", "city_id", "purpose_id"}
         ),
         indexes = {
                 @Index(
