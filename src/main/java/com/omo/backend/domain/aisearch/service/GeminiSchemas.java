@@ -22,9 +22,7 @@ public class GeminiSchemas {
         return Map.of("type", "string", "enum", values);
     }
     private static Map<String, Object> nullableEnumeration(List<String> values) {
-        List<Object> enumWithNull = new java.util.ArrayList<>(values);
-        enumWithNull.add(null);
-        return Map.of("type", List.of("string", "null"), "enum", enumWithNull);
+        return Map.of("type", List.of("string", "null"), "enum", values);
     }
 
     private static final List<String> PURPOSE_VALUES = List.of("WORKING_HOLIDAY", "EXCHANGE_STUDENT", "INTERNSHIP");

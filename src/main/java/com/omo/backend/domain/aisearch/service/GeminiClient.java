@@ -72,7 +72,7 @@ public class GeminiClient implements AiClient {
             } catch (Exception e) {
                 lastException = e;
                 log.warn("[Gemini Call 실패] attempt={}, type={}, error={}",
-                        attempt, responseType.getSimpleName(), e.getMessage());
+                        attempt, responseType.getSimpleName(), e.toString());
 
                 if (attempt < MAX_RETRY) {
                     if (!sleepBeforeRetry(attempt)) {
