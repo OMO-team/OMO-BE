@@ -150,7 +150,13 @@ public class InquiryAttachmentService {
                     completeCommit(inquiryId, uploadToken, preparedAttachments);
                     return;
                 }
-                compensateRollback(inquiryId, uploadToken, preparedAttachments);
+
+                if (status == TransactionSynchronization.STATUS_ROLLED_BACK) {
+                    compensateRollback(inquiryId, uploadToken, preparedAttachments);
+                    return;
+                }
+
+                handleUnknownCompletion(inquiryId, uploadToken, preparedAttachments);
             }
         });
     }
@@ -181,6 +187,14 @@ public class InquiryAttachmentService {
         } catch (RuntimeException exception) {
             log.error("문의 첨부파일 처리 실패 후 업로드 토큰 선점 해제 중 오류가 발생했습니다. inquiryId={}, uploadToken={}", inquiryId, uploadToken, exception);
         }
+    }
+
+    private void handleUnknownCompletion(Long inquiryId, String uploadToken, List<PreparedAttachment> preparedAttachments) {
+        // DB 커밋 여부를 알 수 없으므로 임시·영구 객체와 토큰을 변경하지 않음 (DB 상태를 확인한 뒤 안전하게 정리할 수 있도록 두 object key를 모두 기록)
+        preparedAttachments.forEach(attachment -> log.error(
+                "문의 첨부파일 트랜잭션 결과를 확인할 수 없습니다. inquiryId={}, uploadToken={}, sourceObjectKey={}, destinationObjectKey={}",
+                inquiryId, uploadToken, attachment.sourceObjectKey(), attachment.destinationObjectKey()
+        ));
     }
 
     private void deleteWithLog(Long inquiryId, String objectKey, String operation) {
