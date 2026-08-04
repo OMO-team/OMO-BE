@@ -75,7 +75,7 @@ public class ReportConverter {
     public static List<ReportResponseDTO.StatDTO> toStatDTOList(City city) {
         return List.of(
                 new ReportResponseDTO.StatDTO(StatType.SAFETY, toDouble(city.getSafetyScore()), 5.0, "점"),
-                new ReportResponseDTO.StatDTO(StatType.COST, toDouble(city.getMonthlyCost()), null, "만원"),
+                new ReportResponseDTO.StatDTO(StatType.COST, toDouble(city.getMonthlyCost()), 450.0, "만원"),
                 new ReportResponseDTO.StatDTO(StatType.HOUSING, toDouble(city.getHousingScore()), 5.0, "점"),
                 new ReportResponseDTO.StatDTO(StatType.VISA, toDouble(city.getVisaScore()), 5.0, "점"),
                 new ReportResponseDTO.StatDTO(StatType.INFRA, toDouble(city.getInternetScore()), 5.0, "점"),
@@ -104,7 +104,7 @@ public class ReportConverter {
 
         List<ReportResponseDTO.StatGroupDTO> statGroups = List.of(
                 toStatGroupDTO(StatType.SAFETY, 5.0, "점", cities, City::getSafetyScore),
-                toStatGroupDTO(StatType.COST, null, "만원", cities, City::getMonthlyCost),
+                toStatGroupDTO(StatType.COST, 450.0, "만원", cities, City::getMonthlyCost),
                 toStatGroupDTO(StatType.HOUSING, 5.0, "점", cities, City::getHousingScore),
                 toStatGroupDTO(StatType.VISA, 5.0, "점", cities, City::getVisaScore),
                 toStatGroupDTO(StatType.INFRA, 5.0, "점", cities, City::getInternetScore),
