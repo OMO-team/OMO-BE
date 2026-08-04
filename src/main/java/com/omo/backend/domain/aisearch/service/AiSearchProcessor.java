@@ -48,7 +48,10 @@ public class AiSearchProcessor {
 
         // 1. 자연어 -> 파싱
         AiSearchResponseDTO.ParsedConditions currentParsed;
-        List<String> validCountryNames = cityRepository.findDistinctCountryNames();
+        List<String> validCountryNames = cityRepository.findDistinctCountryNames().stream()
+                .filter(name -> name != null && !name.isBlank())
+                .distinct()
+                .toList();
         try {
             currentParsed = aiClient.callWithSchema(
                     buildParsePrompt(searchQuery, validCountryNames),
