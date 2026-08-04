@@ -9,14 +9,19 @@ import com.omo.backend.global.storage.FileValidationPolicy;
 import com.omo.backend.global.storage.S3Properties;
 import com.omo.backend.global.storage.service.S3FileService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class InquiryAttachmentService {
 
     private final InquiryAttachmentRepository inquiryAttachmentRepository;
@@ -37,22 +42,27 @@ public class InquiryAttachmentService {
         // Redis Lua Script로 READY 상태의 토큰을 PROCESSING 상태로 원자적으로 선점 (동일 토큰을 사용한 동시 요청 중 하나만 이후 첨부파일 처리를 진행할 수 있음)
         claimUploadToken(uploadToken);
 
+        List<PreparedAttachment> preparedAttachments = new ArrayList<>(attachmentKeys.size());
         try {
-            // Redis 발급 내역과 S3 메타데이터를 모두 검증한 뒤 객체 이동 시작
+            // Redis 발급 내역과 S3 메타데이터를 모두 검증한 뒤 영구 객체 복사 시작
             List<ValidatedAttachment> validatedAttachments = attachmentKeys.stream()
                     .map(objectKey -> validateAttachment(uploadToken, objectKey))
                     .toList();
 
-            List<InquiryAttachment> attachments = validatedAttachments.stream()
-                    .map(attachment -> moveAndCreateAttachment(inquiry, attachment))
-                    .toList();
+            for (ValidatedAttachment attachment : validatedAttachments) {
+                // S3가 복사를 완료한 뒤 응답 과정에서 예외가 발생해도 정리할 수 있도록 목적지 키를 먼저 기록
+                PreparedAttachment preparedAttachment = prepareAttachment(inquiry, attachment);
+                preparedAttachments.add(preparedAttachment);
+                s3FileService.copy(s3Properties.inquiryBucket(), preparedAttachment.sourceObjectKey(), preparedAttachment.destinationObjectKey());
+            }
 
-            // 문의와 첨부파일 연결을 저장한 뒤 업로드 토큰을 삭제해 재사용 방지
-            inquiryAttachmentRepository.saveAll(attachments);
-            inquiryUploadSessionStore.consume(uploadToken);
+            inquiryAttachmentRepository.saveAll(preparedAttachments.stream().map(PreparedAttachment::entity).toList());
+
+            // DB 트랜잭션 결과가 확정된 뒤 임시/영구 객체 정리와 토큰 상태 변경 수행
+            registerTransactionCompletion(inquiry.getId(), uploadToken, preparedAttachments);
         } catch (RuntimeException exception) {
-            // 처리에 실패한 토큰은 다시 시도할 수 있도록 선점을 해제
-            inquiryUploadSessionStore.release(uploadToken);
+            // 트랜잭션 동기화 등록 전 실패하면 이미 복사한 영구 객체를 즉시 보상 삭제
+            compensateRollback(inquiry.getId(), uploadToken, preparedAttachments);
             throw exception;
         }
     }
@@ -112,13 +122,10 @@ public class InquiryAttachmentService {
         return new ValidatedAttachment(originalName, objectKey, metadata.contentType(), metadata.contentLength());
     }
 
-    private InquiryAttachment moveAndCreateAttachment(Inquiry inquiry, ValidatedAttachment attachment) {
-        // 문의 ID 기반 영구 object key를 생성하고 임시 객체를 영구 경로로 이동
+    private PreparedAttachment prepareAttachment(Inquiry inquiry, ValidatedAttachment attachment) {
+        // 복사 전에 영구 object key와 저장할 엔티티를 준비해 실패 시 보상 삭제 대상을 추적
         String destinationObjectKey = generatePermanentObjectKey(inquiry.getId(), attachment.objectKey());
-        s3FileService.move(s3Properties.inquiryBucket(), attachment.objectKey(), destinationObjectKey);
-
-        // 이동이 완료된 영구 object key와 S3 메타데이터로 첨부파일 엔티티 생성
-        return InquiryAttachment.createInquiryAttachment(
+        InquiryAttachment entity = InquiryAttachment.createInquiryAttachment(
                 inquiry,
                 attachment.originalName(),
                 extractStoredName(destinationObjectKey),
@@ -126,6 +133,63 @@ public class InquiryAttachmentService {
                 attachment.contentType(),
                 attachment.fileSize()
         );
+        return new PreparedAttachment(attachment.objectKey(), destinationObjectKey, entity);
+    }
+
+    private void registerTransactionCompletion(Long inquiryId, String uploadToken, List<PreparedAttachment> preparedAttachments) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            // 트랜잭션 없이 호출된 경우 repository 저장 성공을 커밋 성공과 동일하게 처리
+            completeCommit(inquiryId, uploadToken, preparedAttachments);
+            return;
+        }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if (status == TransactionSynchronization.STATUS_COMMITTED) {
+                    completeCommit(inquiryId, uploadToken, preparedAttachments);
+                    return;
+                }
+                compensateRollback(inquiryId, uploadToken, preparedAttachments);
+            }
+        });
+    }
+
+    private void completeCommit(Long inquiryId, String uploadToken, List<PreparedAttachment> preparedAttachments) {
+        // DB에 영구 object key 저장이 확정된 뒤 더 이상 필요하지 않은 임시 객체 삭제
+        preparedAttachments.forEach(attachment -> deleteWithLog(inquiryId, attachment.sourceObjectKey(), "임시 객체 정리"));
+
+        // 임시 객체 삭제 실패 여부와 관계없이 토큰은 소비해 중복 문의 등록 차단
+        try {
+            if (!inquiryUploadSessionStore.consume(uploadToken)) {
+                log.warn("문의 첨부파일 처리 완료 후 업로드 토큰을 소비하지 못했습니다. inquiryId={}, uploadToken={}", inquiryId, uploadToken);
+            }
+        } catch (RuntimeException exception) {
+            log.error("문의 첨부파일 처리 완료 후 업로드 토큰 소비 중 오류가 발생했습니다. inquiryId={}, uploadToken={}", inquiryId, uploadToken, exception);
+        }
+    }
+
+    private void compensateRollback(Long inquiryId, String uploadToken, List<PreparedAttachment> preparedAttachments) {
+        // DB 롤백 또는 일부 복사 실패 시 DB에서 참조되지 않을 영구 객체를 보상 삭제
+        preparedAttachments.forEach(attachment -> deleteWithLog(inquiryId, attachment.destinationObjectKey(), "영구 객체 보상 삭제"));
+
+        // 임시 객체는 그대로 남아 있으므로 토큰 선점을 해제해 제한 시간 내 재시도 허용
+        try {
+            if (!inquiryUploadSessionStore.release(uploadToken)) {
+                log.warn("문의 첨부파일 처리 실패 후 업로드 토큰 선점을 해제하지 못했습니다. inquiryId={}, uploadToken={}", inquiryId, uploadToken);
+            }
+        } catch (RuntimeException exception) {
+            log.error("문의 첨부파일 처리 실패 후 업로드 토큰 선점 해제 중 오류가 발생했습니다. inquiryId={}, uploadToken={}", inquiryId, uploadToken, exception);
+        }
+    }
+
+    private void deleteWithLog(Long inquiryId, String objectKey, String operation) {
+        try {
+            s3FileService.delete(s3Properties.inquiryBucket(), objectKey);
+        } catch (RuntimeException exception) {
+            // 이 시점에는 DB 커밋 또는 롤백 결과가 이미 결정되어 삭제 실패를 다시 되돌릴 수 없음 (기존 처리 결과는 유지하고, 나중에 남은 S3 객체를 확인하고 정리할 수 있도록 로그를 기록)
+            log.error("문의 첨부파일 {}에 실패했습니다. inquiryId={}, objectKey={}", operation, inquiryId, objectKey, exception);
+        }
     }
 
     private String generatePermanentObjectKey(Long inquiryId, String tempObjectKey) {
@@ -144,5 +208,11 @@ public class InquiryAttachmentService {
             String objectKey,
             String contentType,
             long fileSize
+    ) {}
+
+    private record PreparedAttachment(
+            String sourceObjectKey,
+            String destinationObjectKey,
+            InquiryAttachment entity
     ) {}
 }
