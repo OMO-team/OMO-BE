@@ -36,7 +36,7 @@ public class CityQueryService {
                 .and(CitySpecification.hasMinSafety(request.minSafetyScore()))
                 .and(CitySpecification.hasHousingDifficulty(request.housingDifficulty()))
                 .and(CitySpecification.hasVisaDifficulty(request.visaDifficulty()))
-                .and(CitySpecification.hasCountry(request.countryCode()))
+                .and(CitySpecification.hasCountry(request.countryCodes()))
                 .and(CitySpecification.hasStayDuration(request.stayDuration()))
                 .and(CitySpecification.hasContinent(request.continent()));
 

@@ -3,6 +3,7 @@ package com.omo.backend.domain.city.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.math.BigDecimal;
+import java.util.List;
 import jakarta.validation.constraints.Size;
 
 public class CityRequestDTO {
@@ -19,8 +20,8 @@ public class CityRequestDTO {
                     allowableValues = {"WORKING_HOLIDAY", "EXCHANGE_STUDENT", "INTERNSHIP"})
             String purposeType,
 
-            @Schema(description = "국가 코드", example = "DE")
-            String countryCode,
+            @Schema(description = "국가 코드 목록 (복수 선택 가능)", example = "[\"DE\", \"AU\"]")
+            List<String> countryCodes,
 
             @Schema(description = "최대 월 생활비 (만원 단위)", example = "200")
             Integer maxMonthlyCost,
