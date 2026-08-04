@@ -100,10 +100,18 @@ public class ReportQueryService {
         ReportResponseDTO.AiSummaryResult aiResult =
                 reportAiSummaryGenerator.generate(city, coreSummaries, prosCons, question);
 
-        ResourceTopic matchedTopic = parseResourceTopic(aiResult.topic());
-        List<CityRelatedResource> resources = matchedTopic != null
-                ? cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, matchedTopic)
-                : cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId);
+        List<CityRelatedResource> resources;
+        if (!Boolean.TRUE.equals(aiResult.answerable())) {
+            resources = List.of();
+        } else {
+            ResourceTopic matchedTopic = parseResourceTopic(aiResult.topic());
+            resources = matchedTopic != null
+                    ? cityRelatedResourceRepository.findByCityIdAndTopicAndDeletedAtIsNull(cityId, matchedTopic)
+                    : cityRelatedResourceRepository.findByCityIdAndDeletedAtIsNull(cityId).stream()
+                            .sorted(java.util.Comparator.comparing(CityRelatedResource::getCreatedAt).reversed())
+                            .limit(2)
+                            .toList();
+        }
 
         return new ReportResponseDTO.AiReportDTO(aiResult.summary(), ReportConverter.toResourceDTOList(resources));
     }

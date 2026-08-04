@@ -78,7 +78,10 @@ public class ReportResponseDTO {
             String summary,
 
             @Schema(description = "질문과 가장 관련 있는 자료 주제 (VISA/COST/HOUSING/SAFETY, 해당 없으면 null)", example = "HOUSING")
-            String topic
+            String topic,
+
+            @Schema(description = "제공된 도시 데이터로 답변 가능했는지 여부", example = "true")
+            Boolean answerable
     ) {}
 
     public record CityReviewDTO(
