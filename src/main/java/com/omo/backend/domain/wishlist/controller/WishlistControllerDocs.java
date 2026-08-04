@@ -18,7 +18,7 @@ public interface WishlistControllerDocs {
 
     @Operation(
             summary = "위시리스트 도시 추가",
-            description = "POST 요청으로 로그인한 회원의 위시리스트에 도시와 선택 목적을 추가합니다. 이미 추가된 도시는 기존 목적을 유지하고 성공 처리합니다.",
+            description = "POST 요청으로 로그인한 회원의 위시리스트에 도시와 선택 목적을 추가합니다. 동일한 도시·목적 조합이 이미 있으면 성공 처리합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -64,7 +64,7 @@ public interface WishlistControllerDocs {
 
     @Operation(
             summary = "위시리스트 도시 삭제",
-            description = "로그인한 회원의 위시리스트에서 도시를 삭제합니다. 존재하지 않는 항목도 성공 처리합니다.",
+            description = "로그인한 회원의 위시리스트에서 도시·목적 조합을 삭제합니다. 존재하지 않는 항목도 성공 처리합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -73,7 +73,7 @@ public interface WishlistControllerDocs {
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
-            description = "도시 ID 검증 실패 또는 타입 오류",
+            description = "도시·목적 ID 검증 실패 또는 타입 오류",
             content = @Content(schema = @Schema(
                     oneOf = {
                             ApiResponse.ErrorResponse.class,
@@ -92,6 +92,10 @@ public interface WishlistControllerDocs {
             @Parameter(description = "삭제할 도시 ID", example = "1", required = true)
             @Positive(message = "도시 ID는 양수여야 합니다.")
             @PathVariable Long cityId,
+
+            @Parameter(description = "삭제할 위시리스트의 목적 ID", example = "3", required = true)
+            @Positive(message = "목적 ID는 양수여야 합니다.")
+            @RequestParam Long purposeId,
 
             @Parameter(hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails
