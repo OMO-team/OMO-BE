@@ -1,6 +1,5 @@
 package com.omo.backend.domain.roadmap.service;
 
-import com.omo.backend.domain.budget.repository.BudgetRepository;
 import com.omo.backend.domain.document.repository.TaskDocumentRepository;
 import com.omo.backend.domain.roadmap.converter.RoadmapConverter;
 import com.omo.backend.domain.roadmap.dto.RoadmapRequestDTO;
@@ -27,7 +26,6 @@ public class RoadmapCommandService {
     private final TaskRepository taskRepository;
     private final TaskDependencyRepository taskDependencyRepository;
     private final TaskDocumentRepository taskDocumentRepository;
-    private final BudgetRepository budgetRepository;
     private final RoadmapScheduleCalculator roadmapScheduleCalculator;
 
     public RoadmapResponseDTO.UpdateScheduleResultDTO updateSchedule(
@@ -59,7 +57,6 @@ public class RoadmapCommandService {
 
         taskDependencyRepository.deleteAllByRoadmapId(roadmapId);
         taskDocumentRepository.deleteAllByRoadmapId(roadmapId);
-        budgetRepository.deleteByRoadmapId(roadmapId);
         taskRepository.deleteAllByRoadmapId(roadmapId);
         roadmapRepository.delete(roadmap);
     }

@@ -4,6 +4,7 @@ import com.omo.backend.common.BaseEntity;
 import com.omo.backend.domain.budget.entity.Budget;
 import com.omo.backend.domain.member.entity.Member;
 import com.omo.backend.domain.task.entity.Task;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -58,7 +59,11 @@ public class Roadmap extends BaseEntity {
     @OneToMany(mappedBy = "roadmap")
     private List<Task> tasks = new ArrayList<>();
 
-    @OneToOne(mappedBy = "roadmap", fetch = FetchType.LAZY)
+    @OneToOne(
+            mappedBy = "roadmap",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.REMOVE
+    )
     private Budget budget;
 
     public static Roadmap create(
