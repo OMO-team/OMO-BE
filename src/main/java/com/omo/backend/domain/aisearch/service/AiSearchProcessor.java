@@ -50,25 +50,14 @@ public class AiSearchProcessor {
         AiSearchResponseDTO.ParsedConditions currentParsed;
         List<String> validCountryNames = cityRepository.findDistinctCountryNames().stream()
                 .filter(name -> name != null && !name.isBlank())
+                .map(String::trim)
                 .distinct()
                 .toList();
-
-        // 디버깅
-        log.info("[Gemini Request Prompt] Query: {}", searchQuery);
-        String envKey = System.getenv("GEMINI_API_KEY");
-        if (envKey == null || envKey.isBlank()) {
-            log.error("[Gemini Key 오류]");
-        } else {
-            String prefix = envKey.substring(0, Math.min(7, envKey.length()));
-            String suffix = envKey.length() > 4 ? envKey.substring(envKey.length() - 4) : "";
-            log.info("[Gemini Key 대조] Length: {}, Format: {}...{}", envKey.length(), prefix, suffix);
-        }
-
 
         try {
             currentParsed = aiClient.callWithSchema(
                     buildParsePrompt(searchQuery, validCountryNames),
-                    GeminiSchemas.parsedConditionsSchema(validCountryNames),
+                    GeminiSchemas.parsedConditionsSchema(),
                     AiSearchResponseDTO.ParsedConditions.class);
         } catch (Exception e) {
             log.error("[AI 파싱 오류] TaskId: {}", taskId, e);

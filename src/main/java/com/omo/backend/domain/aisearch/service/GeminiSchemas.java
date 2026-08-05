@@ -27,7 +27,7 @@ public class GeminiSchemas {
 
     private static final List<String> PURPOSE_VALUES = List.of("WORKING_HOLIDAY", "EXCHANGE_STUDENT", "INTERNSHIP");
 
-    public static Map<String, Object> parsedConditionsSchema(List<String> validCountryNames) {
+    public static Map<String, Object> parsedConditionsSchema() {
         return Map.of(
                 "type", "object",
                 "properties", Map.ofEntries(
@@ -37,7 +37,7 @@ public class GeminiSchemas {
                         Map.entry("requireGoodInfra", bool()),
                         Map.entry("requireEnglishOnly", bool()),
                         Map.entry("maxBudgetKrw", numInt()),
-                        Map.entry("mentionedCountry", nullableEnumeration(validCountryNames)), // ← 동적 enum
+                        Map.entry("mentionedCountry", str()),
                         Map.entry("mentionedPurpose", nullableEnumeration(PURPOSE_VALUES))
                 )
         );
