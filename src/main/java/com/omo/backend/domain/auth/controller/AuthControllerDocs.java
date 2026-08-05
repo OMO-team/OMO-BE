@@ -60,7 +60,7 @@ public interface AuthControllerDocs {
 
     @Operation(
             summary = "Google OAuth 콜백",
-            description = "Google 인가 코드와 요청 목적을 검증하고 로그인 티켓을 발급한 뒤 프론트로 리다이렉트합니다."
+            description = "Google 인가 코드와 요청 목적을 검증하고 프론트로 리다이렉트합니다. 성공 시 ticket, 실패 시 errorCode를 전달합니다."
     )
     ResponseEntity<Void> doGoogleCallback(
             @Parameter(description = "Google 인가 코드")
@@ -73,7 +73,7 @@ public interface AuthControllerDocs {
 
     @Operation(
             summary = "Google 계정 연결 콜백",
-            description = "Google 계정 연결 요청을 검증하고 소셜 계정을 저장한 뒤 프론트 설정 화면으로 리다이렉트합니다."
+            description = "Google 계정 연결 요청을 처리한 뒤 프론트 설정 화면으로 리다이렉트합니다. 성공 시 linked=true, 실패 시 linked=false와 errorCode를 전달합니다."
     )
     ResponseEntity<Void> doGoogleLinkCallback(
             @Parameter(description = "Google 인가 코드")

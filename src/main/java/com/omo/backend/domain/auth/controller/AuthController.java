@@ -10,9 +10,12 @@ import com.omo.backend.domain.auth.service.AuthCommandService;
 import com.omo.backend.domain.auth.service.EmailVerificationService;
 import com.omo.backend.domain.auth.service.GoogleOAuthService;
 import com.omo.backend.global.apiPayload.ApiResponse;
+import com.omo.backend.global.apiPayload.code.GeneralErrorCode;
+import com.omo.backend.global.apiPayload.exception.GeneralException;
 import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/auth/v1")
 public class AuthController implements AuthControllerDocs {
@@ -107,11 +111,12 @@ public class AuthController implements AuthControllerDocs {
             @RequestParam(required = false) String state,
             @RequestParam(required = false) String error
     ) {
-        String frontendRedirectUrl = googleOAuthService.handleCallback(code, state, error);
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .location(URI.create(frontendRedirectUrl))
-                .build();
+        try {
+            return redirect(googleOAuthService.handleCallback(code, state, error));
+        } catch (Exception exception) {
+            String errorCode = resolveOAuthErrorCode(exception);
+            return redirect(googleOAuthService.createCallbackErrorRedirectUrl(errorCode));
+        }
     }
 
     @GetMapping("/oauth/google/link/callback")
@@ -120,12 +125,12 @@ public class AuthController implements AuthControllerDocs {
             @RequestParam(required = false) String state,
             @RequestParam(required = false) String error
     ) {
-        String frontendRedirectUrl =
-                googleOAuthService.handleLinkCallback(code, state, error);
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .location(URI.create(frontendRedirectUrl))
-                .build();
+        try {
+            return redirect(googleOAuthService.handleLinkCallback(code, state, error));
+        } catch (Exception exception) {
+            String errorCode = resolveOAuthErrorCode(exception);
+            return redirect(googleOAuthService.createLinkCallbackErrorRedirectUrl(errorCode));
+        }
     }
 
     @PostMapping("/oauth/google/exchange")
@@ -159,5 +164,21 @@ public class AuthController implements AuthControllerDocs {
             throw new AuthException(AuthErrorCode.INVALID_TOKEN_FORMAT);
         }
         return authorizationHeader.substring(BEARER_PREFIX.length());
+    }
+
+    private ResponseEntity<Void> redirect(String redirectUrl) {
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(redirectUrl))
+                .build();
+    }
+
+    private String resolveOAuthErrorCode(Exception exception) {
+        if (exception instanceof GeneralException generalException) {
+            return generalException.getBaseErrorCode().getCode();
+        }
+
+        log.error("Google OAuth 콜백 처리 중 예상하지 못한 오류 발생", exception);
+        return GeneralErrorCode.INTERNAL_SERVER_ERROR.getCode();
     }
 }

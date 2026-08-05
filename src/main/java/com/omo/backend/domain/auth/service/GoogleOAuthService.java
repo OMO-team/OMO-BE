@@ -173,6 +173,25 @@ public class GoogleOAuthService {
                 .toUriString();
     }
 
+    // Google 회원가입·로그인 콜백 실패 시 오류 코드를 포함한 프론트 리다이렉트 URL 생성
+    public String createCallbackErrorRedirectUrl(String errorCode) {
+        return UriComponentsBuilder.fromUriString(frontendRedirectUri)
+                .queryParam("errorCode", errorCode)
+                .build()
+                .encode()
+                .toUriString();
+    }
+
+    // Google 계정 연결 콜백 실패 시 연결 실패 여부와 오류 코드를 포함한 프론트 리다이렉트 URL 생성
+    public String createLinkCallbackErrorRedirectUrl(String errorCode) {
+        return UriComponentsBuilder.fromUriString(frontendLinkRedirectUri)
+                .queryParam("linked", false)
+                .queryParam("errorCode", errorCode)
+                .build()
+                .encode()
+                .toUriString();
+    }
+
     // 일회용 로그인 티켓을 소비하고 기존 JWT 발급 로직을 호출
     @Transactional(readOnly = true)
     public AuthResponseDTO.LoginResultDTO exchangeLoginTicket(OAuthRequestDTO.GoogleLoginExchangeDTO request) {
