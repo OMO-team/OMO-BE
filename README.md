@@ -170,4 +170,4 @@ src/main/java/com/omo/backend
 - Let's Encrypt(Certbot): TLS 인증서 발급 및 자동 갱신
 - CloudWatch Logs: Spring Boot 컨테이너 로그 수집 및 조회
 
-개발·시연 서버는 직접 SSH 접속 대신 AWS Systems Manager를 통해 배포 명령을 전달하도록 구성되어 있습니다. 외부에서는 Nginx를 통해 HTTPS로 접근하며 Spring Boot의 `8080` 포트는 직접 공개하지 않습니다.
+개발·데모 서버는 직접 SSH 접속 대신 AWS Systems Manager를 통해 배포 명령을 전달하도록 구성되어 있습니다. 외부에서는 Nginx를 통해 HTTPS로 접근하며 Spring Boot의 `8080` 포트는 직접 공개하지 않습니다.
