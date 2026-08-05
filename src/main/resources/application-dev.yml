@@ -61,7 +61,7 @@ jwt:
   refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}
 
 oauth:
-  frontend-redirect-uri: ${OAUTH_FRONTEND_REDIRECT_URI:http://localhost:3000/oauth/callback}
+  frontend-redirect-uri: ${OAUTH_FRONTEND_REDIRECT_URI:http://localhost:5173/oauth/callback}
   google-link-redirect-uri: ${GOOGLE_LINK_REDIRECT_URI:http://localhost:8080/auth/v1/oauth/google/link/callback}
   frontend-link-redirect-uri: ${OAUTH_FRONTEND_LINK_REDIRECT_URI:http://localhost:3000/settings/account}
 
