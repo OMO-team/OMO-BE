@@ -40,7 +40,8 @@ public class InquiryController implements InquiryControllerDocs {
             HttpServletRequest httpServletRequest,
             @Valid @RequestBody InquiryRequestDTO.AttachmentUploadUrlsDTO request
     ) {
-        // 현재 EC2에 직접 연결되는 요청의 원격 IP를 기준으로 1분당 URL 발급 횟수 제한
+        // Nginx가 전달한 실제 클라이언트 IP를 기준으로 1분당 URL 발급 횟수 제한
+        // server.forward-headers-strategy=native 설정으로 getRemoteAddr()에 원본 IP가 반영됨
         inquiryUploadRateLimiter.check(httpServletRequest.getRemoteAddr());
 
         InquiryResponseDTO.AttachmentUploadUrlsResultDTO result = inquiryAttachmentUploadService.createUploadUrls(request);

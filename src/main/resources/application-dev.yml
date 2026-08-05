@@ -50,6 +50,11 @@ spring:
               - email
               - profile
 
+# Nginx가 전달한 X-Forwarded-For/Proto 헤더를 Tomcat이 처리하도록 설정
+# Nginx를 거치지 않은 8080 직접 접근은 네트워크 수준에서 차단해야 함
+server:
+  forward-headers-strategy: native
+
 jwt:
   secret-key: ${JWT_SECRET_KEY}
   access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600000}
