@@ -66,16 +66,14 @@ public class S3FileService {
         }
     }
 
-    public void move(String bucket, String sourceObjectKey, String destinationObjectKey) {
+    public void copy(String bucket, String sourceObjectKey, String destinationObjectKey) {
         try {
-            // S3에는 rename 기능이 없어 영구 경로로 복사한 뒤 임시 객체를 삭제
             s3Client.copyObject(CopyObjectRequest.builder()
                     .sourceBucket(bucket)
                     .sourceKey(sourceObjectKey)
                     .destinationBucket(bucket)
                     .destinationKey(destinationObjectKey)
                     .build());
-            delete(bucket, sourceObjectKey);
         } catch (SdkException exception) {
             throw new StorageException(StorageErrorCode.S3_OPERATION_FAILED);
         }
