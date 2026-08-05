@@ -65,6 +65,19 @@ public class AiSearchProcessor {
 
         }
 
+        String normalizedCountry = normalizeCountryName(currentParsed.mentionedCountry(), validCountryNames);
+
+        currentParsed = AiSearchResponseDTO.ParsedConditions.builder()
+                .requireHighSafety(currentParsed.requireHighSafety())
+                .requireEasyVisa(currentParsed.requireEasyVisa())
+                .requireGoodHousing(currentParsed.requireGoodHousing())
+                .requireGoodInfra(currentParsed.requireGoodInfra())
+                .requireEnglishOnly(currentParsed.requireEnglishOnly())
+                .maxBudgetKrw(currentParsed.maxBudgetKrw())
+                .mentionedCountry(normalizedCountry)
+                .mentionedPurpose(currentParsed.mentionedPurpose())
+                .build();
+
         // 2. 세션에 누적된 이전 조건과 병합
         AiSearchResponseDTO.ParsedConditions previousParsed = parsePreviousConditions(session);
         AiSearchResponseDTO.ParsedConditions parsed = Boolean.TRUE.equals(isRefine)
@@ -187,6 +200,7 @@ public class AiSearchProcessor {
 
         절대 규칙:
         - recommendedCityIds에는 아래 후보 목록에 있는 cityId만 넣어라. 목록에 없는 ID를 지어내면 안 된다.
+        - summary(서술) 작성 시 각 도시를 언급할 때 가능하면 '도시명(국가명)' 또는 '국가명의 도시명' 형태로 국가명을 함께 밝혀서 작성하라. (예: "덴마크의 오르후스", "루마니아의 클루지나포카")
         - summary(서술)에는 점수나 수치를 괄호로 나열하지 말고, "가장 안전한", "예산 조건에 가장 잘 맞는", "영어 활용도가 특히 높은"처럼 정성적인 표현으로 서술하라. 구체적 숫자(4.8점, 250만원 등)는 summary 문장에 직접 쓰지 마라. 숫자 데이터는 별도 필드(recommendedCities)로 이미 전달되니 summary는 자연스러운 설명에 집중한다.
         - summary(서술)에는 후보 데이터에 존재하는 정보와 사용자 질문만 근거로 작성한다. 후보 도시의 비교 및 추천 근거는 반드시 후보 데이터에 포함된 정보만 사용한다.
         - 후보 데이터에 없는 특징(기후, 문화, 치안 수준, 생활비, 한국인 비율 등)을 추론하거나 추가하지 않는다. 
@@ -296,6 +310,22 @@ public class AiSearchProcessor {
         searchLog.updateAiResponse(json, result.emptyResultMessage() != null);
         aiSearchLogRepository.saveAndFlush(searchLog);
 
+    }
+
+    private String normalizeCountryName(String parsedCountry, List<String> validCountryNames) {
+        if (parsedCountry == null || parsedCountry.isBlank()) {
+            return null;
+        }
+
+        String trimmedParsed = parsedCountry.trim();
+
+        return validCountryNames.stream()
+                .filter(dbCountry -> dbCountry.equalsIgnoreCase(trimmedParsed))
+                .findFirst()
+                .orElseGet(() -> {
+                    log.warn("[국가명 매칭 실패] Gemini 반환 국가: '{}' 가 DB 목록에 존재하지 않아 null 처리함", parsedCountry);
+                    return null; // 일치하는 국가가 없으면 무효 처리
+                });
     }
 
 }
