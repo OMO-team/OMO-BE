@@ -52,6 +52,19 @@ public class AiSearchProcessor {
                 .filter(name -> name != null && !name.isBlank())
                 .distinct()
                 .toList();
+
+        // 디버깅
+        log.info("[Gemini Request Prompt] Query: {}", searchQuery);
+        String envKey = System.getenv("GEMINI_API_KEY");
+        if (envKey == null || envKey.isBlank()) {
+            log.error("[Gemini Key 오류]");
+        } else {
+            String prefix = envKey.substring(0, Math.min(7, envKey.length()));
+            String suffix = envKey.length() > 4 ? envKey.substring(envKey.length() - 4) : "";
+            log.info("[Gemini Key 대조] Length: {}, Format: {}...{}", envKey.length(), prefix, suffix);
+        }
+
+
         try {
             currentParsed = aiClient.callWithSchema(
                     buildParsePrompt(searchQuery, validCountryNames),
