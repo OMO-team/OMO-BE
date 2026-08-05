@@ -161,7 +161,10 @@ public class RoadmapQueryService {
                                 task.getDueDate(),
                                 today,
                                 task.isCompleted()
-                        )
+                        ),
+                        data.documentsByTaskId()
+                                .getOrDefault(task.getId(), Collections.emptyList())
+                                .size()
                 ))
                 .toList();
         Long nextScheduleDDay = nextScheduleTask == null

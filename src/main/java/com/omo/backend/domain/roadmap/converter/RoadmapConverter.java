@@ -67,7 +67,8 @@ public final class RoadmapConverter {
             Task task,
             TaskStatus status,
             Long scheduleDDay,
-            Boolean isOverdue
+            Boolean isOverdue,
+            long totalDocumentCount
     ) {
         return RoadmapResponseDTO.TaskItemDTO.builder()
                 .taskId(task.getId())
@@ -78,6 +79,7 @@ public final class RoadmapConverter {
                 .isOverdue(isOverdue)
                 .status(status)
                 .isCompleted(task.isCompleted())
+                .totalDocumentCount(totalDocumentCount)
                 .build();
     }
 
