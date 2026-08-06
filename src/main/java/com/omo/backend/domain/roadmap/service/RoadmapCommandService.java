@@ -38,9 +38,21 @@ public class RoadmapCommandService {
         Roadmap roadmap = getOwnedRoadmapForUpdate(roadmapId, memberId);
         List<Task> tasks = taskRepository
                 .findAllWithTaskTemplateByRoadmap_IdOrderByDisplayOrderAscIdAsc(roadmapId);
+        LocalDate startDate = roadmap.getCreatedAt().toLocalDate();
+        int maxDaysBeforeDeparture = tasks.stream()
+                .mapToInt(task -> task.getTaskTemplate().getDaysBeforeDeparture())
+                .max()
+                .orElse(0);
 
         roadmap.updateDepartureDate(request.departureDate());
-        tasks.forEach(task -> task.recalculateDueDate(request.departureDate()));
+        tasks.forEach(task -> task.updateDueDate(
+                roadmapScheduleCalculator.calculateTaskDueDate(
+                        startDate,
+                        request.departureDate(),
+                        task.getTaskTemplate().getDaysBeforeDeparture(),
+                        maxDaysBeforeDeparture
+                )
+        ));
 
         return RoadmapConverter.toUpdateScheduleResultDTO(
                 roadmap,
