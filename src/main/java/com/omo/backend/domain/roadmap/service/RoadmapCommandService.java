@@ -39,10 +39,7 @@ public class RoadmapCommandService {
         List<Task> tasks = taskRepository
                 .findAllWithTaskTemplateByRoadmap_IdOrderByDisplayOrderAscIdAsc(roadmapId);
         LocalDate startDate = roadmap.getCreatedAt().toLocalDate();
-        int maxDaysBeforeDeparture = tasks.stream()
-                .mapToInt(task -> task.getTaskTemplate().getDaysBeforeDeparture())
-                .max()
-                .orElse(0);
+        int maxDaysBeforeDeparture = calculateMaxDaysBeforeDeparture(tasks);
 
         roadmap.updateDepartureDate(request.departureDate());
         tasks.forEach(task -> task.updateDueDate(
@@ -82,5 +79,17 @@ public class RoadmapCommandService {
         if (departureDate.isBefore(today)) {
             throw new RoadmapException(RoadmapErrorCode.INVALID_DEPARTURE_DATE);
         }
+    }
+
+    private int calculateMaxDaysBeforeDeparture(List<Task> tasks) {
+        int maxDaysBeforeDeparture = 0;
+        for (Task task : tasks) {
+            Integer daysBeforeDeparture = task.getTaskTemplate().getDaysBeforeDeparture();
+            if (daysBeforeDeparture == null || daysBeforeDeparture < 0) {
+                throw new RoadmapException(RoadmapErrorCode.INVALID_TASK_TEMPLATE_SCHEDULE);
+            }
+            maxDaysBeforeDeparture = Math.max(maxDaysBeforeDeparture, daysBeforeDeparture);
+        }
+        return maxDaysBeforeDeparture;
     }
 }
