@@ -32,7 +32,7 @@ public interface CityControllerDocs {
             @Parameter(name = "stayDuration", description = "체류 기간(SHORT / MEDIUM / LONG / VERY_LONG)"),
             @Parameter(name = "continent", description = "대륙 (Asia / Europe / North America / South America / Oceania / Africa)"),
             @Parameter(name = "page", description = "페이지 번호 (0부터 시작, 기본값 0)", example = "0"),
-            @Parameter(name = "size", description = "페이지 크기 (기본값 20)", example = "20")
+            @Parameter(name = "size", description = "페이지 크기 (1 이상 100 이하, 기본값 20)", example = "20")
     })
     ApiResponse<CityResponseDTO.Pagination<CityResponseDTO.CityInfo>> getCities(
             @Parameter(hidden = true)
