@@ -121,7 +121,7 @@ public interface RoadmapControllerDocs {
 
     @Operation(
             summary = "로드맵 일정 설정 및 변경",
-            description = "출국일을 설정하거나 변경하면 모든 태스크 권장 완료일을 새 출국일 기준으로 다시 계산합니다.",
+            description = "출국일을 설정하거나 변경하면 완료 여부와 관계없이 모든 태스크 권장 완료일을 다시 계산합니다. 준비 기간이 짧으면 로드맵 생성일부터 출국일까지의 기간에 맞춰 일정을 비례 압축합니다.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -148,6 +148,13 @@ public interface RoadmapControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "404",
             description = "로드맵을 찾을 수 없거나 다른 회원의 로드맵",
+            content = @Content(schema = @Schema(
+                    implementation = ApiResponse.ErrorResponse.class
+            ))
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "422",
+            description = "태스크 템플릿 일정 데이터의 무결성 오류",
             content = @Content(schema = @Schema(
                     implementation = ApiResponse.ErrorResponse.class
             ))

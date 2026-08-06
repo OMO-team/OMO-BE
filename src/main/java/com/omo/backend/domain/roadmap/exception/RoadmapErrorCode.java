@@ -59,6 +59,11 @@ public enum RoadmapErrorCode implements BaseErrorCode {
             "ROADMAP422_8",
             "동일한 태스크에 같은 서류를 중복 생성할 수 없습니다."
     ),
+    INVALID_TASK_TEMPLATE_SCHEDULE(
+            HttpStatus.UNPROCESSABLE_CONTENT,
+            "ROADMAP422_9",
+            "태스크 템플릿의 일정 기준이 올바르지 않습니다."
+    ),
     ROADMAP_TEMPLATE_NOT_FOUND(
             HttpStatus.NOT_FOUND,
             "ROADMAP404_1",
