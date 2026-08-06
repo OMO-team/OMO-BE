@@ -26,6 +26,8 @@ public class RoadmapResponseDTO {
             @Schema(description = "목적 ID", example = "2")
             Long purposeId,
 
+            LocalDate startDate,
+
             @Schema(description = "출국일(최초 생성 시 미설정)", nullable = true)
             LocalDate departureDate,
 
@@ -44,6 +46,7 @@ public class RoadmapResponseDTO {
             CountryDTO country,
             Long purposeId,
             String purposeName,
+            LocalDate startDate,
             LocalDate departureDate,
             Integer stayMonths,
             Long departureDDay,
@@ -77,6 +80,7 @@ public class RoadmapResponseDTO {
             String cityImageUrl,
             Long purposeId,
             String purposeName,
+            LocalDate startDate,
             LocalDate departureDate,
             Integer stayMonths,
             Long departureDDay,
@@ -125,6 +129,7 @@ public class RoadmapResponseDTO {
     @Builder
     public record UpdateScheduleResultDTO(
             Long roadmapId,
+            LocalDate startDate,
             LocalDate departureDate,
             Long departureDDay,
             List<TaskScheduleDTO> taskSchedules

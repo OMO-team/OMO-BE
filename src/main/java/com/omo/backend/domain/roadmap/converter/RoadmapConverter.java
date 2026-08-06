@@ -21,6 +21,7 @@ public final class RoadmapConverter {
                 .title(roadmap.getTitle())
                 .cityId(roadmap.getRoadmapTemplate().getCity().getCityId())
                 .purposeId(roadmap.getRoadmapTemplate().getPurpose().getPurposeId())
+                .startDate(roadmap.getCreatedAt().toLocalDate())
                 .departureDate(roadmap.getDepartureDate())
                 .taskCount(taskCount)
                 .build();
@@ -49,6 +50,7 @@ public final class RoadmapConverter {
                         .build())
                 .purposeId(roadmap.getRoadmapTemplate().getPurpose().getPurposeId())
                 .purposeName(roadmap.getRoadmapTemplate().getPurpose().getName())
+                .startDate(roadmap.getCreatedAt().toLocalDate())
                 .departureDate(roadmap.getDepartureDate())
                 .stayMonths(roadmap.getStayMonths())
                 .departureDDay(departureDDay)
@@ -103,6 +105,7 @@ public final class RoadmapConverter {
                 .cityImageUrl(roadmap.getRoadmapTemplate().getCity().getImageUrl())
                 .purposeId(roadmap.getRoadmapTemplate().getPurpose().getPurposeId())
                 .purposeName(roadmap.getRoadmapTemplate().getPurpose().getName())
+                .startDate(roadmap.getCreatedAt().toLocalDate())
                 .departureDate(roadmap.getDepartureDate())
                 .stayMonths(roadmap.getStayMonths())
                 .departureDDay(departureDDay)
@@ -144,6 +147,7 @@ public final class RoadmapConverter {
 
         return RoadmapResponseDTO.UpdateScheduleResultDTO.builder()
                 .roadmapId(roadmap.getId())
+                .startDate(roadmap.getCreatedAt().toLocalDate())
                 .departureDate(roadmap.getDepartureDate())
                 .departureDDay(departureDDay)
                 .taskSchedules(taskSchedules)
