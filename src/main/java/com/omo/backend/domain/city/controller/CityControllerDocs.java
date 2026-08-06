@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Tag(name = "City", description = "도시 API")
@@ -46,6 +47,7 @@ public interface CityControllerDocs {
             @RequestParam(required = false) String stayDuration,
             @RequestParam(required = false) String continent,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            @Parameter(hidden = true) HttpServletResponse response
     );
 }

@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -35,8 +37,10 @@ public class CityController implements CityControllerDocs {
             @RequestParam(required = false) String stayDuration,
             @RequestParam(required = false) String continent,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            HttpServletResponse response
     ) {
+        response.setHeader("Cache-Control", "no-store");
         if (keyword != null && keyword.length() > 50) {
             throw new GeneralException(CityErrorCode.INVALID_KEYWORD_LENGTH);
         }
