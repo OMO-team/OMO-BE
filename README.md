@@ -47,16 +47,17 @@
 | Test | JUnit Platform, H2 |
 | Build / Runtime | Gradle 9.5.1, Docker, Docker Compose, Eclipse Temurin 21 JRE |
 | CI/CD | GitHub Actions, Amazon ECR, AWS Systems Manager |
+| Infrastructure / HTTPS | AWS EC2, RDS MySQL, Nginx, Let's Encrypt(Certbot), CloudWatch Logs |
 
 ## 서버 아키텍처
 
 <p align="center">
-  <img src="docs/images/server-architecture.png"
+  <img src="docs/images/simple_omo_server_architecture.png"
        alt="OMO 서버 아키텍처"
        width="100%" />
 </p>
 
-GitHub Actions와 Amazon ECR·AWS Systems Manager를 통해 EC2에 배포하며, Spring Boot는 Redis, RDS MySQL, Private S3 및 Gemini API와 연동됩니다.
+GitHub Actions와 Amazon ECR·AWS Systems Manager를 통해 EC2에 배포합니다. 외부 요청은 `https://omo.ai.kr`의 Nginx에서 TLS를 종료한 뒤 Docker Compose로 실행되는 Spring Boot `:8080`으로 전달됩니다. Spring Boot는 Redis, RDS MySQL, Private S3 및 Gemini API와 연동되며, 애플리케이션 로그는 CloudWatch Logs에서 확인합니다. HTTPS 인증서는 Let's Encrypt와 Certbot으로 발급하고 자동 갱신합니다.
 
 ## 주요 설계
 
@@ -145,10 +146,18 @@ src/main/java/com/omo/backend
 | 문의 | `/api/v1/inquiries` | 문의 등록 및 첨부파일 URL 발급 |
 | 약관 | `/api/v1/terms` | 약관 조회 |
 
-상세 요청·응답 형식은 애플리케이션 실행 후 Swagger UI에서 확인할 수 있습니다.
+상세 요청·응답 형식은 Swagger UI에서 확인할 수 있습니다.
 
+### 개발·데모 서버
+
+- API Base URL: `https://omo.ai.kr`
+- Swagger UI: `https://omo.ai.kr/swagger-ui/index.html`
+- Health Check: `https://omo.ai.kr/actuator/health`
+
+### 로컬 환경
+
+- API Base URL: `http://localhost:8080`
 - Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 - Health Check: `http://localhost:8080/actuator/health`
 
 ## CI/CD
@@ -157,5 +166,8 @@ src/main/java/com/omo/backend
 - `develop` 브랜치 Push: 테스트·빌드 후 Docker 이미지 생성 및 Amazon ECR Push
 - AWS Systems Manager Run Command: EC2에서 새 이미지 Pull 및 컨테이너 재시작
 - Actuator Health Check: 배포 후 애플리케이션 상태 검증
+- Nginx Reverse Proxy: HTTPS `:443` 요청을 Spring Boot `:8080`으로 전달하고 HTTP 요청을 HTTPS로 리다이렉트
+- Let's Encrypt(Certbot): TLS 인증서 발급 및 자동 갱신
+- CloudWatch Logs: Spring Boot 컨테이너 로그 수집 및 조회
 
-운영 서버는 직접 SSH 접속 대신 AWS Systems Manager를 통해 배포 명령을 전달하도록 구성되어 있습니다.
+개발·데모 서버는 직접 SSH 접속 대신 AWS Systems Manager를 통해 배포 명령을 전달하도록 구성되어 있습니다. 외부에서는 Nginx를 통해 HTTPS로 접근하며 Spring Boot의 `8080` 포트는 직접 공개하지 않습니다.
