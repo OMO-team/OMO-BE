@@ -37,6 +37,10 @@ public class TaskTemplateValidator {
     ) {
         Set<Long> taskTemplateIds = new HashSet<>();
         for (TaskTemplate template : taskTemplates) {
+            if (template.getDaysBeforeDeparture() == null
+                    || template.getDaysBeforeDeparture() < 0) {
+                throw new RoadmapException(RoadmapErrorCode.INVALID_TASK_TEMPLATE_SCHEDULE);
+            }
             if (!roadmapTemplateId.equals(template.getRoadmapTemplate().getId())
                     || template.getId() == null
                     || !taskTemplateIds.add(template.getId())) {
