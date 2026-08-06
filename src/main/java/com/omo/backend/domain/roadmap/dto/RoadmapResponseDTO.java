@@ -110,7 +110,8 @@ public class RoadmapResponseDTO {
             Long scheduleDDay,
             Boolean isOverdue,
             TaskStatus status,
-            Boolean isCompleted
+            Boolean isCompleted,
+            Long totalDocumentCount
     ) {
     }
 
