@@ -82,13 +82,6 @@ public class CityResponseDTO {
             boolean isWishlisted
     ) {}
 
-    // 필터 목록 결과
-    @Builder
-    public record CityListResult(
-            int totalCount,
-            List<CityInfo> cities
-    ) {}
-
     //국가 정보
     @Builder
     public record CountryDTO(
@@ -127,5 +120,15 @@ public class CityResponseDTO {
     public record WishlistCityListResult(
             int totalCount,
             List<WishlistCityInfo> cities
+    ) {}
+
+    @Builder
+    public record Pagination<T>(
+            List<T> data,
+            int page,
+            int size,
+            long totalElements,
+            int totalPages,
+            boolean hasNext
     ) {}
 }

@@ -1,5 +1,7 @@
 package com.omo.backend.domain.city.repository;
 import com.omo.backend.domain.city.entity.City;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,7 +23,7 @@ public interface CityRepository extends JpaRepository<City, Long>, JpaSpecificat
 
     @Override
     @EntityGraph(attributePaths = "country")
-    List<City> findAll(Specification<City> spec);
+    Page<City> findAll(Specification<City> spec, Pageable pageable);
 
     @EntityGraph(attributePaths = "country")
     @Query("SELECT c FROM City c WHERE " +

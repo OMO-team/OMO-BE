@@ -7,9 +7,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
 @Tag(name = "City", description = "도시 API")
@@ -28,10 +30,11 @@ public interface CityControllerDocs {
             @Parameter(name = "housingDifficulty", description = "숙소 난이도 (EASY / NORMAL / HARD)"),
             @Parameter(name = "visaDifficulty", description = "비자 난이도 (EASY / NORMAL / HARD)"),
             @Parameter(name = "stayDuration", description = "체류 기간(SHORT / MEDIUM / LONG / VERY_LONG)"),
-            @Parameter(name = "continent", description = "대륙 (Asia / Europe / North America / South America / Oceania / Africa)")
-
+            @Parameter(name = "continent", description = "대륙 (Asia / Europe / North America / South America / Oceania / Africa)"),
+            @Parameter(name = "page", description = "페이지 번호 (0부터 시작, 기본값 0)", example = "0"),
+            @Parameter(name = "size", description = "페이지 크기 (1 이상 100 이하, 기본값 20)", example = "20")
     })
-    ApiResponse<CityResponseDTO.CityListResult> getCities(
+    ApiResponse<CityResponseDTO.Pagination<CityResponseDTO.CityInfo>> getCities(
             @Parameter(hidden = true)
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String keyword,
@@ -42,6 +45,9 @@ public interface CityControllerDocs {
             @RequestParam(required = false) String housingDifficulty,
             @RequestParam(required = false) String visaDifficulty,
             @RequestParam(required = false) String stayDuration,
-            @RequestParam(required = false) String continent
+            @RequestParam(required = false) String continent,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @Parameter(hidden = true) HttpServletResponse response
     );
 }

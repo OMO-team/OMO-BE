@@ -4,9 +4,9 @@ import com.omo.backend.domain.city.dto.CityResponseDTO;
 import com.omo.backend.domain.city.entity.City;
 import com.omo.backend.domain.purpose.entity.Purpose;
 import com.omo.backend.domain.wishlist.entity.MemberWishlist;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
-import java.util.Set;
 
 public class CityConverter {
 
@@ -31,23 +31,6 @@ public class CityConverter {
                 .internetScore(city.getInternetScore())
                 .stayDuration(city.getStayDuration() != null ? city.getStayDuration().name() : null)
                 .isWishlisted(isWishlisted)
-                .build();
-    }
-
-    // 위시리스트 목록 등 isWishlisted 불필요한 경우 (모두 false)
-    public static CityResponseDTO.CityListResult toCityListResult(List<City> cities) {
-        return toCityListResult(cities, Set.of());
-    }
-
-    // 필터 통합 검색 (로그인 사용자 위시리스트 여부 포함)
-    public static CityResponseDTO.CityListResult toCityListResult(List<City> cities, Set<Long> wishlistedCityIds) {
-        List<CityResponseDTO.CityInfo> cityInfoList = cities.stream()
-                .map(city -> toCityInfo(city, wishlistedCityIds.contains(city.getCityId())))
-                .toList();
-
-        return CityResponseDTO.CityListResult.builder()
-                .totalCount(cityInfoList.size())
-                .cities(cityInfoList)
                 .build();
     }
 
@@ -86,6 +69,17 @@ public class CityConverter {
                 .internetScore(cityInfo.internetScore())
                 .stayDuration(cityInfo.stayDuration())
                 .isWishlisted(cityInfo.isWishlisted())
+                .build();
+    }
+
+    public static <T> CityResponseDTO.Pagination<T> toPagination(List<T> data, Page<?> pageInfo) {
+        return CityResponseDTO.Pagination.<T>builder()
+                .data(data)
+                .page(pageInfo.getNumber())
+                .size(pageInfo.getSize())
+                .totalElements(pageInfo.getTotalElements())
+                .totalPages(pageInfo.getTotalPages())
+                .hasNext(pageInfo.hasNext())
                 .build();
     }
 }
