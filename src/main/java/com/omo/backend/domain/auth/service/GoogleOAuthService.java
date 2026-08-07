@@ -194,7 +194,8 @@ public class GoogleOAuthService {
 
     // 일회용 로그인 티켓을 소비하고 기존 JWT 발급 로직을 호출
     @Transactional(readOnly = true)
-    public AuthResponseDTO.LoginResultDTO exchangeLoginTicket(OAuthRequestDTO.GoogleLoginExchangeDTO request) {
+    public AuthResponseDTO.LoginResultDTO exchangeLoginTicket(
+            OAuthRequestDTO.GoogleLoginExchangeDTO request, String guestSessionId) {
         String memberIdValue = redisTemplate.opsForValue().getAndDelete(loginTicketKey(request.ticket()));
         if (!StringUtils.hasText(memberIdValue)) {
             throw new AuthException(AuthErrorCode.OAUTH_TICKET_INVALID);
@@ -209,7 +210,7 @@ public class GoogleOAuthService {
         }
 
         validateActiveMember(member);
-        return authCommandService.issueLoginTokens(member);
+        return authCommandService.issueLoginTokens(member, guestSessionId);
     }
 
     // Google 콜백에서 받은 인가 코드를 Google 액세스 토큰으로 교환

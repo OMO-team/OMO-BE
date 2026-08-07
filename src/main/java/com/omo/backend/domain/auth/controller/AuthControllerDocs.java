@@ -5,6 +5,7 @@ import com.omo.backend.domain.auth.dto.AuthResponseDTO;
 import com.omo.backend.domain.auth.dto.OAuthRequestDTO;
 import com.omo.backend.domain.auth.dto.OAuthResponseDTO;
 import com.omo.backend.global.apiPayload.ApiResponse;
+import com.omo.backend.global.interceptor.GuestSessionInterceptor;
 import com.omo.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,7 +49,9 @@ public interface AuthControllerDocs {
 
     @Operation(summary = "일반 로그인", description = "이메일과 비밀번호로 로그인합니다.")
     ApiResponse<AuthResponseDTO.LoginResultDTO> doLogin(
-            @Valid @RequestBody AuthRequestDTO.LoginDTO request
+            @RequestBody @Valid AuthRequestDTO.LoginDTO request,
+            @RequestAttribute(name = GuestSessionInterceptor.ATTR_NAME, required = false) String guestSessionId
+
     );
 
     @Operation(summary = "Google 회원가입 시작", description = "필수 약관 동의를 검증하고 Google OAuth 인증 URL을 발급합니다.")
@@ -89,7 +93,9 @@ public interface AuthControllerDocs {
             description = "일회용 로그인 티켓을 검증하고 OMO 액세스 토큰과 리프레시 토큰을 발급합니다."
     )
     ApiResponse<AuthResponseDTO.LoginResultDTO> exchangeGoogleLoginTicket(
-            @Valid @RequestBody OAuthRequestDTO.GoogleLoginExchangeDTO request
+            @Valid @RequestBody OAuthRequestDTO.GoogleLoginExchangeDTO request,
+            @RequestAttribute(name = GuestSessionInterceptor.ATTR_NAME, required = false) String guestSessionId
+
     );
 
     @Operation(summary = "토큰 재발급", description = "리프레시 토큰을 검증하고 새로운 액세스 토큰과 리프레시 토큰을 발급합니다.")

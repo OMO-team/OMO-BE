@@ -12,6 +12,7 @@ import com.omo.backend.domain.auth.service.GoogleOAuthService;
 import com.omo.backend.global.apiPayload.ApiResponse;
 import com.omo.backend.global.apiPayload.code.GeneralErrorCode;
 import com.omo.backend.global.apiPayload.exception.GeneralException;
+import com.omo.backend.global.interceptor.GuestSessionInterceptor;
 import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,14 +21,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -85,9 +79,10 @@ public class AuthController implements AuthControllerDocs {
 
     @PostMapping("/login/local")
     public ApiResponse<AuthResponseDTO.LoginResultDTO> doLogin(
-            @RequestBody @Valid AuthRequestDTO.LoginDTO request
+            @RequestBody @Valid AuthRequestDTO.LoginDTO request,
+            @RequestAttribute(name = GuestSessionInterceptor.ATTR_NAME, required = false) String guestSessionId
     ) {
-        AuthResponseDTO.LoginResultDTO result = authCommandService.login(request);
+        AuthResponseDTO.LoginResultDTO result = authCommandService.login(request, guestSessionId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -135,9 +130,10 @@ public class AuthController implements AuthControllerDocs {
 
     @PostMapping("/oauth/google/exchange")
     public ApiResponse<AuthResponseDTO.LoginResultDTO> exchangeGoogleLoginTicket(
-            @Valid @RequestBody OAuthRequestDTO.GoogleLoginExchangeDTO request
+            @Valid @RequestBody OAuthRequestDTO.GoogleLoginExchangeDTO request,
+            @RequestAttribute(name = GuestSessionInterceptor.ATTR_NAME, required = false) String guestSessionId
     ) {
-        AuthResponseDTO.LoginResultDTO result = googleOAuthService.exchangeLoginTicket(request);
+        AuthResponseDTO.LoginResultDTO result = googleOAuthService.exchangeLoginTicket(request, guestSessionId);
         return ApiResponse.onSuccess(result);
     }
 
