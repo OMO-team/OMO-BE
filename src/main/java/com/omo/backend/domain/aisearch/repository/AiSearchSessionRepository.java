@@ -14,4 +14,8 @@ public interface AiSearchSessionRepository extends JpaRepository<AiSearchSession
     Optional<AiSearchSession> findByIdAndDeletedAtIsNull(Long id);
 
     // 지정 시간 이전 생성된 세션 조회 (스케줄러용)
-    Slice<AiSearchSession> findAllByCreatedAtBeforeAndDeletedAtIsNull(LocalDateTime threshold, Pageable pageable);}
+    Slice<AiSearchSession> findAllByCreatedAtBeforeAndDeletedAtIsNull(LocalDateTime threshold, Pageable pageable);
+
+    // 게스트 세션 Id로 활성화된 세션 전체 조회
+    List<AiSearchSession> findAllByGuestSessionIdAndDeletedAtIsNull(String guestSessionId);
+}

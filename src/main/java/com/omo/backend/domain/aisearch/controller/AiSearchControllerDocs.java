@@ -4,10 +4,14 @@ import com.omo.backend.domain.aisearch.dto.AiSearchRequestDTO;
 import com.omo.backend.domain.aisearch.dto.AiSearchResponseDTO;
 import com.omo.backend.domain.aisearch.dto.RecommendPromptChipResponseDTO;
 import com.omo.backend.global.apiPayload.ApiResponse;
+import com.omo.backend.global.interceptor.GuestSessionInterceptor;
+import com.omo.backend.global.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @Tag(name = "AI Search", description = "AI 검색 API")
@@ -18,7 +22,9 @@ public interface AiSearchControllerDocs {
 
     @Operation(summary = "AI 스마트 브리핑 분석 요청 API", description = "AI 검색어와 세션 정보, 이어묻기 여부를 받아 세션을 생성하고 taskId를 발급합니다.")
     ApiResponse<AiSearchResponseDTO.BriefingInitResult> requestSmartBriefing(
-            @Valid @RequestBody AiSearchRequestDTO.BriefingRequest request
+            @Valid @RequestBody AiSearchRequestDTO.BriefingRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestAttribute(GuestSessionInterceptor.ATTR_NAME) String guestSessionId
     );
 
     @Operation(summary = "AI 스마트 브리핑 분석 결과 조회 API", description = "taskId의 작업 상태(PROCESSING/COMPLETED/FAILED) 및 최종 브리핑 결과를 조회합니다.")
@@ -26,5 +32,7 @@ public interface AiSearchControllerDocs {
             @PathVariable("taskId") String taskId);
 
     @Operation(summary = "AI 검색 세션 삭제 API", description = "특정 AI 검색 세션을 삭제(Soft Delete)합니다.")
-    ApiResponse<String> deleteSession(@PathVariable Long sessionId);
+    ApiResponse<String> deleteSession(@PathVariable Long sessionId,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails,
+                                      @RequestAttribute(GuestSessionInterceptor.ATTR_NAME) String guestSessionId);
 }
