@@ -4,6 +4,9 @@ import com.omo.backend.domain.aisearch.entity.AiSearchSession;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +19,9 @@ public interface AiSearchSessionRepository extends JpaRepository<AiSearchSession
     // 지정 시간 이전 생성된 세션 조회 (스케줄러용)
     Slice<AiSearchSession> findAllByCreatedAtBeforeAndDeletedAtIsNull(LocalDateTime threshold, Pageable pageable);
 
-    // 게스트 세션 Id로 활성화된 세션 전체 조회
-    List<AiSearchSession> findAllByGuestSessionIdAndDeletedAtIsNull(String guestSessionId);
+    // 게스트 세션을 회원 계정으로 마이그레이션 (동시 로그인 시 중복 이전 방지)
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE AiSearchSession s SET s.memberId = :memberId, s.guestSessionId = NULL " +
+            "WHERE s.guestSessionId = :guestSessionId AND s.memberId IS NULL AND s.deletedAt IS NULL")
+    int migrateGuestSessions(@Param("memberId") Long memberId, @Param("guestSessionId") String guestSessionId);
 }

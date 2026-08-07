@@ -58,11 +58,6 @@ public class AiSearchSession extends BaseEntity {
         return guestSessionId != null && guestSessionId.equals(this.guestSessionId);
     }
 
-    public void migrateToMember(Long memberId) {
-        this.memberId = memberId;
-        this.guestSessionId = null;
-    }
-
     // 세션 삭제 메서드
     public void delete() {
         this.deletedAt = LocalDateTime.now();

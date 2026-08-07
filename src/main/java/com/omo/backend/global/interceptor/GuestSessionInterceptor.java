@@ -17,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GuestSessionInterceptor implements HandlerInterceptor {
 
-    public static final String COOKIE_NAME = "guest_session_id";
+    public static final String COOKIE_NAME = "__Host-guest_session_id";
     public static final String ATTR_NAME = "guestSessionId";
 
     @Override
@@ -28,7 +28,7 @@ public class GuestSessionInterceptor implements HandlerInterceptor {
             ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, guestSessionId)
                     .httpOnly(true)
                     .secure(true)
-                    .sameSite("Lax")
+                    .sameSite("None")
                     .path("/")
                     .maxAge(Duration.ofDays(30))
                     .build();
@@ -39,11 +39,24 @@ public class GuestSessionInterceptor implements HandlerInterceptor {
     }
 
     private String extractCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) return null;
-        return Arrays.stream(request.getCookies())
-                .filter(c -> c.getName().equals(COOKIE_NAME))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+
+        for (Cookie cookie : cookies) {
+            if (COOKIE_NAME.equals(cookie.getName())) {
+                String value = cookie.getValue();
+                return isValidUuid(value) ? value : null; // 형식 안 맞으면 없는 것처럼 처리
+            }
+        }
+        return null;
+    }
+    private boolean isValidUuid(String value) {
+        if (value == null) return false;
+        try {
+            UUID.fromString(value);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }
