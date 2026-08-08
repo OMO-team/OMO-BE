@@ -41,6 +41,20 @@ public class AuthCommandService {
     private final ApplicationEventPublisher eventPublisher;
 
     public AuthResponseDTO.LoginResultDTO login(AuthRequestDTO.LoginDTO request) {
+        Member member = authenticateLocalMember(request);
+
+        // 이메일과 비밀번호가 일치할 경우 토큰 생성
+        return issueLoginTokens(member);
+    }
+
+    // 새로 추가하는 오버로드 - 게스트 세션 마이그레이션이 필요한 곳에서 사용
+    public AuthResponseDTO.LoginResultDTO login(AuthRequestDTO.LoginDTO request, String guestSessionId) {
+        Member member = authenticateLocalMember(request);
+
+        return issueLoginTokens(member, guestSessionId);
+    }
+
+    private Member authenticateLocalMember(AuthRequestDTO.LoginDTO request) {
         // 이메일로 회원 조회
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.INVALID_LOGIN_ID_OR_PASSWORD));
@@ -50,18 +64,8 @@ public class AuthCommandService {
             throw new MemberException(MemberErrorCode.INVALID_LOGIN_ID_OR_PASSWORD);
         }
 
-        // 이메일과 비밀번호가 일치할 경우 토큰 생성
-        return issueLoginTokens(member);
-    }
-
-    // 새로 추가하는 오버로드 - 게스트 세션 마이그레이션이 필요한 곳에서 사용
-    public AuthResponseDTO.LoginResultDTO login(AuthRequestDTO.LoginDTO request, String guestSessionId) {
-        Member member = memberRepository.findByEmail(request.email())
-                .orElseThrow(() -> new MemberException(MemberErrorCode.INVALID_LOGIN_ID_OR_PASSWORD));
-        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
-            throw new MemberException(MemberErrorCode.INVALID_LOGIN_ID_OR_PASSWORD);
-        }
-        return issueLoginTokens(member, guestSessionId);
+        validateActiveMember(member);
+        return member;
     }
 
     public AuthResponseDTO.LoginResultDTO issueLoginTokens(Member member) {
@@ -186,11 +190,14 @@ public class AuthCommandService {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
 
+        validateActiveMember(member);
+        return member;
+    }
+
+    private void validateActiveMember(Member member) {
         if (member.getStatus() != MemberStatus.ACTIVE) {
             throw new MemberException(MemberErrorCode.MEMBER_NOT_FOUND);
         }
-
-        return member;
     }
 
     private void validatePasswordConfirm(String password, String passwordConfirm) {
