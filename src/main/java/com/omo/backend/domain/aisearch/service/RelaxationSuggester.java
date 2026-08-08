@@ -15,7 +15,7 @@ public class RelaxationSuggester {
         List<AiSearchResponseDTO.SuggestedRelaxation> suggestions = new ArrayList<>();
 
         if (parsed.maxBudgetKrw() != null) {
-            int relaxedBudget = parsed.maxBudgetKrw() + 300_000;
+            int relaxedBudget = parsed.maxBudgetKrw() + 30;
             var relaxedConditions = withMaxBudget(parsed, relaxedBudget);
             suggestions.add(AiSearchResponseDTO.SuggestedRelaxation.of(
                     "BUDGET", "예산 조건을 30만 원만 높여보세요.",
@@ -58,7 +58,7 @@ public class RelaxationSuggester {
         if (Boolean.TRUE.equals(c.requireGoodHousing())) parts.add("집 구하기 쉽고");
         if (Boolean.TRUE.equals(c.requireGoodInfra())) parts.add("인프라가 좋고");
         if (c.mentionedCountry() != null) parts.add(c.mentionedCountry() + "에 있고");
-        if (c.maxBudgetKrw() != null) parts.add((c.maxBudgetKrw() / 10_000) + "만원 이하인");
+        if (c.maxBudgetKrw() != null) parts.add(c.maxBudgetKrw() + "만원 이하인");
 
         String prefix = String.join(" ", parts);
         return (prefix.isEmpty() ? "" : prefix + " ") + "도시 추천해줘";
