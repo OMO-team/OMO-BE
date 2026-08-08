@@ -5,8 +5,11 @@ import com.omo.backend.domain.aisearch.dto.AiSearchResponseDTO;
 import com.omo.backend.domain.aisearch.dto.RecommendPromptChipResponseDTO;
 import com.omo.backend.domain.aisearch.service.AiSearchService;
 import com.omo.backend.global.apiPayload.ApiResponse;
+import com.omo.backend.global.interceptor.GuestSessionInterceptor;
+import com.omo.backend.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,9 +29,12 @@ public class AiSearchController implements AiSearchControllerDocs {
     @Override
     @PostMapping("/briefing")
     public ApiResponse<AiSearchResponseDTO.BriefingInitResult> requestSmartBriefing(
-        @Valid @RequestBody AiSearchRequestDTO.BriefingRequest request
+        @Valid @RequestBody AiSearchRequestDTO.BriefingRequest request,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestAttribute(GuestSessionInterceptor.ATTR_NAME) String guestSessionId
     ) {
-        AiSearchResponseDTO.BriefingInitResult result = aiSearchService.requestSmartBriefing(request);
+        Long memberId = (userDetails != null) ? userDetails.getMemberId() : null;
+        var result = aiSearchService.requestSmartBriefing(request, memberId, guestSessionId);
         return ApiResponse.onSuccess(result);
     }
 
@@ -41,9 +47,15 @@ public class AiSearchController implements AiSearchControllerDocs {
         return ApiResponse.onSuccess(result);
     }
 
+    @Override
     @DeleteMapping("/sessions/{sessionId}")
-    public ApiResponse<String> deleteSession(@PathVariable Long sessionId) {
-        aiSearchService.deleteSession(sessionId);
-        return ApiResponse.onSuccess("세션이 성공적으로 삭제되었습니다.");
+    public ApiResponse<String> deleteSession(
+            @PathVariable Long sessionId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestAttribute(GuestSessionInterceptor.ATTR_NAME) String guestSessionId
+    ) {
+        Long memberId = (userDetails != null) ? userDetails.getMemberId() : null;
+        aiSearchService.deleteSession(sessionId, memberId, guestSessionId);
+        return ApiResponse.onSuccess(null);
     }
 }

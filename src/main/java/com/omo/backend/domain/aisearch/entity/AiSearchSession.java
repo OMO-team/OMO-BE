@@ -27,6 +27,9 @@ public class AiSearchSession extends BaseEntity {
     @Column(name = "accumulated_conditions", nullable = false, columnDefinition = "TEXT")
     private String accumulatedConditions;
 
+    @Column(name = "guest_session_id", length = 36)
+    private String guestSessionId;
+
     @OneToMany(mappedBy = "aiSearchSession", cascade = CascadeType.ALL)
     @Builder.Default
     private List<AiSearchLog> searchLogs = new ArrayList<>();
@@ -40,10 +43,19 @@ public class AiSearchSession extends BaseEntity {
     }
 
     // 세 세션 생성 메서드
-    public static AiSearchSession createSession() {
+    public static AiSearchSession createSession(Long memberId, String guestSessionId) {
         return AiSearchSession.builder()
+                .memberId(memberId)
+                .guestSessionId(memberId == null ? guestSessionId : null)
                 .accumulatedConditions("{}")
                 .build();
+    }
+
+    public boolean isOwnedBy(Long memberId, String guestSessionId) {
+        if (memberId != null) {
+            return memberId.equals(this.memberId);
+        }
+        return guestSessionId != null && guestSessionId.equals(this.guestSessionId);
     }
 
     // 세션 삭제 메서드

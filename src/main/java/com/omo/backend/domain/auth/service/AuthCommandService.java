@@ -1,5 +1,6 @@
 package com.omo.backend.domain.auth.service;
 
+import com.omo.backend.domain.aisearch.event.LoginSucceededEvent;
 import com.omo.backend.domain.auth.converter.AuthConverter;
 import com.omo.backend.domain.auth.dto.AuthRequestDTO;
 import com.omo.backend.domain.auth.dto.AuthResponseDTO;
@@ -16,6 +17,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class AuthCommandService {
     private final JwtTokenProvider jwtTokenProvider;
     private final StringRedisTemplate redisTemplate;
     private final EmailVerificationService emailVerificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AuthResponseDTO.LoginResultDTO login(AuthRequestDTO.LoginDTO request) {
         // 이메일로 회원 조회
@@ -51,6 +54,16 @@ public class AuthCommandService {
         return issueLoginTokens(member);
     }
 
+    // 새로 추가하는 오버로드 - 게스트 세션 마이그레이션이 필요한 곳에서 사용
+    public AuthResponseDTO.LoginResultDTO login(AuthRequestDTO.LoginDTO request, String guestSessionId) {
+        Member member = memberRepository.findByEmail(request.email())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.INVALID_LOGIN_ID_OR_PASSWORD));
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
+            throw new MemberException(MemberErrorCode.INVALID_LOGIN_ID_OR_PASSWORD);
+        }
+        return issueLoginTokens(member, guestSessionId);
+    }
+
     public AuthResponseDTO.LoginResultDTO issueLoginTokens(Member member) {
         String accessToken = jwtTokenProvider.createAccessToken(member.getId(), member.getEmail());
         String refreshToken = jwtTokenProvider.createRefreshToken(member.getId(), member.getEmail());
@@ -59,6 +72,16 @@ public class AuthCommandService {
 
         return AuthConverter.toLoginResultDTO(member.getId(), accessToken, refreshToken);
     }
+
+    // 새로 추가하는 오버로드 - 이벤트 발행은 여기서만
+    public AuthResponseDTO.LoginResultDTO issueLoginTokens(Member member, String guestSessionId) {
+        AuthResponseDTO.LoginResultDTO result = issueLoginTokens(member);
+
+        eventPublisher.publishEvent(new LoginSucceededEvent(member.getId(), guestSessionId));
+
+        return result;
+    }
+
 
     public AuthResponseDTO.ReissueResultDTO reissue(AuthRequestDTO.ReissueDTO request) {
         String refreshToken = request.refreshToken();
