@@ -19,7 +19,8 @@ public interface CityControllerDocs {
 
     @Operation(
             summary = "도시 검색 및 필터 적용",
-            description = "키워드 검색 + 필터 조건(월 생활비, 점수, 난이도 등)을 적용하여 도시 목록을 조회합니다. 모든 쿼리 파라미터는 선택 사항 입니다."
+            description = "키워드 검색 + 필터 조건(월 생활비, 점수, 난이도 등)을 적용하여 도시 목록을 조회합니다. 모든 쿼리 파라미터는 선택 사항입니다.\n\n" +
+                    "⚠️ **주의**: 필터 조건을 많이 선택할수록 조건이 중복 적용되어 빈 배열이 반환될 수 있습니다. 필터 조건을 줄여서 다시 시도해 주세요."
     )
     @Parameters({
             @Parameter(name = "keyword", description = "검색 키워드 (도시명, 국가명, 설명, 최대 50자)", required = false, example = "베를린"),
