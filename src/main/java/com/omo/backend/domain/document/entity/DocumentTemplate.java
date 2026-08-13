@@ -36,18 +36,13 @@ public class DocumentTemplate extends BaseEntity {
     @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "ocr_support", nullable = false)
-    private Boolean ocrSupport;
-
     public static DocumentTemplate createDocumentTemplate(
             String documentName,
-            String description,
-            Boolean ocrSupport
+            String description
     ) {
         return DocumentTemplate.builder()
                 .documentName(documentName)
                 .description(description)
-                .ocrSupport(ocrSupport)
                 .build();
     }
 }
