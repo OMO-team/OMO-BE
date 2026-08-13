@@ -19,7 +19,7 @@ public class CountryController implements CountryControllerDocs{
 
     @GetMapping
     public ApiResponse<CountryResponseDTO.CountryListResult> getCountries(
-            @RequestParam PurposeEnum purposeType
+            @RequestParam(required = false) PurposeEnum purposeType
             ){
         return ApiResponse.onSuccess(countryQueryService.getCountries(purposeType));
     }

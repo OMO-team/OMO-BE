@@ -18,9 +18,11 @@ public class CountryQueryService {
     private final CountryRepository countryRepository;
 
     public CountryResponseDTO.CountryListResult getCountries(PurposeEnum purposeType){
-        List<CountryResponseDTO.CountryInfo> countries = countryRepository
-                .findCountriesWithCityCountByPurposeType(purposeType)
-                .stream()
+        List<Object[]> rows = (purposeType != null)
+                ? countryRepository.findCountriesWithCityCountByPurposeType(purposeType)
+                : countryRepository.findCountriesWithCityCount();
+
+        List<CountryResponseDTO.CountryInfo> countries = rows.stream()
                 .map(row -> CountryConverter.toCountryInfo((Country) row[0], (Long) row[1]))
                 .toList();
         return CountryConverter.toCountryListResult(purposeType, countries);
