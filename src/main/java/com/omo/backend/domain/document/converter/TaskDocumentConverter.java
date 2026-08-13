@@ -19,7 +19,6 @@ public class TaskDocumentConverter {
                 .taskDocumentId(taskDocument.getId())
                 .documentName(documentTemplate.getDocumentName())
                 .description(documentTemplate.getDescription())
-                .ocrSupport(documentTemplate.getOcrSupport())
                 .checked(taskDocument.getChecked())
                 .build();
     }

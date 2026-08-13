@@ -19,9 +19,6 @@ public class TaskDocumentResponseDTO {
             @Schema(description = "서류 설명", example = "현재 재직 상태를 증명하는 서류입니다.")
             String description,
 
-            @Schema(description = "OCR 지원 여부", example = "true")
-            Boolean ocrSupport,
-
             @Schema(description = "서류 완료 체크 여부", example = "false")
             Boolean checked
     ) {
