@@ -41,8 +41,8 @@ public class CityRequestDTO {
                     allowableValues = {"SHORT", "MEDIUM", "LONG", "VERY_LONG"})
             String stayDuration,
 
-            @Schema(description = "대륙", example = "Europe",
-                    allowableValues = {"Asia", "Europe", "North America", "South America", "Oceania", "Africa"})
+            @Schema(description = "대륙", example = "아시아",
+                    allowableValues = {"아시아", "유럽", "북아메리카", "남아메리카", "오세아니아", "아프리카"})
             String continent
 
     ) {}

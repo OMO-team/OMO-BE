@@ -31,7 +31,7 @@ public interface CityControllerDocs {
             @Parameter(name = "housingDifficulty", description = "숙소 난이도 (EASY / NORMAL / HARD)"),
             @Parameter(name = "visaDifficulty", description = "비자 난이도 (EASY / NORMAL / HARD)"),
             @Parameter(name = "stayDuration", description = "체류 기간(SHORT / MEDIUM / LONG / VERY_LONG)"),
-            @Parameter(name = "continent", description = "대륙 (Asia / Europe / North America / South America / Oceania / Africa)"),
+            @Parameter(name = "continent", description = "대륙 (아시아 / 유럽 / 북아메리카 / 남아메리카 / 오세아니아 / 아프리카)"),
             @Parameter(name = "page", description = "페이지 번호 (0부터 시작, 기본값 0)", example = "0"),
             @Parameter(name = "size", description = "페이지 크기 (1 이상 100 이하, 기본값 20)", example = "20")
     })
