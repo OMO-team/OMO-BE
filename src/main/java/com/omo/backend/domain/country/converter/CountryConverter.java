@@ -1,0 +1,32 @@
+package com.omo.backend.domain.country.converter;
+
+import com.omo.backend.domain.country.dto.CountryResponseDTO;
+import com.omo.backend.domain.country.entity.Country;
+import com.omo.backend.domain.purpose.enums.PurposeEnum;
+
+import java.util.List;
+
+public class CountryConverter {
+
+    // Country -> 국가 정보 DTO
+    public static CountryResponseDTO.CountryInfo toCountryInfo(Country country, Long recommendedCityCount){
+        return CountryResponseDTO.CountryInfo.builder()
+                .countryId(country.getCountryId())
+                .name(country.getName())
+                .code(country.getCode())
+                .imageUrl(country.getImageUrl())
+                .continent(country.getContinent())
+                .recommendedCityCount(recommendedCityCount)
+                .build();
+    }
+
+    // CountryInfo 리스트 -> 목적이 있는 국가 목록 DTO
+    public static CountryResponseDTO.CountryListResult toCountryListResult(
+            PurposeEnum purposeType, List<CountryResponseDTO.CountryInfo> countries){
+        return CountryResponseDTO.CountryListResult.builder()
+                .purposeType(purposeType != null ? purposeType.name() : null)
+                .countries(countries)
+                .build();
+
+    }
+}

@@ -1,0 +1,170 @@
+package com.omo.backend.domain.aisearch.service;
+
+import com.omo.backend.domain.aisearch.converter.AiSearchConverter;
+import com.omo.backend.domain.aisearch.dto.AiSearchRequestDTO;
+import com.omo.backend.domain.aisearch.dto.AiSearchResponseDTO;
+import com.omo.backend.domain.aisearch.dto.RecommendPromptChipResponseDTO;
+import com.omo.backend.domain.aisearch.entity.AiSearchLog;
+import com.omo.backend.domain.aisearch.entity.AiSearchSession;
+import com.omo.backend.domain.aisearch.entity.RecommendPromptChip;
+import com.omo.backend.domain.aisearch.enums.TaskStatus;
+import com.omo.backend.domain.aisearch.event.AiBriefingRequestedEvent;
+import com.omo.backend.domain.aisearch.exception.AiSearchErrorCode;
+import com.omo.backend.domain.aisearch.repository.AiSearchLogRepository;
+import com.omo.backend.domain.aisearch.repository.AiSearchSessionRepository;
+import com.omo.backend.domain.aisearch.repository.RecommendPromptChipRepository;
+import com.omo.backend.global.apiPayload.exception.GeneralException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class AiSearchService {
+
+    private final RecommendPromptChipRepository recommendPromptChipRepository;
+    private final AiSearchSessionRepository aiSearchSessionRepository;
+    private final AiSearchLogRepository aiSearchLogRepository;
+    private final StringRedisTemplate redisTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ApplicationEventPublisher eventPublisher;
+
+    // Redis Key Prefix 및 만료시간(TTL)
+    private static final String TASK_PREFIX = "ai_task:";
+    private static final long TASK_TTL_MINUTES = 30; // 30분 후 자동 삭제
+
+    /**
+     * 현재 활성화 상태(isActive = true)인 추천 프롬프트 칩 목록을 조회
+     **/
+    public RecommendPromptChipResponseDTO.ChipList getActiveRecommendPromptChips() {
+        List<RecommendPromptChip> chips = recommendPromptChipRepository.findAllByIsActiveTrue();
+
+        return AiSearchConverter.toChipList(chips);
+    }
+
+    /**
+     * AI 스마트 브리핑 분석 요청 (요청 ~ 로딩 화면까지)
+     */
+    @Transactional
+    public AiSearchResponseDTO.BriefingInitResult requestSmartBriefing(
+            AiSearchRequestDTO.BriefingRequest request, Long memberId, String guestSessionId) {
+
+        // 1. 세션 조회 or 생성
+        AiSearchSession session = getOrCreateSession(request.sessionId(), request.isRefine(), memberId, guestSessionId);
+
+        // 2. 고유 taskId 생성
+        String taskId = "task_" + UUID.randomUUID().toString().replace("-", "");
+        log.info("[AI Search Request] SessionId: {}, TaskId: {}, Query: {}, isRefine: {}",
+                session.getId(), taskId, request.searchQuery(), request.isRefine());
+
+        // 3. AI 검색 로그 저장
+        AiSearchLog searchLog = AiSearchLog.createSearchLog(session, request.searchQuery(), request.isRefine(), taskId);
+        aiSearchLogRepository.save(searchLog);
+
+        // 4. Redis에 taskId 초기 작업 상태 저장
+        saveInitialTaskStatus(taskId);
+
+        // 커밋 이후에만 실행되도록 이벤트 발행
+        eventPublisher.publishEvent(new AiBriefingRequestedEvent(
+                taskId, session.getId(), request.searchQuery(), request.isRefine()
+        ));
+
+        // 5. 응답 DTO 반환
+        return AiSearchConverter.toBriefingInitResult(session.getId(), taskId);
+    }
+
+    private AiSearchSession getOrCreateSession(Long sessionId, Boolean isRefine, Long memberId, String guestSessionId) {
+        if (Boolean.TRUE.equals(isRefine)) {
+            AiSearchSession session = Optional.ofNullable(sessionId)
+                    .flatMap(aiSearchSessionRepository::findByIdAndDeletedAtIsNull)
+                    .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_SESSION_NOT_FOUND));
+
+            if (!session.isOwnedBy(memberId, guestSessionId)) {
+                throw new GeneralException(AiSearchErrorCode.AI_SESSION_ACCESS_DENIED);
+            }
+            return session;
+        }
+
+        // 첫 검색이거나 세션 Id가 없는 경우 -> 새 세션 생성
+        AiSearchSession newSession = AiSearchSession.createSession(memberId, guestSessionId);
+        return aiSearchSessionRepository.save(newSession);
+    }
+
+    private void saveInitialTaskStatus(String taskId) {
+        String key = TASK_PREFIX + taskId;
+        redisTemplate.opsForValue().set(key, "PROCESSING", Duration.ofMinutes(TASK_TTL_MINUTES));
+    }
+
+    /**
+     * AI 스마트 브리핑 상태 및 결과 조회 (결과 화면까지)
+     */
+    public AiSearchResponseDTO.BriefingStatusResult getSmartBriefingStatus(String taskId) {
+        String key = TASK_PREFIX + taskId;
+        String statusStr = redisTemplate.opsForValue().get(key);
+
+        // 1. Redis에 작업 키가 없는 경우 (만료 or 유효하지 않은 taskId)
+        if (statusStr == null) {
+            throw new GeneralException(AiSearchErrorCode.AI_TASK_ID_INVALID);
+        }
+
+        // 2. 진행 중인 경우
+        if ("PROCESSING".equals(statusStr)) {
+            return AiSearchConverter.toProcessingStatusResult();
+        }
+
+        // 3. 작업이 실패한 경우
+        if ("FAILED".equals(statusStr)) {
+            throw new GeneralException(AiSearchErrorCode.AI_ANALYSIS_FAILED);
+        }
+
+        // 4. 완료된 경우
+        AiSearchLog searchLog = aiSearchLogRepository.findByTaskId(taskId)
+                .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_TASK_ID_INVALID));
+
+        try {
+            AiSearchResponseDTO.BriefingStatusResult result = objectMapper.readValue(
+                    searchLog.getAiResponse(),
+                    AiSearchResponseDTO.BriefingStatusResult.class
+            );
+
+            return AiSearchResponseDTO.BriefingStatusResult.builder()
+                    .status(TaskStatus.COMPLETED)
+                    .isRefine(searchLog.getIsRefine())
+                    .activePurpose(result.activePurpose())
+                    .selectedCountry(result.selectedCountry())
+                    .briefingData(result.briefingData())
+                    .emptyResultMessage(result.emptyResultMessage())
+                    .suggestedRelaxations(result.suggestedRelaxations())
+                    .build();
+
+        } catch (Exception e) {
+            log.error("[JSON Parsing Error] TaskId: {}, Error: {}", taskId, e.getMessage());
+            throw new GeneralException(AiSearchErrorCode.AI_ANALYSIS_FAILED);
+        }
+    }
+
+    /**
+     * AI 검색 세션 단건 삭제 (Soft Delete)
+     */
+    @Transactional
+    public void deleteSession(Long sessionId, Long memberId, String guestSessionId) {
+        AiSearchSession session = aiSearchSessionRepository.findByIdAndDeletedAtIsNull(sessionId)
+                .orElseThrow(() -> new GeneralException(AiSearchErrorCode.AI_SESSION_NOT_FOUND));
+
+        if (!session.isOwnedBy(memberId, guestSessionId)) {
+            throw new GeneralException(AiSearchErrorCode.AI_SESSION_ACCESS_DENIED);
+        }
+        session.delete();
+    }
+
+}

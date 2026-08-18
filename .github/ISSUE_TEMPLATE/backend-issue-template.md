@@ -1,3 +1,11 @@
+---
+name: Backend Issue
+about: 백엔드 작업용 이슈 템플릿
+title: "[Feat] "
+labels: "backend"
+assignees: ""
+---
+
 ## 📌 작업 개요
 - 
 
